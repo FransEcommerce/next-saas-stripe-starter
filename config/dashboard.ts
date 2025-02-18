@@ -4,7 +4,7 @@ import { SidebarNavItem } from "types";
 
 export const sidebarLinks: SidebarNavItem[] = [
   {
-    title: "MENU",
+    title: "ADMIN",
     items: [
       {
         href: "/admin",
@@ -12,14 +12,6 @@ export const sidebarLinks: SidebarNavItem[] = [
         title: "Admin Panel",
         authorizeOnly: UserRole.ADMIN,
       },
-      { href: "/dashboard", icon: "dashboard", title: "Dashboard" },
-      {
-        href: "/dashboard/billing",
-        icon: "billing",
-        title: "Billing",
-        authorizeOnly: UserRole.USER,
-      },
-      { href: "/dashboard/charts", icon: "lineChart", title: "Charts" },
       {
         href: "/admin/orders",
         icon: "package",
@@ -45,6 +37,19 @@ export const sidebarLinks: SidebarNavItem[] = [
         title: "Coupons",
         authorizeOnly: UserRole.ADMIN,
       },
+    ],
+  },
+  {
+    title: "MENU",
+    items: [
+      { href: "/dashboard", icon: "dashboard", title: "Dashboard" },
+      {
+        href: "/dashboard/billing",
+        icon: "billing",
+        title: "Billing",
+        authorizeOnly: UserRole.USER,
+      },
+      { href: "/dashboard/charts", icon: "lineChart", title: "Charts" },
       {
         href: "#/dashboard/posts",
         icon: "post",
