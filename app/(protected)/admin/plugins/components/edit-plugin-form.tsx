@@ -17,8 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FileUpload } from "./file-upload";
-import { ImageUpload } from "./image-upload";
+import { FileUpload } from "@/components/file-upload";
 import { updatePlugin } from "../actions";
 import { Plugin } from "@prisma/client";
 
@@ -135,44 +134,6 @@ export function EditPluginForm({ plugin }: EditPluginFormProps) {
 
             <FormField
               control={form.control}
-              name="avatar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Avatar</FormLabel>
-                  <FormControl>
-                    <ImageUpload
-                      label="Upload Avatar"
-                      onUploadComplete={(url) => form.setValue("avatar", url)}
-                      defaultImage={field.value}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="fileId"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Plugin File</FormLabel>
-                  <FormControl>
-                    <FileUpload onUploadComplete={handleUploadComplete} />
-                  </FormControl>
-                  <FormDescription>
-                    Upload your plugin file (ZIP, RAR, or 7Z format).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* 第二列 */}
-          <div className="space-y-8">
-            <FormField
-              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -194,24 +155,6 @@ export function EditPluginForm({ plugin }: EditPluginFormProps) {
 
             <FormField
               control={form.control}
-              name="cover"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cover</FormLabel>
-                  <FormControl>
-                    <ImageUpload
-                      label="Upload Cover"
-                      onUploadComplete={(url) => form.setValue("cover", url)}
-                      defaultImage={field.value}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="version"
               render={({ field }) => (
                 <FormItem>
@@ -226,6 +169,91 @@ export function EditPluginForm({ plugin }: EditPluginFormProps) {
                 </FormItem>
               )}
             />
+          </div>
+
+          {/* 第二列 */}
+          <div className="space-y-8">
+            <FormField
+              control={form.control}
+              name="fileId"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Plugin File</FormLabel>
+                  <FormControl>
+                    <FileUpload
+                      parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+                      onUploadComplete={(data) => {
+                        form.setValue("fileId", data.fileId);
+                        form.setValue("fileName", data.fileName);
+                        form.setValue("fileSize", data.fileSize);
+                        form.setValue("downloadUrl", data.downloadUrl);
+                      }}
+                      accept=".zip,.rar,.7z"
+                      placeholderText="Upload your plugin file"
+                      value={form.getValues("fileName")}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload your plugin file (ZIP, RAR, or 7Z format).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="avatar"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Avatar</FormLabel>
+                    <FormControl>
+                      <FileUpload
+                        id="plugin-avatar"
+                        parentId="ccccffb9-a335-4091-aac2-2a24ba3b9883"
+                        onUploadComplete={(data) => {
+                          form.setValue("avatar", data.downloadUrl);
+                        }}
+                        accept="image/*"
+                        placeholderText="Upload plugin avatar"
+                        value={form.getValues("avatar")}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload a square image for your plugin avatar.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cover"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Cover Image</FormLabel>
+                    <FormControl>
+                      <FileUpload
+                        id="plugin-cover"
+                        parentId="ccccffb9-a335-4091-aac2-2a24ba3b9883"
+                        onUploadComplete={(data) => {
+                          form.setValue("cover", data.downloadUrl);
+                        }}
+                        accept="image/*"
+                        placeholderText="Upload plugin cover"
+                        value={form.getValues("cover")}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload a cover image for your plugin.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
 

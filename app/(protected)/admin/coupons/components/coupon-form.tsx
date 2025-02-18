@@ -99,7 +99,7 @@ export function CouponForm({ initialData }: CouponFormProps) {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        const randomCode = `SAVE-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                         field.onChange(randomCode);
                       }}
                     >
