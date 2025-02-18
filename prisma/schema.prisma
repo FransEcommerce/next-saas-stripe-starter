@@ -22,6 +22,21 @@ enum LicenseStatus {
   REVOKED    // 已撤销
 }
 
+enum OrderStatus {
+  PENDING    // 待付款
+  PAID       // 已支付
+  CANCELLED  // 已取消
+  REFUNDED   // 已退款
+  PROCESSING // 处理中
+  COMPLETED  // 已完成
+  FAILED     // 失败
+}
+
+enum CouponType {
+  FIXED      // 固定金额
+  PERCENTAGE // 百分比
+}
+
 model Account {
   id                String   @id @default(uuid())
   userId            String
@@ -66,10 +81,20 @@ model User {
   updatedAt     DateTime  @default(now()) @map(name: "updated_at")
   role          UserRole  @default(USER)
 
+  // 账单信息
+  billingName    String?
+  billingAddress String?
+  billingCity    String?
+  billingState   String?
+  billingCountry String?
+  billingZip     String?
+  billingPhone   String?
+
   accounts Account[]
   sessions Session[]
-  licenses      License[]
+  licenses License[]
   downloadTokens DownloadToken[]
+  orders Order[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -107,45 +132,133 @@ model Plugin {
   uiFields        Json          // 返回给中间插件的UI配置字段
   
   // 关联
+  products        Product[]
   licenses        License[]
   downloadTokens  DownloadToken[]
 
   @@map(name: "plugins")
 }
 
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  comparePrice Decimal? @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+  duration    Int?     // 许可证有效期（天数），null 表示永久
+  features    Json?    // 产品特性列表
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pluginId    String
+  plugin      Plugin   @relation(fields: [pluginId], references: [id])
+  orders      Order[]
+
+  @@index([pluginId])
+  @@map(name: "products")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique @default(uuid()) // 订单编号
+  status          OrderStatus @default(PENDING)
+  amount          Decimal     @db.Decimal(10, 2)      // 订单金额
+  subtotal        Decimal     @db.Decimal(10, 2)      // 小计金额
+  discountAmount  Decimal?    @db.Decimal(10, 2)      // 折扣金额
+  tax             Decimal?    @db.Decimal(10, 2)      // 税费
+  paymentId       String?                             // 支付ID
+  paymentMethod   String?                             // 支付方式
+  paymentNote     String?                             // 支付备注
+  paymentProof    String?                             // 支付凭证（如转账截图URL）
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  paidAt          DateTime?                           // 支付时间
+  refundedAt      DateTime?                           // 退款时间
+  cancelledAt     DateTime?                           // 取消时间
+
+  // 账单信息
+  billingName    String?
+  billingAddress String?
+  billingCity    String?
+  billingState   String?
+  billingCountry String?
+  billingZip     String?
+  billingPhone   String?
+  billingEmail   String?
+
+  // 关联
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  license     License?
+  couponId    String?
+  coupon      Coupon?  @relation(fields: [couponId], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+  @@index([couponId])
+  @@map(name: "orders")
+}
+
+model Coupon {
+  id          String      @id @default(uuid())
+  code        String      @unique                    // 优惠码
+  type        CouponType                            // 优惠类型
+  value       Decimal     @db.Decimal(10, 2)        // 优惠值（固定金额或百分比）
+  active      Boolean     @default(true)            // 是否激活
+  maxUses     Int?                                  // 最大使用次数，null 表示无限制
+  usedCount   Int         @default(0)               // 已使用次数
+  minAmount   Decimal?    @db.Decimal(10, 2)        // 最小订单金额
+  startDate   DateTime?                             // 开始时间
+  endDate     DateTime?                             // 结束时间
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // 关联
+  orders      Order[]
+
+  @@map(name: "coupons")
+}
+
 model License {
   id          String        @id @default(uuid())
-  licenseKey  String        @unique    // 许可证密钥
-  domain      String?       // 授权域名
-  status      LicenseStatus // 许可证状态
-  expiresAt   DateTime?     // 过期时间（如果有）
-  activatedAt DateTime?     // 激活时间
+  licenseKey  String        @unique
+  domain      String?
+  status      LicenseStatus
+  expiresAt   DateTime?
+  activatedAt DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  
-  // 关联
+
   pluginId    String
   plugin      Plugin        @relation(fields: [pluginId], references: [id])
   userId      String
   user        User          @relation(fields: [userId], references: [id])
-  
+  orderId     String?       @unique
+  order       Order?        @relation(fields: [orderId], references: [id])
+
   @@index([licenseKey])
+  @@index([pluginId])
+  @@index([userId])
   @@map(name: "licenses")
 }
 
 model DownloadToken {
   id          String    @id @default(uuid())
-  token       String    @unique    // 一次性下载令牌
-  expiresAt   DateTime  // 令牌过期时间（如15分钟）
+  token       String    @unique
+  expiresAt   DateTime
   used        Boolean   @default(false)
   createdAt   DateTime  @default(now())
-  
-  // 关联
+
   pluginId    String
   plugin      Plugin    @relation(fields: [pluginId], references: [id])
   userId      String
   user        User      @relation(fields: [userId], references: [id])
 
   @@index([token])
+  @@index([pluginId])
+  @@index([userId])
   @@map(name: "download_tokens")
 }

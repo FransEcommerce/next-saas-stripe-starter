@@ -28,6 +28,24 @@ export const sidebarLinks: SidebarNavItem[] = [
         authorizeOnly: UserRole.ADMIN,
       },
       {
+        href: "/admin/products",
+        icon: "package",
+        title: "Products",
+        authorizeOnly: UserRole.ADMIN,
+      },
+      {
+        href: "/admin/plugins",
+        icon: "package",
+        title: "Plugins",
+        authorizeOnly: UserRole.ADMIN,
+      },
+      {
+        href: "/admin/coupons",
+        icon: "package",
+        title: "Coupons",
+        authorizeOnly: UserRole.ADMIN,
+      },
+      {
         href: "#/dashboard/posts",
         icon: "post",
         title: "User Posts",

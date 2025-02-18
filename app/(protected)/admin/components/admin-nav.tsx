@@ -17,6 +17,10 @@ const navItems = [
     title: "Orders",
     href: "/admin/orders",
   },
+  {
+    title: "Products",
+    href: "/admin/products",
+  },
 ];
 
 export function AdminNav() {

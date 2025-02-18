@@ -106,6 +106,13 @@ export function EditPluginForm({ plugin }: EditPluginFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight">Edit Plugin</h2>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 gap-8">
           {/* 第一列 */}
           <div className="space-y-8">
@@ -265,12 +272,6 @@ export function EditPluginForm({ plugin }: EditPluginFormProps) {
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
         </div>
       </form>
     </Form>

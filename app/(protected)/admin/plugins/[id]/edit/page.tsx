@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
-import { constructMetadata } from "@/lib/utils";
 import { prisma } from "@/lib/db";
+import { constructMetadata } from "@/lib/utils";
 import { EditPluginForm } from "../../components/edit-plugin-form";
 
 export const metadata = constructMetadata({
@@ -27,12 +27,7 @@ export default async function EditPluginPage({ params }: EditPluginPageProps) {
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Edit Plugin</h2>
-      </div>
-      <div className="grid gap-4">
-        <EditPluginForm plugin={plugin} />
-      </div>
+      <EditPluginForm plugin={plugin} />
     </div>
   );
 }
