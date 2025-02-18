@@ -15,8 +15,15 @@ enum UserRole {
   USER
 }
 
+enum LicenseStatus {
+  PENDING    // 待激活
+  ACTIVE     // 已激活
+  EXPIRED    // 已过期
+  REVOKED    // 已撤销
+}
+
 model Account {
-  id                String   @id @default(cuid())
+  id                String   @id @default(uuid())
   userId            String
   type              String
   provider          String
@@ -39,7 +46,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -50,7 +57,7 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -61,6 +68,8 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  licenses      License[]
+  downloadTokens DownloadToken[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -77,4 +86,66 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map(name: "verification_tokens")
+}
+
+model Plugin {
+  id              String          @id @default(uuid())
+  name            String          // 插件名称
+  description     String?         // 插件描述
+  version         String          // 插件版本
+  avatar          String?         // 插件头像URL
+  cover           String?         // 插件封面URL
+  fileId          String?         // 云存储文件ID
+  fileName        String?         // 原始文件名
+  fileSize        String?         // 文件大小
+  downloadUrl     String          // 云存储下载链接
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // 插件配置
+  activationFields Json          // 激活时需要返回的字段
+  uiFields        Json          // 返回给中间插件的UI配置字段
+  
+  // 关联
+  licenses        License[]
+  downloadTokens  DownloadToken[]
+
+  @@map(name: "plugins")
+}
+
+model License {
+  id          String        @id @default(uuid())
+  licenseKey  String        @unique    // 许可证密钥
+  domain      String?       // 授权域名
+  status      LicenseStatus // 许可证状态
+  expiresAt   DateTime?     // 过期时间（如果有）
+  activatedAt DateTime?     // 激活时间
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // 关联
+  pluginId    String
+  plugin      Plugin        @relation(fields: [pluginId], references: [id])
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  
+  @@index([licenseKey])
+  @@map(name: "licenses")
+}
+
+model DownloadToken {
+  id          String    @id @default(uuid())
+  token       String    @unique    // 一次性下载令牌
+  expiresAt   DateTime  // 令牌过期时间（如15分钟）
+  used        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  
+  // 关联
+  pluginId    String
+  plugin      Plugin    @relation(fields: [pluginId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([token])
+  @@map(name: "download_tokens")
 }
