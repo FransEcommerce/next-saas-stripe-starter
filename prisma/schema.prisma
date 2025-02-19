@@ -183,7 +183,7 @@ model Product {
 
 model Order {
   id                 String      @id @default(uuid())
-  orderNumber        String      @unique @default(uuid()) // 订单编号
+  orderNumber        String      @unique // 订单编号
   status             OrderStatus @default(PENDING)
   amount             Decimal     @db.Decimal(10, 2)      // 订单金额
   subtotal           Decimal     @db.Decimal(10, 2)      // 小计金额

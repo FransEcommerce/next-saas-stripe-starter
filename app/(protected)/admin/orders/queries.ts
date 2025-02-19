@@ -185,34 +185,37 @@ export async function getOrders() {
       include: {
         user: {
           select: {
-            id: true,
             name: true,
             email: true,
-          },
+          }
         },
         product: {
-          include: {
-            plugin: {
-              select: {
-                name: true,
-                version: true,
-              },
-            },
-          },
+          select: {
+            name: true,
+            price: true,
+          }
         },
         license: {
           select: {
             id: true,
             licenseKey: true,
             status: true,
-            activatedAt: true,
-            expiresAt: true,
-          },
+          }
         },
+        affiliate: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              }
+            }
+          }
+        }
       },
       orderBy: {
-        createdAt: "desc",
-      },
+        createdAt: 'desc'
+      }
     });
 
     // Convert all Decimal values to numbers

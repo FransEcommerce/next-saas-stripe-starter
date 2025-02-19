@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { Prisma } from "@prisma/client";
+import { generateOrderNumber } from "@/lib/order";
 
 function generateLicenseKey() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -91,6 +92,7 @@ export async function createOrder(data: CreateOrderInput) {
       // 创建订单
       const newOrder = await tx.order.create({
         data: {
+          orderNumber: generateOrderNumber(),
           userId: data.userId,
           productId: data.productId,
           couponId: data.couponId || undefined,
@@ -339,23 +341,60 @@ export async function deleteOrder(orderId: string) {
       throw new Error("Unauthorized access");
     }
 
-    // 首先删除关联的许可证
-    await prisma.license.deleteMany({
-      where: { orderId },
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        license: true,
+        affiliate: true,
+      },
     });
 
-    // 然后删除订单
-    await prisma.order.delete({
-      where: { id: orderId },
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // 1. 如果订单状态是 COMPLETED 且有推荐人佣金，需要减去推荐人的总收入
+      if (order.status === "COMPLETED" && order.affiliateId && order.affiliateCommission) {
+        await tx.affiliate.update({
+          where: { id: order.affiliateId },
+          data: {
+            totalEarnings: {
+              decrement: order.affiliateCommission
+            }
+          }
+        });
+      }
+
+      // 2. 删除关联的许可证
+      if (order.license) {
+        await tx.license.delete({
+          where: { id: order.license.id }
+        });
+      }
+
+      // 3. 如果订单使用了优惠券，减少优惠券使用次数
+      if (order.couponId) {
+        await tx.coupon.update({
+          where: { id: order.couponId },
+          data: {
+            usedCount: {
+              decrement: 1
+            }
+          }
+        });
+      }
+
+      // 4. 最后删除订单
+      await tx.order.delete({
+        where: { id: orderId }
+      });
     });
 
     revalidatePath("/admin/orders");
     return { success: true };
   } catch (error) {
-    console.error("Error deleting order:", error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Failed to delete order",
-    };
+    console.error("Failed to delete order:", error);
+    throw error;
   }
 }
