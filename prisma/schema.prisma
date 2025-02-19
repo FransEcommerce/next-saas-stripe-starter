@@ -37,6 +37,27 @@ enum CouponType {
   PERCENTAGE // 百分比
 }
 
+enum AffiliateCommissionType {
+  FIXED      // 固定金额
+  PERCENTAGE // 百分比
+}
+
+enum PaymentMethodType {
+  BANK_TRANSFER  // 银行转账
+  PAYPAL         // PayPal
+  ALIPAY         // 支付宝
+  WECHAT         // 微信
+  USDT           // USDT
+}
+
+enum PaymentStatus {
+  PENDING    // 待处理
+  PROCESSING // 处理中
+  COMPLETED  // 已完成
+  FAILED     // 失败
+  CANCELLED  // 已取消
+}
+
 model Account {
   id                String   @id @default(uuid())
   userId            String
@@ -95,6 +116,7 @@ model User {
   licenses License[]
   downloadTokens DownloadToken[]
   orders Order[]
+  affiliate     Affiliate?
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -160,45 +182,52 @@ model Product {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  orderNumber     String      @unique @default(uuid()) // 订单编号
-  status          OrderStatus @default(PENDING)
-  amount          Decimal     @db.Decimal(10, 2)      // 订单金额
-  subtotal        Decimal     @db.Decimal(10, 2)      // 小计金额
-  discountAmount  Decimal?    @db.Decimal(10, 2)      // 折扣金额
-  tax             Decimal?    @db.Decimal(10, 2)      // 税费
-  paymentId       String?                             // 支付ID
-  paymentMethod   String?                             // 支付方式
-  paymentNote     String?                             // 支付备注
-  paymentProof    String?                             // 支付凭证（如转账截图URL）
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  paidAt          DateTime?                           // 支付时间
-  refundedAt      DateTime?                           // 退款时间
-  cancelledAt     DateTime?                           // 取消时间
+  id                 String      @id @default(uuid())
+  orderNumber        String      @unique @default(uuid()) // 订单编号
+  status             OrderStatus @default(PENDING)
+  amount             Decimal     @db.Decimal(10, 2)      // 订单金额
+  subtotal           Decimal     @db.Decimal(10, 2)      // 小计金额
+  discountAmount     Decimal?    @db.Decimal(10, 2)      // 折扣金额
+  tax                Decimal?    @db.Decimal(10, 2)      // 税费
+  paymentId          String?                             // 支付ID
+  paymentMethod      String?                             // 支付方式
+  paymentNote        String?                             // 支付备注
+  paymentProof       String?                             // 支付凭证（如转账截图URL）
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  paidAt             DateTime?                           // 支付时间
+  refundedAt         DateTime?                           // 退款时间
+  cancelledAt        DateTime?                           // 取消时间
 
   // 账单信息
-  billingName    String?
-  billingAddress String?
-  billingCity    String?
-  billingState   String?
-  billingCountry String?
-  billingZip     String?
-  billingPhone   String?
-  billingEmail   String?
+  billingName        String?
+  billingAddress     String?
+  billingCity        String?
+  billingState       String?
+  billingCountry     String?
+  billingZip         String?
+  billingPhone       String?
+  billingEmail       String?
 
   // 关联
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id])
-  license     License?
-  couponId    String?
-  coupon      Coupon?  @relation(fields: [couponId], references: [id])
+  userId             String
+  user               User        @relation(fields: [userId], references: [id])
+  productId          String
+  product            Product     @relation(fields: [productId], references: [id])
+  license            License?
+  couponId           String?
+  coupon             Coupon?     @relation(fields: [couponId], references: [id])
+  affiliateId        String?
+  affiliate          Affiliate?  @relation("AffiliateOrders", fields: [affiliateId], references: [id])
+  affiliateCommission Decimal?    @db.Decimal(10, 2)
+  affiliatePayment   AffiliatePayment? @relation(fields: [affiliatePaymentId], references: [id])
+  affiliatePaymentId String?
 
   @@index([userId])
   @@index([productId])
   @@index([couponId])
+  @@index([affiliateId])
+  @@index([affiliatePaymentId])
   @@map(name: "orders")
 }
 
@@ -261,4 +290,62 @@ model DownloadToken {
   @@index([pluginId])
   @@index([userId])
   @@map(name: "download_tokens")
+}
+
+model Affiliate {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  commissionType  AffiliateCommissionType
+  commissionValue Decimal   @db.Decimal(10, 2)
+  totalEarnings   Decimal   @default(0) @db.Decimal(10, 2)
+  referralCode    String    @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // 关联
+  referredOrders  Order[]   @relation("AffiliateOrders")
+  paymentMethod   AffiliatePaymentMethod?
+  payments        AffiliatePayment[]
+
+  @@map(name: "affiliates")
+}
+
+model AffiliatePaymentMethod {
+  id          String            @id @default(uuid())
+  type        PaymentMethodType
+  details     Json              // 存储具体的支付信息，如银行账号、PayPal邮箱等
+  isDefault   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // 关联
+  affiliateId String            @unique
+  affiliate   Affiliate         @relation(fields: [affiliateId], references: [id])
+  payments    AffiliatePayment[]
+
+  @@map(name: "affiliate_payment_methods")
+}
+
+model AffiliatePayment {
+  id          String         @id @default(uuid())
+  amount      Decimal        @db.Decimal(10, 2)  // 支付金额
+  currency    String         @default("USD")      // 货币类型
+  status      PaymentStatus  @default(PENDING)
+  note        String?                            // 支付备注
+  proofUrl    String?                           // 支付凭证URL
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  processedAt DateTime?                         // 处理时间
+  
+  // 关联
+  affiliateId String
+  affiliate   Affiliate     @relation(fields: [affiliateId], references: [id])
+  methodId    String
+  method      AffiliatePaymentMethod @relation(fields: [methodId], references: [id])
+  orders      Order[]               // 关联的订单（这次支付包含哪些订单的佣金）
+
+  @@index([affiliateId])
+  @@index([methodId])
+  @@map(name: "affiliate_payments")
 }

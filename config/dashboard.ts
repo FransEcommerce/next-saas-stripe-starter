@@ -37,6 +37,12 @@ export const sidebarLinks: SidebarNavItem[] = [
         title: "Coupons",
         authorizeOnly: UserRole.ADMIN,
       },
+      {
+        href: "/admin/affiliates",
+        icon: "package",
+        title: "Affiliates",
+        authorizeOnly: UserRole.ADMIN,
+      },
     ],
   },
   {

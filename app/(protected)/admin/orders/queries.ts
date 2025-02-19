@@ -437,3 +437,19 @@ export async function validateCoupon(code: string, amount: number) {
     return { error: "Failed to validate coupon" };
   }
 }
+
+// 获取所有推荐人
+export async function getAffiliates() {
+  const affiliates = await prisma.affiliate.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
+    }
+  });
+  return affiliates;
+}

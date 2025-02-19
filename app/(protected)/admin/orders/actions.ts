@@ -38,6 +38,8 @@ interface OrderInput {
   discountAmount?: number;
   paymentMethod?: string;
   tax?: number;
+  affiliateId?: string;
+  affiliateCommission?: number;
 }
 
 interface CreateOrderInput {
@@ -60,6 +62,8 @@ interface CreateOrderInput {
   billingCountry?: string;
   billingZip?: string;
   billingPhone?: string;
+  affiliateId?: string;
+  affiliateCommission?: number;
 }
 
 function convertDecimalToNumber(decimal: Prisma.Decimal | null): number {
@@ -106,6 +110,8 @@ export async function createOrder(data: CreateOrderInput) {
           billingCountry: data.billingCountry || null,
           billingZip: data.billingZip || null,
           billingPhone: data.billingPhone || null,
+          affiliateId: data.affiliateId || null,
+          affiliateCommission: data.affiliateCommission || null,
         },
         include: {
           product: true,
@@ -126,6 +132,18 @@ export async function createOrder(data: CreateOrderInput) {
 
       return newOrder;
     });
+
+    // 只在订单状态为 COMPLETED 时才更新推荐人的总收入
+    if (data.status === "COMPLETED" && order.affiliateId && order.affiliateCommission) {
+      await prisma.affiliate.update({
+        where: { id: order.affiliateId },
+        data: {
+          totalEarnings: {
+            increment: order.affiliateCommission
+          }
+        }
+      });
+    }
 
     const processedOrder = {
       ...order,
@@ -227,6 +245,8 @@ export async function updateOrder(id: string, data: OrderInput) {
         refundedAt: data.status === "REFUNDED" && !order.refundedAt ? new Date() : order.refundedAt,
         cancelledAt: data.status === "CANCELLED" && !order.cancelledAt ? new Date() : order.cancelledAt,
         couponId,
+        affiliateId: data.affiliateId,
+        affiliateCommission: data.affiliateCommission,
       },
     });
 

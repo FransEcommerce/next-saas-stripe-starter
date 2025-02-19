@@ -18,9 +18,10 @@ import { formatPrice } from "@/lib/utils";
 
 const orderStatusMap = {
   PENDING: { label: "Pending", color: "bg-yellow-500/20 text-yellow-700" },
+  PROCESSING: { label: "Processing", color: "bg-blue-500/20 text-blue-700" },
   COMPLETED: { label: "Completed", color: "bg-green-500/20 text-green-700" },
   FAILED: { label: "Failed", color: "bg-red-500/20 text-red-700" },
-  REFUNDED: { label: "Refunded", color: "bg-blue-500/20 text-blue-700" },
+  REFUNDED: { label: "Refunded", color: "bg-purple-500/20 text-purple-700" },
   CANCELLED: { label: "Cancelled", color: "bg-gray-500/20 text-gray-700" },
 };
 
@@ -52,7 +53,7 @@ export function OrderDetails({ order }: { order: any }) {
             <div className="font-mono">{order.orderNumber}</div>
           </div>
           <Separator />
-          <div className="grid gap-2">
+          <div className="grid gap-2 w-fit">
             <div className="text-sm font-medium">Status</div>
             <Badge
               className={orderStatusMap[order.status].color}
@@ -136,7 +137,7 @@ export function OrderDetails({ order }: { order: any }) {
                 </div>
               </div>
               <Separator />
-              <div className="grid gap-2">
+              <div className="grid gap-2 w-fit">
                 <div className="text-sm font-medium">Status</div>
                 <Badge
                   variant="secondary"

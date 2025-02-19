@@ -14,7 +14,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Coupon } from "@prisma/client";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { deleteCoupon } from "../actions";
 import { toast } from "sonner";
 
@@ -25,6 +37,8 @@ interface CouponListProps {
 export function CouponList({ coupons = [] }: CouponListProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
 
   const handleEdit = (id: string) => {
     router.push(`/admin/coupons/${id}`);
@@ -86,7 +100,7 @@ export function CouponList({ coupons = [] }: CouponListProps) {
               </TableCell>
               <TableCell>
                 <Badge
-                  variant={coupon.active ? "success" : "destructive"}
+                  variant={coupon.active ? "default" : "destructive"}
                 >
                   {coupon.active ? "Active" : "Inactive"}
                 </Badge>
@@ -107,43 +121,60 @@ export function CouponList({ coupons = [] }: CouponListProps) {
                 {format(new Date(coupon.createdAt), "MM/dd/yyyy")}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(coupon.id)}
-                  >
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        disabled={isDeleting}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[160px]">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleEdit(coupon.id)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                      onClick={() => {
+                        setSelectedCouponId(coupon.id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <AlertDialog open={isDeleteDialogOpen && selectedCouponId === coupon.id}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Coupon</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this coupon? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          handleDelete(selectedCouponId!);
+                          setIsDeleteDialogOpen(false);
+                        }}
+                        className="bg-red-600 hover:bg-red-700"
                       >
                         Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Coupon</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this coupon? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(coupon.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TableCell>
             </TableRow>
           ))
