@@ -75,7 +75,17 @@ export function EditPaymentDialog({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      amount: Number(initialData.amount) || 0,
+      subtotal: Number(initialData.subtotal) || 0,
+      discountAmount: initialData.discountAmount ? Number(initialData.discountAmount) : undefined,
+      tax: initialData.tax ? Number(initialData.tax) : undefined,
+      affiliateCommission: initialData.affiliateCommission ? Number(initialData.affiliateCommission) : undefined,
+      paymentMethod: initialData.paymentMethod,
+      paymentNote: initialData.paymentNote,
+      paymentProof: initialData.paymentProof,
+      couponCode: initialData.couponCode
+    },
   });
 
   const handleSubmit = async (data: FormValues) => {

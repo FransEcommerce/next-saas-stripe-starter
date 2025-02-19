@@ -633,8 +633,18 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
       },
     });
 
+    // 转换 Decimal 类型为普通数字
+    const formattedOrder = {
+      ...updatedOrder,
+      amount: Number(updatedOrder.amount),
+      subtotal: Number(updatedOrder.subtotal),
+      discountAmount: updatedOrder.discountAmount ? Number(updatedOrder.discountAmount) : null,
+      tax: updatedOrder.tax ? Number(updatedOrder.tax) : null,
+      affiliateCommission: updatedOrder.affiliateCommission ? Number(updatedOrder.affiliateCommission) : null,
+    };
+
     revalidatePath(`/admin/orders/${orderId}`);
-    return { success: true, data: updatedOrder };
+    return { success: true, data: formattedOrder };
   } catch (error) {
     console.error("Error updating order payment:", error);
     return { error: "Failed to update payment information" };

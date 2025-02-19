@@ -64,7 +64,6 @@ export function EditCustomerDialog({
       setIsPending(true);
       await onSubmit(data);
       onOpenChange(false);
-      toast.success("Customer information updated");
     } catch (error) {
       toast.error("Failed to update customer information");
     } finally {

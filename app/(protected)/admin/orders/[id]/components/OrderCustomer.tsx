@@ -45,7 +45,6 @@ export function OrderCustomer({ order }: OrderCustomerProps) {
     try {
       await updateOrderCustomer(order.id, data);
       toast.success("Customer information updated");
-      window.location.reload();
     } catch (error) {
       console.error("Failed to update customer:", error);
       toast.error("Failed to update customer information");
