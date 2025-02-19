@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Product, Plugin } from "@prisma/client";
+import { Plugin } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import {
@@ -37,6 +37,27 @@ import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { deleteProduct } from "../actions";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: string;
+  comparePrice: string | null;
+  active: boolean;
+  duration: string | null;
+  features: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  pluginId: string;
+  plugin: {
+    name: string;
+    description: string | null;
+  };
+  orders: {
+    id: string;
+  }[];
+}
 
 interface ProductWithRelations extends Product {
   plugin: Plugin;
@@ -91,10 +112,10 @@ export function ProductsList({ products }: ProductsListProps) {
                 <TableCell>{product.plugin.name}</TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span>{formatPrice(Number(product.price))}</span>
+                    <span>{formatPrice(product.price)}</span>
                     {product.comparePrice && (
                       <span className="text-sm text-muted-foreground line-through">
-                        {formatPrice(Number(product.comparePrice))}
+                        {formatPrice(product.comparePrice)}
                       </span>
                     )}
                   </div>

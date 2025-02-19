@@ -6,6 +6,7 @@ import { AddAffiliateButton } from "./components/add-affiliate-button";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Suspense } from "react";
+import { DashboardHeader } from "@/components/dashboard/header";
 
 export default async function AffiliatesPage() {
   const [affiliates, users] = await Promise.all([
@@ -14,21 +15,21 @@ export default async function AffiliatesPage() {
   ]);
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Affiliates</h2>
-          <p className="text-muted-foreground">
-            Manage your affiliate partners
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="outline">
+    <>
+      <div className="flex-1 space-y-4">
+        <div className="flex items-center justify-between">
+          <DashboardHeader
+            heading="Affiliates"
+            text="Manage your affiliate partners and commission settings."
+          />
+          <div className="flex items-center gap-4">
             <Link href="/admin/affiliates/payments">
-              Manage Payments
+              <Button variant="outline">
+                Manage Payments
+              </Button>
             </Link>
-          </Button>
-          <AddAffiliateButton users={users} />
+            <AddAffiliateButton users={users} />
+          </div>
         </div>
       </div>
       <Suspense fallback={<div>Loading...</div>}>
@@ -37,6 +38,6 @@ export default async function AffiliatesPage() {
           users={users}
         />
       </Suspense>
-    </div>
+    </>
   );
 }

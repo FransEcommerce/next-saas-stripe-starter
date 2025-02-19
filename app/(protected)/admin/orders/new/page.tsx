@@ -24,6 +24,7 @@ interface OrderCalculation {
 interface BillingInfo {
   billingName: string;
   billingEmail: string;
+  billingCompany: string;
   billingAddress: string;
   billingCity: string;
   billingState: string;
@@ -56,6 +57,7 @@ export default function NewOrderPage() {
   const [billingInfo, setBillingInfo] = useState<BillingInfo>({
     billingName: "",
     billingEmail: "",
+    billingCompany: "",
     billingAddress: "",
     billingCity: "",
     billingState: "",
@@ -144,6 +146,7 @@ export default function NewOrderPage() {
       setBillingInfo({
         billingName: user.billingName || "",
         billingEmail: user.email || "",
+        billingCompany: user.billingCompany || "",
         billingAddress: user.billingAddress || "",
         billingCity: user.billingCity || "",
         billingState: user.billingState || "",

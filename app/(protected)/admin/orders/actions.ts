@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { Prisma } from "@prisma/client";
 import { generateOrderNumber } from "@/lib/order";
+import { z } from "zod";
 
 function generateLicenseKey() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -29,6 +30,8 @@ interface OrderInput {
   amount: number;
   status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED" | "CANCELLED";
   billingName: string;
+  billingEmail: string;
+  billingCompany: string;
   billingAddress: string;
   billingCity: string;
   billingState: string;
@@ -49,22 +52,23 @@ interface CreateOrderInput {
   couponId?: string;
   amount: number;
   subtotal: number;
-  discountAmount: number;
-  tax: number;
+  tax?: number;
+  discountAmount?: number;
   status: string;
-  paymentMethod: string;
+  paymentMethod?: string;
   paymentNote?: string;
   paymentProof?: string;
-  billingName?: string;
-  billingEmail?: string;
-  billingAddress?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingCountry?: string;
-  billingZip?: string;
-  billingPhone?: string;
-  affiliateId?: string;
-  affiliateCommission?: number;
+  affiliateId?: string | null;
+  affiliateCommission?: number | null;
+  billingName: string;
+  billingEmail: string;
+  billingCompany: string;
+  billingAddress: string;
+  billingCity: string;
+  billingState: string;
+  billingCountry: string;
+  billingZip: string;
+  billingPhone: string;
 }
 
 function convertDecimalToNumber(decimal: Prisma.Decimal | null): number {
@@ -98,20 +102,21 @@ export async function createOrder(data: CreateOrderInput) {
           couponId: data.couponId || undefined,
           amount: new Prisma.Decimal(data.amount),
           subtotal: new Prisma.Decimal(data.subtotal),
-          discountAmount: new Prisma.Decimal(data.discountAmount),
-          tax: new Prisma.Decimal(data.tax),
+          discountAmount: new Prisma.Decimal(data.discountAmount || 0),
+          tax: new Prisma.Decimal(data.tax || 0),
           status: data.status,
           paymentMethod: data.paymentMethod,
           paymentNote: data.paymentNote || null,
           paymentProof: data.paymentProof || null,
-          billingName: data.billingName || null,
-          billingEmail: data.billingEmail || null,
-          billingAddress: data.billingAddress || null,
-          billingCity: data.billingCity || null,
-          billingState: data.billingState || null,
-          billingCountry: data.billingCountry || null,
-          billingZip: data.billingZip || null,
-          billingPhone: data.billingPhone || null,
+          billingName: data.billingName,
+          billingEmail: data.billingEmail,
+          billingCompany: data.billingCompany,
+          billingAddress: data.billingAddress,
+          billingCity: data.billingCity,
+          billingState: data.billingState,
+          billingCountry: data.billingCountry,
+          billingZip: data.billingZip,
+          billingPhone: data.billingPhone,
           affiliateId: data.affiliateId || null,
           affiliateCommission: data.affiliateCommission || null,
         },
@@ -199,6 +204,7 @@ export async function updateOrder(id: string, data: OrderInput) {
             plugin: true,
           },
         },
+        license: true,
       },
     });
 
@@ -212,15 +218,64 @@ export async function updateOrder(id: string, data: OrderInput) {
     const tax = data.tax || 0;
     const amount = subtotal - discountAmount + tax;
 
-    // Handle coupon if provided
-    let couponId: string | undefined;
+    // Handle coupon changes
+    let couponId: string | undefined = order.couponId;
     if (data.couponCode) {
       const coupon = await prisma.coupon.findFirst({
         where: { code: data.couponCode },
       });
 
       if (coupon) {
-        couponId = coupon.id;
+        // If coupon is different from current one
+        if (coupon.id !== order.couponId) {
+          // Decrement old coupon usage if exists
+          if (order.couponId) {
+            await prisma.coupon.update({
+              where: { id: order.couponId },
+              data: { usedCount: { decrement: 1 } }
+            });
+          }
+          // Increment new coupon usage
+          await prisma.coupon.update({
+            where: { id: coupon.id },
+            data: { usedCount: { increment: 1 } }
+          });
+          couponId = coupon.id;
+        }
+      }
+    } else if (order.couponId) {
+      // If coupon was removed, decrement its usage
+      await prisma.coupon.update({
+        where: { id: order.couponId },
+        data: { usedCount: { decrement: 1 } }
+      });
+      couponId = undefined;
+    }
+
+    // Handle affiliate commission changes
+    if (data.affiliateId && data.affiliateCommission) {
+      // If order was completed and affiliate changed or commission amount changed
+      if (order.status === "COMPLETED") {
+        if (order.affiliateId && order.affiliateCommission) {
+          // Deduct old commission
+          await prisma.affiliate.update({
+            where: { id: order.affiliateId },
+            data: {
+              totalEarnings: {
+                decrement: order.affiliateCommission
+              }
+            }
+          });
+        }
+        // Add new commission
+        await prisma.affiliate.update({
+          where: { id: data.affiliateId },
+          data: {
+            totalEarnings: {
+              increment: data.affiliateCommission
+            }
+          }
+        });
       }
     }
 
@@ -236,6 +291,8 @@ export async function updateOrder(id: string, data: OrderInput) {
         tax,
         status: data.status,
         billingName: data.billingName,
+        billingEmail: data.billingEmail,
+        billingCompany: data.billingCompany,
         billingAddress: data.billingAddress,
         billingCity: data.billingCity,
         billingState: data.billingState,
@@ -252,20 +309,29 @@ export async function updateOrder(id: string, data: OrderInput) {
       },
     });
 
-    // Create license if order status changes to completed
+    // Handle license based on status change
     if (data.status === "COMPLETED" && order.status !== "COMPLETED") {
-      await prisma.license.create({
-        data: {
-          licenseKey: generateLicenseKey(),
-          pluginId: order.product.plugin.id,
-          userId: data.userId,
-          status: "PENDING",
-          expiresAt: order.product.duration
-            ? new Date(Date.now() + order.product.duration * 24 * 60 * 60 * 1000)
-            : null,
-          orderId: order.id,
-        },
-      });
+      // Create new license if none exists
+      if (!order.license) {
+        await prisma.license.create({
+          data: {
+            licenseKey: generateLicenseKey(),
+            pluginId: order.product.plugin.id,
+            userId: data.userId,
+            status: "ACTIVE",
+            expiresAt: order.product.duration
+              ? new Date(Date.now() + order.product.duration * 24 * 60 * 60 * 1000)
+              : null,
+            orderId: order.id,
+          },
+        });
+      } else if (order.license.status !== "ACTIVE") {
+        // Update existing license to active if not already
+        await prisma.license.update({
+          where: { id: order.license.id },
+          data: { status: "ACTIVE" }
+        });
+      }
     }
 
     revalidatePath("/admin/orders");
@@ -314,10 +380,13 @@ export async function updateOrderStatus(orderId: string, status: string) {
         await prisma.license.create({
           data: {
             licenseKey: generateLicenseKey(),
-            status: "ACTIVE",
+            status: "PENDING",
             orderId: order.id,
             userId: order.userId,
             pluginId: order.product.plugin.id,
+            expiresAt: order.product.duration
+              ? new Date(Date.now() + order.product.duration * 24 * 60 * 60 * 1000)
+              : null,
           },
         });
       }
@@ -395,6 +464,109 @@ export async function deleteOrder(orderId: string) {
     return { success: true };
   } catch (error) {
     console.error("Failed to delete order:", error);
+    throw error;
+  }
+}
+
+const updateCustomerSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+  billingCompany: z.string().optional(),
+  billingName: z.string().optional(),
+  billingAddress: z.string().optional(),
+  billingCity: z.string().optional(),
+  billingState: z.string().optional(),
+  billingCountry: z.string().optional(),
+  billingZip: z.string().optional(),
+  billingPhone: z.string().optional(),
+});
+
+const updatePaymentSchema = z.object({
+  amount: z.number().min(0),
+  subtotal: z.number().min(0),
+  discountAmount: z.number().min(0).optional(),
+  tax: z.number().min(0).optional(),
+  affiliateCommission: z.number().min(0).optional(),
+  paymentMethod: z.string().optional(),
+  paymentNote: z.string().optional(),
+  paymentProof: z.string().url().optional(),
+  couponCode: z.string().optional(),
+});
+
+export async function updateOrderCustomer(orderId: string, data: z.infer<typeof updateCustomerSchema>) {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: true },
+    });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    // 更新用户信息
+    await prisma.user.update({
+      where: { id: order.userId },
+      data: {
+        name: data.name,
+        email: data.email,
+      },
+    });
+
+    // 更新订单账单信息
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        billingCompany: data.billingCompany,
+        billingName: data.billingName,
+        billingAddress: data.billingAddress,
+        billingCity: data.billingCity,
+        billingState: data.billingState,
+        billingCountry: data.billingCountry,
+        billingZip: data.billingZip,
+        billingPhone: data.billingPhone,
+      },
+    });
+
+    revalidatePath("/admin/orders/[id]", "page");
+  } catch (error) {
+    console.error("Failed to update order customer:", error);
+    throw error;
+  }
+}
+
+export async function updateOrderPayment(orderId: string, data: z.infer<typeof updatePaymentSchema>) {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    // 计算新的总金额
+    const total = data.subtotal - (data.discountAmount || 0) + (data.tax || 0);
+
+    // 更新订单支付信息
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        amount: total,
+        subtotal: data.subtotal,
+        discountAmount: data.discountAmount,
+        tax: data.tax,
+        affiliateCommission: data.affiliateCommission,
+        paymentMethod: data.paymentMethod,
+        paymentNote: data.paymentNote,
+        paymentProof: data.paymentProof,
+        couponCode: data.couponCode,
+      },
+    });
+
+    revalidatePath("/admin/orders/[id]", "page");
+  } catch (error) {
+    console.error("Failed to update order payment:", error);
     throw error;
   }
 }

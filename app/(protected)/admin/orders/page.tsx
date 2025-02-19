@@ -21,13 +21,42 @@ export default async function OrdersPage() {
   const orders = await prisma.order.findMany({
     include: {
       user: true,
-      product: true,
+      product: {
+        include: {
+          plugin: true,
+        },
+      },
       license: true,
+      affiliate: {
+        include: {
+          user: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
     },
   });
+
+  // 转换 Decimal 为字符串
+  const serializedOrders = orders.map(order => ({
+    ...order,
+    amount: order.amount.toString(),
+    subtotal: order.subtotal.toString(),
+    discountAmount: order.discountAmount?.toString(),
+    tax: order.tax?.toString(),
+    affiliateCommission: order.affiliateCommission?.toString(),
+    product: {
+      ...order.product,
+      price: order.product.price.toString(),
+      comparePrice: order.product.comparePrice?.toString(),
+    },
+    affiliate: order.affiliate ? {
+      ...order.affiliate,
+      commissionValue: order.affiliate.commissionValue.toString(),
+      totalEarnings: order.affiliate.totalEarnings.toString(),
+    } : null,
+  }));
 
   return (
     <>
@@ -44,8 +73,8 @@ export default async function OrdersPage() {
         </Link>
       </div>
       <div className="flex-1 space-y-4 pt-6">
-        {orders.length > 0 ? (
-          <OrdersList orders={orders} />
+        {serializedOrders.length > 0 ? (
+          <OrdersList orders={serializedOrders} />
         ) : (
           <EmptyPlaceholder>
             <EmptyPlaceholder.Icon name="package" />

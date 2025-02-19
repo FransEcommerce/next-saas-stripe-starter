@@ -49,6 +49,20 @@ export function PaymentDialog({ open, onClose, payments }: PaymentDialogProps) {
     0
   );
 
+  const getPaymentMethodLabel = (method: string) => {
+    const methodMap: Record<string, string> = {
+      BANK_TRANSFER: "Bank Transfer",
+      PAYPAL: "PayPal",
+      STRIPE: "Stripe",
+      CREDIT_CARD: "Credit Card",
+      DEBIT_CARD: "Debit Card",
+      RAZORPAY: "Razorpay",
+      CRYPTO: "Cryptocurrency",
+      OTHER: "Other",
+    };
+    return methodMap[method] || method;
+  };
+
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
@@ -96,10 +110,14 @@ export function PaymentDialog({ open, onClose, payments }: PaymentDialogProps) {
           <div className="grid gap-2">
             <Label>Payment Method</Label>
             <div className="text-sm">
-              <div className="font-medium">{affiliate.paymentMethod?.type}</div>
-              <div className="text-muted-foreground">
-                {JSON.stringify(affiliate.paymentMethod?.details)}
+              <div className="font-medium">
+                {affiliate.paymentMethod ? getPaymentMethodLabel(affiliate.paymentMethod.type) : "No payment method set"}
               </div>
+              {affiliate.paymentMethod?.details && (
+                <div className="text-muted-foreground">
+                  {affiliate.paymentMethod.details}
+                </div>
+              )}
             </div>
           </div>
           <div className="grid gap-2">

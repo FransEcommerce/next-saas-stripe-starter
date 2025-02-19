@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { formatDistance } from "date-fns";
-import { Eye, MoreHorizontal, Copy, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Copy, Trash2, UserCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -34,6 +34,50 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: string;
+  amount: string;
+  subtotal: string;
+  discountAmount: string | null;
+  tax: string | null;
+  paymentId: string | null;
+  paymentMethod: string | null;
+  paymentNote: string | null;
+  paymentProof: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  paidAt: Date | null;
+  refundedAt: Date | null;
+  cancelledAt: Date | null;
+  user: {
+    name: string | null;
+    email: string | null;
+  };
+  product: {
+    name: string;
+    price: string;
+    comparePrice: string | null;
+    plugin: {
+      name: string;
+    };
+  };
+  license: {
+    licenseKey: string;
+    status: string;
+  } | null;
+  affiliate: {
+    user: {
+      name: string | null;
+      email: string | null;
+    };
+    commissionValue: string;
+    totalEarnings: string;
+  } | null;
+  affiliateCommission: string | null;
+}
+
 const orderStatusMap = {
   PENDING: { label: "Pending", color: "bg-yellow-500/20 text-yellow-700" },
   PROCESSING: { label: "Processing", color: "bg-blue-500/20 text-blue-700" },
@@ -43,7 +87,7 @@ const orderStatusMap = {
   CANCELLED: { label: "Cancelled", color: "bg-gray-500/20 text-gray-700" },
 };
 
-export function OrdersList({ orders }: { orders: any[] }) {
+export function OrdersList({ orders }: { orders: Order[] }) {
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");
@@ -56,6 +100,21 @@ export function OrdersList({ orders }: { orders: any[] }) {
     } catch (error) {
       toast.error("Failed to delete order");
     }
+  };
+
+  const getPaymentMethodLabel = (method: string | null | undefined) => {
+    if (!method) return "N/A";
+    const methodMap: Record<string, string> = {
+      BANK_TRANSFER: "Bank Transfer",
+      PAYPAL: "PayPal",
+      STRIPE: "Stripe",
+      CREDIT_CARD: "Credit Card",
+      DEBIT_CARD: "Debit Card",
+      RAZORPAY: "Razorpay",
+      CRYPTO: "Cryptocurrency",
+      OTHER: "Other",
+    };
+    return methodMap[method] || method;
   };
 
   return (
@@ -101,9 +160,16 @@ export function OrdersList({ orders }: { orders: any[] }) {
                 {order.affiliateCommission ? (
                   <div className="flex flex-col">
                     <span className="font-medium">{formatPrice(order.affiliateCommission)}</span>
-                    <span className="text-xs text-muted-foreground truncate max-w-[120px]">
-                      {order.affiliate?.user?.name || order.affiliate?.user?.email}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {order.affiliate && (
+                        <Badge variant="secondary" className="gap-1">
+                          <UserCircle className="h-3 w-3" />
+                          <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                            {order.affiliate.user?.name || order.affiliate.user?.email || "Unknown"}
+                          </span>
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <span className="text-muted-foreground">-</span>
@@ -118,7 +184,7 @@ export function OrdersList({ orders }: { orders: any[] }) {
                 </Badge>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                {order.paymentMethod || "N/A"}
+                {getPaymentMethodLabel(order.paymentMethod)}
               </TableCell>
               <TableCell className="text-muted-foreground">
                 {formatDistance(new Date(order.createdAt), new Date(), {

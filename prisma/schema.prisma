@@ -43,11 +43,14 @@ enum AffiliateCommissionType {
 }
 
 enum PaymentMethodType {
-  BANK_TRANSFER  // 银行转账
-  PAYPAL         // PayPal
-  ALIPAY         // 支付宝
-  WECHAT         // 微信
-  USDT           // USDT
+  BANK_TRANSFER    // Bank Transfer
+  PAYPAL           // PayPal
+  STRIPE           // Stripe
+  CREDIT_CARD      // Credit Card
+  DEBIT_CARD       // Debit Card
+  RAZORPAY         // Razorpay
+  CRYPTO           // Cryptocurrency
+  OTHER            // Other payment methods
 }
 
 enum PaymentStatus {
@@ -103,6 +106,7 @@ model User {
   role          UserRole  @default(USER)
 
   // 账单信息
+  billingCompany String?
   billingName    String?
   billingAddress String?
   billingCity    String?
@@ -200,6 +204,7 @@ model Order {
   cancelledAt        DateTime?                           // 取消时间
 
   // 账单信息
+  billingCompany     String?
   billingName        String?
   billingAddress     String?
   billingCity        String?

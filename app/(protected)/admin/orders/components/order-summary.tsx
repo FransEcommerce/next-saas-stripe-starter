@@ -86,9 +86,13 @@ export function OrderSummary({
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="STRIPE">Credit Card (Stripe)</SelectItem>
-                <SelectItem value="PAYPAL">PayPal</SelectItem>
                 <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                <SelectItem value="PAYPAL">PayPal</SelectItem>
+                <SelectItem value="STRIPE">Stripe</SelectItem>
+                <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
+                <SelectItem value="DEBIT_CARD">Debit Card</SelectItem>
+                <SelectItem value="RAZORPAY">Razorpay</SelectItem>
+                <SelectItem value="CRYPTO">Cryptocurrency</SelectItem>
                 <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>

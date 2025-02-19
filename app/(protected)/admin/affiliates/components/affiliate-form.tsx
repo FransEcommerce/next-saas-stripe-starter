@@ -34,7 +34,16 @@ const formSchema = z.object({
   userId: z.string().min(1, "Please select a user"),
   commissionType: z.enum(["FIXED", "PERCENTAGE"]),
   commissionValue: z.string().transform(Number),
-  paymentMethodType: z.enum(["BANK_TRANSFER", "PAYPAL", "ALIPAY", "WECHAT"]),
+  paymentMethodType: z.enum([
+    "BANK_TRANSFER",
+    "PAYPAL",
+    "STRIPE",
+    "CREDIT_CARD",
+    "DEBIT_CARD",
+    "RAZORPAY",
+    "CRYPTO",
+    "OTHER",
+  ]),
   paymentDetails: z.string().min(1, "Payment details are required"),
 });
 
@@ -140,8 +149,12 @@ export function AffiliateForm({
   const paymentMethodTypes = [
     { value: "BANK_TRANSFER", label: "Bank Transfer" },
     { value: "PAYPAL", label: "PayPal" },
-    { value: "ALIPAY", label: "Alipay" },
-    { value: "WECHAT", label: "WeChat Pay" },
+    { value: "STRIPE", label: "Stripe" },
+    { value: "CREDIT_CARD", label: "Credit Card" },
+    { value: "DEBIT_CARD", label: "Debit Card" },
+    { value: "RAZORPAY", label: "Razorpay" },
+    { value: "CRYPTO", label: "Cryptocurrency" },
+    { value: "OTHER", label: "Other" },
   ];
 
   const getPaymentDetailsPlaceholder = (type: string) => {
@@ -150,10 +163,16 @@ export function AffiliateForm({
         return "Bank name, account number, account holder name";
       case "PAYPAL":
         return "PayPal email address";
-      case "ALIPAY":
-        return "Alipay account";
-      case "WECHAT":
-        return "WeChat account";
+      case "STRIPE":
+        return "Stripe account ID";
+      case "CREDIT_CARD":
+        return "Card number, expiry date, CVV";
+      case "DEBIT_CARD":
+        return "Card number, expiry date, CVV";
+      case "RAZORPAY":
+        return "Razorpay account ID";
+      case "CRYPTO":
+        return "Wallet address";
       default:
         return "Enter payment details";
     }

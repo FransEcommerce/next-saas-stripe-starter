@@ -103,6 +103,20 @@ export function AffiliateList({ initialAffiliates, users }: AffiliateListProps) 
     }
   };
 
+  const getPaymentMethodLabel = (method: string) => {
+    const methodMap: Record<string, string> = {
+      BANK_TRANSFER: "Bank Transfer",
+      PAYPAL: "PayPal",
+      STRIPE: "Stripe",
+      CREDIT_CARD: "Credit Card",
+      DEBIT_CARD: "Debit Card",
+      RAZORPAY: "Razorpay",
+      CRYPTO: "Cryptocurrency",
+      OTHER: "Other",
+    };
+    return methodMap[method] || method;
+  };
+
   return (
     <>
       <Table>
@@ -146,7 +160,7 @@ export function AffiliateList({ initialAffiliates, users }: AffiliateListProps) 
               <TableCell>
                 {affiliate.paymentMethod ? (
                   <div className="text-sm">
-                    <div className="font-medium">{affiliate.paymentMethod.type}</div>
+                    <div className="font-medium">{getPaymentMethodLabel(affiliate.paymentMethod.type)}</div>
                     <div className="text-muted-foreground">
                       {affiliate.paymentMethod.details}
                     </div>

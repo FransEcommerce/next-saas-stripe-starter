@@ -65,17 +65,31 @@ const paymentStatusMap = {
 function getStatusColor(status: string) {
   switch (status) {
     case 'COMPLETED':
-      return 'bg-green-500';
+      return 'bg-green-500/20 text-green-700';
     case 'PROCESSING':
-      return 'bg-yellow-500';
+      return 'bg-yellow-500/20 text-yellow-700';
     case 'FAILED':
-      return 'bg-red-500';
+      return 'bg-red-500/20 text-red-700';
     case 'CANCELLED':
-      return 'bg-gray-500';
+      return 'bg-gray-500/20 text-gray-700';
     default:
-      return 'bg-blue-500';
+      return 'bg-blue-500/20 text-blue-700';
   }
 }
+
+const getPaymentMethodLabel = (method: string) => {
+  const methodMap: Record<string, string> = {
+    BANK_TRANSFER: "Bank Transfer",
+    PAYPAL: "PayPal",
+    STRIPE: "Stripe",
+    CREDIT_CARD: "Credit Card",
+    DEBIT_CARD: "Debit Card",
+    RAZORPAY: "Razorpay",
+    CRYPTO: "Cryptocurrency",
+    OTHER: "Other",
+  };
+  return methodMap[method] || method;
+};
 
 export function PaymentList({ payments, onSuccess }: PaymentListProps) {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
@@ -138,7 +152,7 @@ export function PaymentList({ payments, onSuccess }: PaymentListProps) {
                   </div>
                 </TableCell>
                 <TableCell>{formatPrice(payment.amount)}</TableCell>
-                <TableCell>{payment.method.type}</TableCell>
+                <TableCell>{getPaymentMethodLabel(payment.method.type)}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span
@@ -211,9 +225,9 @@ export function PaymentList({ payments, onSuccess }: PaymentListProps) {
                 <div>
                   <div className="font-medium mb-1">Payment Method</div>
                   <div className="text-sm">
-                    <div>{selectedPayment.method.type}</div>
+                    <div>{getPaymentMethodLabel(selectedPayment.method.type)}</div>
                     <div className="text-muted-foreground">
-                      {JSON.stringify(selectedPayment.method.details)}
+                      {selectedPayment.method.details}
                     </div>
                   </div>
                 </div>
@@ -225,8 +239,8 @@ export function PaymentList({ payments, onSuccess }: PaymentListProps) {
                 </div>
                 <div>
                   <div className="font-medium mb-1">Status</div>
-                  <Badge variant="secondary" className={getStatusColor(selectedPayment.status)}>
-                    {selectedPayment.status}
+                  <Badge variant="secondary" className={`${getStatusColor(selectedPayment.status)} border-none`}>
+                    {paymentStatusMap[selectedPayment.status as keyof typeof paymentStatusMap]?.label || selectedPayment.status}
                   </Badge>
                 </div>
               </div>
@@ -244,7 +258,7 @@ export function PaymentList({ payments, onSuccess }: PaymentListProps) {
                   <TableBody>
                     {selectedPayment.orders.map((order) => (
                       <TableRow key={order.orderNumber}>
-                        <TableCell>{order.orderNumber}</TableCell>
+                        <TableCell>#{order.orderNumber}</TableCell>
                         <TableCell>{formatPrice(order.amount)}</TableCell>
                         <TableCell>{formatPrice(order.affiliateCommission)}</TableCell>
                       </TableRow>

@@ -43,6 +43,12 @@ export const sidebarLinks: SidebarNavItem[] = [
         title: "Affiliates",
         authorizeOnly: UserRole.ADMIN,
       },
+      {
+        href: "/admin/users",
+        icon: "package",
+        title: "Users",
+        authorizeOnly: UserRole.ADMIN,
+      },
     ],
   },
   {

@@ -63,6 +63,20 @@ export function PendingPaymentList({ payments }: PendingPaymentListProps) {
     totalCommission: number
   }>);
 
+  const getPaymentMethodLabel = (method: string) => {
+    const methodMap: Record<string, string> = {
+      BANK_TRANSFER: "Bank Transfer",
+      PAYPAL: "PayPal",
+      STRIPE: "Stripe",
+      CREDIT_CARD: "Credit Card",
+      DEBIT_CARD: "Debit Card",
+      RAZORPAY: "Razorpay",
+      CRYPTO: "Cryptocurrency",
+      OTHER: "Other",
+    };
+    return methodMap[method] || method;
+  };
+
   return (
     <div className="rounded-md border space-y-4">
       <Table>
@@ -99,9 +113,11 @@ export function PendingPaymentList({ payments }: PendingPaymentListProps) {
                 <TableCell>
                   {group.affiliate.paymentMethod ? (
                     <div className="text-sm">
-                      <div className="font-medium">{group.affiliate.paymentMethod.type}</div>
+                      <div className="font-medium">
+                        {getPaymentMethodLabel(group.affiliate.paymentMethod.type)}
+                      </div>
                       <div className="text-muted-foreground">
-                        {JSON.stringify(group.affiliate.paymentMethod.details)}
+                        {group.affiliate.paymentMethod.details}
                       </div>
                     </div>
                   ) : (
