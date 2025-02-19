@@ -38,6 +38,11 @@ interface OrderStatusProps {
   order: {
     id: string;
     status: OrderStatus;
+    amount?: number;
+    subtotal?: number;
+    discountAmount?: number;
+    tax?: number;
+    affiliateCommission?: number;
   };
 }
 
@@ -66,7 +71,7 @@ export function OrderStatus({ order }: OrderStatusProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" disabled={isPending}>
-            Change Status
+          {orderStatusMap[status].label}
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

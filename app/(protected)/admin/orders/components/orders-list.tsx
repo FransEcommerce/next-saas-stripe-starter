@@ -34,50 +34,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface Order {
-  id: string;
-  orderNumber: string;
-  status: string;
-  amount: string;
-  subtotal: string;
-  discountAmount: string | null;
-  tax: string | null;
-  paymentId: string | null;
-  paymentMethod: string | null;
-  paymentNote: string | null;
-  paymentProof: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  paidAt: Date | null;
-  refundedAt: Date | null;
-  cancelledAt: Date | null;
-  user: {
-    name: string | null;
-    email: string | null;
-  };
-  product: {
-    name: string;
-    price: string;
-    comparePrice: string | null;
-    plugin: {
-      name: string;
-    };
-  };
-  license: {
-    licenseKey: string;
-    status: string;
-  } | null;
-  affiliate: {
-    user: {
-      name: string | null;
-      email: string | null;
-    };
-    commissionValue: string;
-    totalEarnings: string;
-  } | null;
-  affiliateCommission: string | null;
-}
-
 const orderStatusMap = {
   PENDING: { label: "Pending", color: "bg-yellow-500/20 text-yellow-700" },
   PROCESSING: { label: "Processing", color: "bg-blue-500/20 text-blue-700" },
@@ -87,7 +43,7 @@ const orderStatusMap = {
   CANCELLED: { label: "Cancelled", color: "bg-gray-500/20 text-gray-700" },
 };
 
-export function OrdersList({ orders }: { orders: Order[] }) {
+export function OrdersList({ orders }: { orders: any[] }) {
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");

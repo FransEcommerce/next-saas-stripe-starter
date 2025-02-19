@@ -68,18 +68,26 @@ export async function getProducts() {
         active: true,
       },
       include: {
-        plugin: true,
+        plugin: {
+          select: {
+            id: true,
+            name: true,
+            version: true,
+            avatar: true,
+            description: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: "desc",
+        name: "asc",
       },
     });
 
-    // 序列化 Decimal 类型数据
+    // Convert Decimal values to numbers
     return products.map(product => ({
       ...product,
-      price: product.price.toString(),
-      comparePrice: product.comparePrice?.toString(),
+      price: convertDecimalToNumber(product.price),
+      comparePrice: convertDecimalToNumber(product.comparePrice),
     }));
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -318,6 +326,11 @@ export async function getOrdersByUser(userId: string) {
 
 export async function getCoupons() {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      throw new Error("Unauthorized");
+    }
+
     const coupons = await prisma.coupon.findMany({
       where: {
         active: true,
@@ -356,11 +369,10 @@ export async function getCoupons() {
       },
     });
 
-    // 序列化 Decimal 类型数据
+    // Convert Decimal values to numbers
     return coupons.map(coupon => ({
       ...coupon,
-      value: coupon.value.toString(),
-      minAmount: coupon.minAmount?.toString(),
+      value: convertDecimalToNumber(coupon.value),
     }));
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -371,7 +383,7 @@ export async function getCoupons() {
 export async function validateCoupon(code: string, amount: number) {
   try {
     const coupon = await prisma.coupon.findUnique({
-      where: { code },
+      where: { code }
     });
 
     if (!coupon) {
@@ -401,15 +413,26 @@ export async function validateCoupon(code: string, amount: number) {
       };
     }
 
-    // 序列化 Decimal 类型数据
-    return { 
+    let discountAmount = 0;
+    const value = Number(coupon.value);
+
+    if (coupon.type === "FIXED") {
+      discountAmount = value;
+    } else if (coupon.type === "PERCENTAGE") {
+      // 确保百分比计算正确
+      discountAmount = (amount * (value / 100));
+    }
+
+    // 确保折扣不超过订单金额
+    discountAmount = Math.min(discountAmount, amount);
+
+    return {
       coupon: {
-        ...coupon,
-        value: coupon.value.toString(),
-        minAmount: coupon.minAmount?.toString(),
-        discountAmount: coupon.type === 'FIXED' 
-          ? Number(coupon.value)
-          : (amount * Number(coupon.value)) / 100
+        id: coupon.id,
+        code: coupon.code,
+        type: coupon.type,
+        value: value,
+        discountAmount: Number(discountAmount.toFixed(2))
       }
     };
   } catch (error) {
@@ -422,17 +445,14 @@ export async function validateCoupon(code: string, amount: number) {
 export async function getAffiliates() {
   const affiliates = await prisma.affiliate.findMany({
     include: {
-      user: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
+    }
   });
-
-  // 序列化 Decimal 类型数据
-  return affiliates.map(affiliate => ({
-    ...affiliate,
-    commissionValue: affiliate.commissionValue.toString(),
-    totalEarnings: affiliate.totalEarnings.toString(),
-  }));
+  return affiliates;
 }

@@ -22,6 +22,7 @@ async function getOrder(orderId: string) {
       affiliate: {
         include: {
           user: true,
+          paymentMethod: true,
         },
       },
     },
@@ -31,32 +32,32 @@ async function getOrder(orderId: string) {
     notFound();
   }
 
-  // 序列化 Decimal 类型数据
-  const serializedOrder = {
+  // Convert Decimal fields to numbers
+  const processedOrder = {
     ...order,
-    amount: order.amount.toString(),
-    subtotal: order.subtotal.toString(),
-    discountAmount: order.discountAmount?.toString(),
-    tax: order.tax?.toString(),
-    affiliateCommission: order.affiliateCommission?.toString(),
+    amount: Number(order.amount.toString()),
+    subtotal: order.subtotal ? Number(order.subtotal.toString()) : null,
+    discountAmount: order.discountAmount ? Number(order.discountAmount.toString()) : 0,
+    tax: order.tax ? Number(order.tax.toString()) : 0,
+    affiliateCommission: order.affiliateCommission ? Number(order.affiliateCommission.toString()) : null,
     product: {
       ...order.product,
-      price: order.product.price.toString(),
-      comparePrice: order.product.comparePrice?.toString(),
+      price: Number(order.product.price.toString()),
+      comparePrice: order.product.comparePrice ? Number(order.product.comparePrice.toString()) : null,
     },
-    coupon: order.coupon ? {
-      ...order.coupon,
-      value: order.coupon.value.toString(),
-      minAmount: order.coupon.minAmount?.toString(),
-    } : null,
     affiliate: order.affiliate ? {
       ...order.affiliate,
-      commissionValue: order.affiliate.commissionValue.toString(),
-      totalEarnings: order.affiliate.totalEarnings.toString(),
+      commissionValue: Number(order.affiliate.commissionValue.toString()),
+      totalEarnings: Number(order.affiliate.totalEarnings.toString())
     } : null,
+    coupon: order.coupon ? {
+      ...order.coupon,
+      value: Number(order.coupon.value.toString()),
+      minAmount: order.coupon.minAmount ? Number(order.coupon.minAmount.toString()) : null,
+    } : null
   };
 
-  return serializedOrder;
+  return processedOrder;
 }
 
 export default async function OrderPage({

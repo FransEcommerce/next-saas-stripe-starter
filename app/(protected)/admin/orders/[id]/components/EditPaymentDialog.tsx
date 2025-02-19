@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { validateCoupon } from "../../actions";
 
 const formSchema = z.object({
   amount: z.number().min(0),
@@ -80,11 +81,24 @@ export function EditPaymentDialog({
   const handleSubmit = async (data: FormValues) => {
     try {
       setIsPending(true);
+
+      // 如果提供了优惠券码,先验证优惠券
+      if (data.couponCode) {
+        const validationResult = await validateCoupon(data.couponCode, data.subtotal);
+        if (validationResult.error) {
+          toast.error(validationResult.error);
+          setIsPending(false);
+          return;
+        }
+        // 使用验证后的折扣金额
+        data.discountAmount = validationResult.data.discountAmount;
+      }
+
       await onSubmit(data);
       onOpenChange(false);
-      toast.success("Payment information updated");
     } catch (error) {
-      toast.error("Failed to update payment information");
+      toast.error("An error occurred while saving changes");
+      console.error(error);
     } finally {
       setIsPending(false);
     }

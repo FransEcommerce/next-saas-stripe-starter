@@ -71,6 +71,18 @@ interface CreateOrderInput {
   billingPhone: string;
 }
 
+interface OrderPaymentUpdateInput {
+  amount: number;
+  subtotal: number;
+  discountAmount?: number;
+  tax?: number;
+  affiliateCommission?: number;
+  paymentMethod?: string;
+  paymentNote?: string;
+  paymentProof?: string;
+  couponCode?: string;
+}
+
 function convertDecimalToNumber(decimal: Prisma.Decimal | null): number {
   if (decimal === null) return 0;
   return Number(decimal.toString());
@@ -368,7 +380,24 @@ export async function updateOrderStatus(orderId: string, status: string) {
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: { status },
+      include: {
+        product: true
+      }
     });
+
+    const processedOrder = {
+      ...updatedOrder,
+      amount: convertDecimalToNumber(updatedOrder.amount),
+      subtotal: convertDecimalToNumber(updatedOrder.subtotal),
+      discountAmount: convertDecimalToNumber(updatedOrder.discountAmount),
+      tax: convertDecimalToNumber(updatedOrder.tax),
+      affiliateCommission: convertDecimalToNumber(updatedOrder.affiliateCommission),
+      product: updatedOrder.product ? {
+        ...updatedOrder.product,
+        price: convertDecimalToNumber(updatedOrder.product.price),
+        comparePrice: convertDecimalToNumber(updatedOrder.product.comparePrice),
+      } : null,
+    };
 
     // 如果订单状态变更为已完成，且还没有许可证，则创建许可证
     if (status === "COMPLETED") {
@@ -393,7 +422,7 @@ export async function updateOrderStatus(orderId: string, status: string) {
     }
 
     revalidatePath("/admin/orders");
-    return updatedOrder;
+    return processedOrder;
   } catch (error) {
     console.error("Error updating order status:", error);
     return {
@@ -535,38 +564,141 @@ export async function updateOrderCustomer(orderId: string, data: z.infer<typeof 
   }
 }
 
-export async function updateOrderPayment(orderId: string, data: z.infer<typeof updatePaymentSchema>) {
+export async function updateOrderPayment(orderId: string, data: OrderPaymentUpdateInput) {
   try {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-    });
-
-    if (!order) {
-      throw new Error("Order not found");
-    }
-
-    // 计算新的总金额
-    const total = data.subtotal - (data.discountAmount || 0) + (data.tax || 0);
-
-    // 更新订单支付信息
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        amount: total,
-        subtotal: data.subtotal,
-        discountAmount: data.discountAmount,
-        tax: data.tax,
-        affiliateCommission: data.affiliateCommission,
-        paymentMethod: data.paymentMethod,
-        paymentNote: data.paymentNote,
-        paymentProof: data.paymentProof,
-        couponCode: data.couponCode,
+      include: {
+        coupon: true,
+        product: true,
       },
     });
 
-    revalidatePath("/admin/orders/[id]", "page");
+    if (!order) {
+      return { error: "Order not found" };
+    }
+
+    // 准备更新数据
+    let updateData = {
+      amount: data.subtotal - (data.discountAmount || 0) + (data.tax || 0),
+      subtotal: data.subtotal,
+      discountAmount: data.discountAmount || 0,
+      tax: data.tax || 0,
+      affiliateCommission: data.affiliateCommission,
+      paymentMethod: data.paymentMethod,
+      paymentNote: data.paymentNote,
+      paymentProof: data.paymentProof,
+    };
+
+    // 处理优惠券变更
+    if (data.couponCode) {
+      const coupon = await prisma.coupon.findFirst({
+        where: { code: data.couponCode },
+      });
+
+      if (coupon) {
+        // 如果优惠券不同于当前使用的优惠券
+        if (coupon.id !== order.couponId) {
+          // 如果之前有使用优惠券,减少原优惠券的使用次数
+          if (order.couponId) {
+            await prisma.coupon.update({
+              where: { id: order.couponId },
+              data: { usedCount: { decrement: 1 } }
+            });
+          }
+          // 增加新优惠券的使用次数
+          await prisma.coupon.update({
+            where: { id: coupon.id },
+            data: { usedCount: { increment: 1 } }
+          });
+          updateData = { ...updateData, couponId: coupon.id };
+        }
+      }
+    } else if (order.couponId) {
+      // 如果移除了优惠券,减少优惠券使用次数
+      await prisma.coupon.update({
+        where: { id: order.couponId },
+        data: { usedCount: { decrement: 1 } }
+      });
+      updateData = { ...updateData, couponId: null };
+    }
+
+    // 更新订单
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: updateData,
+      include: {
+        coupon: true,
+        product: true,
+      },
+    });
+
+    revalidatePath(`/admin/orders/${orderId}`);
+    return { success: true, data: updatedOrder };
   } catch (error) {
-    console.error("Failed to update order payment:", error);
-    throw error;
+    console.error("Error updating order payment:", error);
+    return { error: "Failed to update payment information" };
+  }
+}
+
+export async function validateCoupon(code: string, subtotal: number) {
+  try {
+    const coupon = await prisma.coupon.findFirst({
+      where: { 
+        code,
+        active: true,
+        OR: [
+          { maxUses: null },
+          { maxUses: { gt: prisma.coupon.fields.usedCount } }
+        ],
+        AND: [
+          {
+            OR: [
+              { startDate: null },
+              { startDate: { lte: new Date() } }
+            ]
+          },
+          {
+            OR: [
+              { endDate: null },
+              { endDate: { gte: new Date() } }
+            ]
+          }
+        ]
+      },
+    });
+
+    if (!coupon) {
+      return { error: "Invalid or expired coupon code" };
+    }
+
+    // 检查最小订单金额
+    if (coupon.minAmount && subtotal < Number(coupon.minAmount)) {
+      return { 
+        error: `Order amount does not meet minimum requirement (${formatPrice(Number(coupon.minAmount))}) for this coupon` 
+      };
+    }
+
+    // 计算折扣金额
+    let discountAmount = 0;
+    if (coupon.type === "PERCENTAGE") {
+      discountAmount = (subtotal * Number(coupon.value)) / 100;
+    } else {
+      discountAmount = Number(coupon.value);
+    }
+
+    return { 
+      success: true, 
+      data: {
+        id: coupon.id,
+        code: coupon.code,
+        type: coupon.type,
+        value: Number(coupon.value),
+        discountAmount
+      }
+    };
+  } catch (error) {
+    console.error("Error validating coupon:", error);
+    return { error: "Failed to validate coupon" };
   }
 }

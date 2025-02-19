@@ -31,31 +31,24 @@ export default async function ProductsPage() {
     },
   });
 
-  // 序列化 Decimal 类型数据
-  const serializedProducts = products.map(product => ({
-    ...product,
-    price: product.price.toString(),
-    comparePrice: product.comparePrice?.toString(),
-  }));
-
   return (
     <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between">
         <DashboardHeader
           heading="Products"
-          text="Create and manage products."
+          text="Manage your products, pricing, and features."
         />
         <div className="flex items-center space-x-2">
           <Link href="/admin/products/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              New Product
+              Add Product
             </Button>
           </Link>
         </div>
       </div>
       <div className="grid gap-4">
-        <ProductsList products={serializedProducts} />
+        <ProductsList products={products} />
       </div>
     </div>
   );

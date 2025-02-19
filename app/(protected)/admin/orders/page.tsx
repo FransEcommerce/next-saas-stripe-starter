@@ -21,11 +21,7 @@ export default async function OrdersPage() {
   const orders = await prisma.order.findMany({
     include: {
       user: true,
-      product: {
-        include: {
-          plugin: true,
-        },
-      },
+      product: true,
       license: true,
       affiliate: {
         include: {
@@ -38,23 +34,23 @@ export default async function OrdersPage() {
     },
   });
 
-  // 转换 Decimal 为字符串
-  const serializedOrders = orders.map(order => ({
+  // Convert Decimal fields to numbers
+  const processedOrders = orders.map(order => ({
     ...order,
-    amount: order.amount.toString(),
-    subtotal: order.subtotal.toString(),
-    discountAmount: order.discountAmount?.toString(),
-    tax: order.tax?.toString(),
-    affiliateCommission: order.affiliateCommission?.toString(),
+    amount: Number(order.amount.toString()),
+    subtotal: order.subtotal ? Number(order.subtotal.toString()) : null,
+    discountAmount: order.discountAmount ? Number(order.discountAmount.toString()) : 0,
+    tax: order.tax ? Number(order.tax.toString()) : 0,
+    affiliateCommission: order.affiliateCommission ? Number(order.affiliateCommission.toString()) : null,
     product: {
       ...order.product,
-      price: order.product.price.toString(),
-      comparePrice: order.product.comparePrice?.toString(),
+      price: Number(order.product.price.toString()),
+      comparePrice: order.product.comparePrice ? Number(order.product.comparePrice.toString()) : null,
     },
     affiliate: order.affiliate ? {
       ...order.affiliate,
-      commissionValue: order.affiliate.commissionValue.toString(),
-      totalEarnings: order.affiliate.totalEarnings.toString(),
+      commissionValue: Number(order.affiliate.commissionValue.toString()),
+      totalEarnings: Number(order.affiliate.totalEarnings.toString())
     } : null,
   }));
 
@@ -73,8 +69,8 @@ export default async function OrdersPage() {
         </Link>
       </div>
       <div className="flex-1 space-y-4 pt-6">
-        {serializedOrders.length > 0 ? (
-          <OrdersList orders={serializedOrders} />
+        {processedOrders.length > 0 ? (
+          <OrdersList orders={processedOrders} />
         ) : (
           <EmptyPlaceholder>
             <EmptyPlaceholder.Icon name="package" />

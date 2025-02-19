@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import {
   Card,
@@ -51,18 +52,20 @@ export function OrderProduct({ order }: OrderProductProps) {
               <p className="font-medium leading-none">
                 {product.plugin.name}
               </p>
-              <p className="text-sm text-muted-foreground">
-                Version {product.plugin.version}
-              </p>
             </div>
             {product.plugin.description && (
               <p className="text-sm text-muted-foreground">
                 {product.plugin.description}
               </p>
             )}
+            <div className="flex justify-between items-center">
             <p className="font-medium">
               {formatPrice(Number(product.price))}
             </p>
+            <Badge className="text-sm" variant="default">
+               Version {product.plugin.version}
+            </Badge>
+            </div>
           </div>
         </div>
       </CardContent>

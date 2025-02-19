@@ -30,6 +30,11 @@ interface OrderPaymentProps {
     paymentNote?: string | null;
     paymentProof?: string | null;
     couponCode?: string | null;
+    coupon?: {
+      code: string;
+      value: number;
+      type: string;
+    } | null;
     affiliate?: {
       user: {
         name: string;
@@ -44,9 +49,14 @@ export function OrderPayment({ order }: OrderPaymentProps) {
 
   const handleUpdatePayment = async (data: any) => {
     try {
-      await updateOrderPayment(order.id, data);
-      toast.success("Payment information updated");
-      window.location.reload();
+      const result = await updateOrderPayment(order.id, data);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        setIsEditDialogOpen(false);
+        toast.success("Payment information updated", {
+        });
+      }
     } catch (error) {
       console.error("Failed to update payment:", error);
       toast.error("Failed to update payment information");
@@ -112,11 +122,13 @@ export function OrderPayment({ order }: OrderPaymentProps) {
           <div className="space-y-4">
             <div className="space-y-2">
               <PriceRow label="Subtotal" amount={order.subtotal} />
-              <PriceRow 
-                label={`Discount${order.couponCode ? ` (${order.couponCode})` : ''}`} 
-                amount={order.discountAmount || 0} 
-                type="discount" 
-              />
+              {(order.discountAmount || 0) > 0 && (
+                <PriceRow 
+                  label={`Discount${order.coupon ? ` (${order.coupon.code})` : ''}`} 
+                  amount={order.discountAmount || 0} 
+                  type="discount" 
+                />
+              )}
               {order.affiliateCommission && order.affiliateCommission > 0 && (
                 <div className="space-y-1">
                   <PriceRow 
