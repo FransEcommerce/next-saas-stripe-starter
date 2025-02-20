@@ -144,12 +144,14 @@ model Plugin {
   name            String          // 插件名称
   description     String?         // 插件描述
   version         String          // 插件版本
+  chatpionVersion String?         // Chatpion版本要求
   avatar          String?         // 插件头像URL
   cover           String?         // 插件封面URL
   fileId          String?         // 云存储文件ID
   fileName        String?         // 原始文件名
   fileSize        String?         // 文件大小
   downloadUrl     String          // 云存储下载链接
+  changelog       String?         // 更新日志
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   
@@ -157,11 +159,19 @@ model Plugin {
   activationFields Json          // 激活时需要返回的字段
   uiFields        Json          // 返回给中间插件的UI配置字段
   
+  // 版本管理相关字段
+  isLatest        Boolean        @default(true)    // 是否是最新版本
+  parentId        String?        // 原始插件ID（第一个版本为null）
+  parentPlugin    Plugin?        @relation("PluginVersions", fields: [parentId], references: [id])
+  childVersions   Plugin[]       @relation("PluginVersions")
+  versionNumber   Int           @default(1)        // 版本号数字(1,2,3...)
+
   // 关联
   products        Product[]
   licenses        License[]
   downloadTokens  DownloadToken[]
 
+  @@index([parentId])
   @@map(name: "plugins")
 }
 

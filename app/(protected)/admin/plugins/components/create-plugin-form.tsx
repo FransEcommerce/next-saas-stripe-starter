@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createPlugin } from "../actions";
 import { FileUpload } from "@/components/file-upload";
+import { toast } from "sonner";
 
 const pluginFormSchema = z.object({
   name: z.string().min(2, {
@@ -28,16 +29,16 @@ const pluginFormSchema = z.object({
   version: z.string().min(1, {
     message: "Version is required.",
   }),
+  chatpionVersion: z.string().min(1, {
+    message: "Chatpion version is required.",
+  }),
+  changelog: z.string().optional(),
   avatar: z.string().optional(),
   cover: z.string().optional(),
-  fileId: z.string().min(1, {
-    message: "Please upload a plugin file.",
-  }),
-  fileName: z.string(),
-  fileSize: z.string(),
-  downloadUrl: z.string().url({
-    message: "Invalid download URL.",
-  }),
+  fileId: z.string().optional(),
+  fileName: z.string().optional(),
+  fileSize: z.string().optional(),
+  downloadUrl: z.string().url().optional(),
   activationFields: z.string().min(2, {
     message: "Activation fields must be valid JSON.",
   }),
@@ -58,6 +59,8 @@ export function CreatePluginForm() {
       name: "",
       description: "",
       version: "1.0.0",
+      chatpionVersion: "1.0.0",
+      changelog: "",
       avatar: "",
       cover: "",
       fileId: "",
@@ -93,9 +96,9 @@ export function CreatePluginForm() {
 
       await createPlugin(parsedData);
       router.push("/admin/plugins");
-      router.refresh();
+      toast.success("New plugin created successfully");
     } catch (error) {
-      console.error("Error creating plugin:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create plugin");
     } finally {
       setIsLoading(false);
     }
@@ -163,6 +166,23 @@ export function CreatePluginForm() {
                   </FormControl>
                   <FormDescription>
                     The version number of your plugin.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="chatpionVersion"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Required Chatpion Version</FormLabel>
+                  <FormControl>
+                    <Input placeholder="1.0.0" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    The minimum Chatpion version required for this plugin.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -257,6 +277,27 @@ export function CreatePluginForm() {
 
         {/* 配置字段（单列） */}
         <div className="space-y-6">
+          <FormField
+            control={form.control}
+            name="changelog"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Changelog</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe the initial version..."
+                    className="h-32 font-mono"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Document the features of this initial version.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="activationFields"

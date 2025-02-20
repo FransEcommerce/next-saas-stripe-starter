@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plugin } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,79 +20,90 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/file-upload";
-import { updatePlugin } from "../actions";
-import { Plugin } from "@prisma/client";
-import { toast } from "sonner";
+import { createPluginVersion } from "../../../actions";
 
-const pluginFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  description: z.string().optional(),
-  version: z.string().min(1, {
-    message: "Version is required.",
-  }),
-  chatpionVersion: z.string().min(1, {
-    message: "Chatpion version is required.",
-  }),
-  changelog: z.string().optional(),
-  avatar: z.string().optional(),
-  cover: z.string().optional(),
-  fileId: z.string().optional(),
-  fileName: z.string().optional(),
-  fileSize: z.string().optional(),
-  downloadUrl: z.string().url().optional(),
-  activationFields: z.string().min(2, {
-    message: "Activation fields must be valid JSON.",
-  }),
-  uiFields: z.string().min(2, {
-    message: "UI fields must be valid JSON.",
-  }),
-});
-
-type PluginFormValues = z.infer<typeof pluginFormSchema>;
-
-interface EditPluginFormProps {
-  plugin: Plugin;
-  returnPath?: string;
+// 在组件外部添加这个辅助函数
+function compareVersions(v1: string, v2: string): number {
+  const v1Parts = v1.split('.').map(Number);
+  const v2Parts = v2.split('.').map(Number);
+  
+  for (let i = 0; i < 3; i++) {
+    if (v1Parts[i] > v2Parts[i]) return 1;
+    if (v1Parts[i] < v2Parts[i]) return -1;
+  }
+  return 0;
 }
 
-export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
+function incrementVersion(version: string): string {
+  const parts = version.split('.').map(Number);
+  if (parts.length !== 3) return '1.0.0';
+  
+  parts[2] += 1; // 增加补丁版本
+  return parts.join('.');
+}
+
+interface CreateVersionFormProps {
+  plugin: Plugin;
+}
+
+export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<PluginFormValues>({
+  const pluginFormSchema = z.object({
+    name: z.string().min(2, {
+      message: "Name must be at least 2 characters.",
+    }),
+    description: z.string().optional(),
+    version: z.string().min(1, {
+      message: "Version is required.",
+    }),
+    chatpionVersion: z.string().min(1, {
+      message: "Chatpion version is required.",
+    }),
+    changelog: z.string().min(1, {
+      message: "Changelog is required for new versions.",
+    }),
+    avatar: z.string().optional(),
+    cover: z.string().optional(),
+    fileId: z.string().optional(),
+    fileName: z.string().optional(),
+    fileSize: z.string().optional(),
+    downloadUrl: z.string().url().optional(),
+    activationFields: z.string().min(2, {
+      message: "Activation fields must be valid JSON.",
+    }),
+    uiFields: z.string().min(2, {
+      message: "UI fields must be valid JSON.",
+    }),
+  });
+
+  const form = useForm<z.infer<typeof pluginFormSchema>>({
     resolver: zodResolver(pluginFormSchema),
     defaultValues: {
       name: plugin.name,
       description: plugin.description || "",
-      version: plugin.version,
-      chatpionVersion: plugin.chatpionVersion || "1.0.0",
-      changelog: plugin.changelog || "",
+      version: incrementVersion(plugin.version),
+      chatpionVersion: plugin.chatpionVersion || "",
+      changelog: "",
       avatar: plugin.avatar || "",
       cover: plugin.cover || "",
-      fileId: plugin.fileId,
-      fileName: plugin.fileName || "",
-      fileSize: plugin.fileSize || "",
-      downloadUrl: plugin.downloadUrl,
+      fileId: "",
+      fileName: "",
+      fileSize: "",
+      downloadUrl: "",
       activationFields: JSON.stringify(plugin.activationFields, null, 2),
       uiFields: JSON.stringify(plugin.uiFields, null, 2),
     },
   });
 
-  const handleUploadComplete = (fileData: {
-    fileId: string;
-    fileName: string;
-    fileSize: string;
-    downloadUrl: string;
-  }) => {
-    form.setValue("fileId", fileData.fileId);
-    form.setValue("fileName", fileData.fileName);
-    form.setValue("fileSize", fileData.fileSize);
-    form.setValue("downloadUrl", fileData.downloadUrl);
-  };
+  async function onSubmit(data: z.infer<typeof pluginFormSchema>) {
+    // 检查版本号
+    if (compareVersions(data.version, plugin.version) <= 0) {
+      toast.error("New version must be higher than the current version");
+      return;
+    }
 
-  async function onSubmit(data: PluginFormValues) {
     setIsLoading(true);
 
     try {
@@ -100,11 +113,13 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
         uiFields: JSON.parse(data.uiFields),
       };
 
-      await updatePlugin(plugin.id, parsedData);
-      router.push(returnPath || "/admin/plugins");
-      toast.success("Plugin updated successfully");
+      await createPluginVersion(plugin.id, parsedData);
+      toast.success("New version created successfully");
+      router.push(`/admin/plugins/${plugin.id}/versions`);
+      router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update plugin");
+      console.error("Error creating plugin version:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create version");
     } finally {
       setIsLoading(false);
     }
@@ -114,9 +129,14 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold tracking-tight">Edit Plugin</h2>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">New Version</h2>
+            <p className="text-muted-foreground">
+              Create a new version for {plugin.name} (Current version: {plugin.version})
+            </p>
+          </div>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? "Creating..." : "Create Version"}
           </Button>
         </div>
 
@@ -125,53 +145,15 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
           <div className="space-y-8">
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Plugin name" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The name of your plugin as it will appear to users.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe your plugin"
-                      className="resize-none h-[38px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    A brief description of what your plugin does.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="version"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Version</FormLabel>
                   <FormControl>
-                    <Input placeholder="1.0.0" {...field} />
+                    <Input placeholder="2.0.0" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The version number of your plugin.
+                    The version number for this new release.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -189,6 +171,27 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
                   </FormControl>
                   <FormDescription>
                     The minimum Chatpion version required for this plugin.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe what's new in this version"
+                      className="resize-none h-[80px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    A brief description of the changes in this version.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -215,11 +218,10 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
                       }}
                       accept=".zip,.rar,.7z"
                       placeholderText="Upload your plugin file"
-                      value={form.getValues("fileName")}
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload your plugin file (ZIP, RAR, or 7Z format).
+                    Upload the new version of your plugin file (ZIP, RAR, or 7Z format).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -286,6 +288,27 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
         <div className="space-y-6">
           <FormField
             control={form.control}
+            name="changelog"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Changelog</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe what's new in this version..."
+                    className="h-32 font-mono"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Document the changes and new features in this version.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="activationFields"
             render={({ field }) => (
               <FormItem>
@@ -320,27 +343,6 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
                 </FormControl>
                 <FormDescription>
                   JSON object containing fields for UI configuration.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="changelog"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Changelog</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Describe the changes in this version..."
-                    className="h-32 font-mono"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Document the changes made in this version. This will be displayed in the plugin&apos;s update history.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

@@ -33,8 +33,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Plus, History } from "lucide-react";
 import { deletePlugin } from "../actions";
+import { toast } from "sonner";
 
 interface PluginsListProps {
   plugins: Plugin[];
@@ -48,11 +49,14 @@ export function PluginsList({ plugins }: PluginsListProps) {
   const handleDelete = async () => {
     if (!selectedPlugin) return;
 
-    const result = await deletePlugin(selectedPlugin.id);
-    if (result.success) {
+    try {
+      await deletePlugin(selectedPlugin.id);
       setIsDeleteDialogOpen(false);
       setSelectedPlugin(null);
       router.refresh();
+      toast.success("Plugin deleted successfully");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete plugin");
     }
   };
 
@@ -62,10 +66,10 @@ export function PluginsList({ plugins }: PluginsListProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead>Description</TableHead>
             <TableHead>Version</TableHead>
+            <TableHead>Chatpion Version</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-[70px]"></TableHead>
+            <TableHead className="w-[150px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -78,9 +82,25 @@ export function PluginsList({ plugins }: PluginsListProps) {
           ) : (
             plugins.map((plugin) => (
               <TableRow key={plugin.id}>
-                <TableCell className="font-medium">{plugin.name}</TableCell>
-                <TableCell>{plugin.description}</TableCell>
-                <TableCell>{plugin.version}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{plugin.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {plugin.description || "No description"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{plugin.version}</span>
+                    <span className="text-sm text-muted-foreground">
+                      Version #{plugin.versionNumber}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {plugin.chatpionVersion || "Not specified"}
+                </TableCell>
                 <TableCell>
                   {formatDistanceToNow(new Date(plugin.createdAt), {
                     addSuffix: true,
@@ -105,6 +125,18 @@ export function PluginsList({ plugins }: PluginsListProps) {
                         <Link href={`/admin/plugins/${plugin.id}/edit`} className="cursor-pointer">
                           <Pencil className="mr-2 h-4 w-4" />
                           Edit
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/plugins/${plugin.id}/versions/new`} className="cursor-pointer">
+                          <Plus className="mr-2 h-4 w-4" />
+                          New Version
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/plugins/${plugin.id}/versions`} className="cursor-pointer">
+                          <History className="mr-2 h-4 w-4" />
+                          Version History
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem

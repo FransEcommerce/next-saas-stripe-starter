@@ -37,7 +37,7 @@ export default async function SettingsPage() {
           billingZip: user.billingZip || "",
           billingPhone: user.billingPhone || ""
         }} />
-        {/* <UserRoleForm user={{ id: user.id, role: user.role }} /> */}
+        <UserRoleForm user={{ id: user.id, role: user.role }} />
         <DeleteAccountSection />
       </div>
     </>
