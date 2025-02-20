@@ -6,6 +6,7 @@ import { DeleteAccountSection } from "@/components/dashboard/delete-account";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { UserNameForm } from "@/components/forms/user-name-form";
 import { UserRoleForm } from "@/components/forms/user-role-form";
+import { UserBillingForm } from "@/components/forms/user-billing-form";
 
 export const metadata = constructMetadata({
   title: "Settings – SaaS Starter",
@@ -25,7 +26,18 @@ export default async function SettingsPage() {
       />
       <div className="divide-y divide-muted pb-10">
         <UserNameForm user={{ id: user.id, name: user.name || "" }} />
-        <UserRoleForm user={{ id: user.id, role: user.role }} />
+        <UserBillingForm user={{
+          id: user.id,
+          billingCompany: user.billingCompany || "",
+          billingName: user.billingName || "",
+          billingAddress: user.billingAddress || "",
+          billingCity: user.billingCity || "",
+          billingState: user.billingState || "",
+          billingCountry: user.billingCountry || "",
+          billingZip: user.billingZip || "",
+          billingPhone: user.billingPhone || ""
+        }} />
+        {/* <UserRoleForm user={{ id: user.id, role: user.role }} /> */}
         <DeleteAccountSection />
       </div>
     </>

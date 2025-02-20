@@ -38,7 +38,7 @@ export async function getUsers() {
 }
 
 export async function getUserById(id: string) {
-  return await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id },
     include: {
       orders: {
@@ -60,7 +60,9 @@ export async function getUserById(id: string) {
     },
   });
 
-  return users.map(user => ({
+  if (!user) return null;
+
+  return {
     ...user,
     affiliate: user.affiliate
       ? {
@@ -68,5 +70,5 @@ export async function getUserById(id: string) {
           totalEarnings: Number(user.affiliate.totalEarnings)
         }
       : null
-  }));
+  };
 }

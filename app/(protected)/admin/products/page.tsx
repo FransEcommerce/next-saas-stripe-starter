@@ -17,7 +17,7 @@ export default async function ProductsPage() {
   const user = await getCurrentUser();
   if (!user || user.role !== "ADMIN") redirect("/login");
 
-  const products = await prisma.product.findMany({
+  const rawProducts = await prisma.product.findMany({
     include: {
       plugin: true,
       orders: {
@@ -29,13 +29,13 @@ export default async function ProductsPage() {
     orderBy: {
       createdAt: "desc",
     },
-  }).then((products) =>
-    products.map((product) => ({
-      ...product,
-      price: product.price.toNumber(),
-      comparePrice: product.comparePrice?.toNumber() || null,
-    }))
-  );
+  });
+
+  const products = rawProducts.map(product => ({
+    ...product,
+    price: product.price ? parseFloat(product.price.toString()) : null,
+    comparePrice: product.comparePrice ? parseFloat(product.comparePrice.toString()) : null,
+  }));
 
   return (
     <div className="flex-1 space-y-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatDate } from "@/lib/utils";
 import {
   Table,
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -29,6 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { UserDialog } from "./user-dialog";
+import { createUser, updateUser, deleteUser, getUserRelatedDataCount } from "../actions";
 
 interface User {
   id: string;
@@ -42,6 +43,14 @@ interface User {
     id: string;
     totalEarnings: number;
   } | null;
+  billingCompany?: string | null;
+  billingName?: string | null;
+  billingAddress?: string | null;
+  billingCity?: string | null;
+  billingState?: string | null;
+  billingCountry?: string | null;
+  billingZip?: string | null;
+  billingPhone?: string | null;
 }
 
 interface UsersListProps {
@@ -52,13 +61,44 @@ export function UsersList({ users }: UsersListProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showUserDialog, setShowUserDialog] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [relatedData, setRelatedData] = useState<{
+    ordersCount: number;
+    licensesCount: number;
+    downloadTokensCount: number;
+    affiliateData: {
+      id: string;
+      totalEarnings: number;
+      referredOrdersCount: number;
+      paymentsCount: number;
+    } | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (selectedUser) {
+      getUserRelatedDataCount(selectedUser.id).then(setRelatedData).catch(() => setRelatedData(null));
+    } else {
+      setRelatedData(null);
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    const handleCreateUser = () => {
+      setEditingUser(null);
+      setShowUserDialog(true);
+    };
+
+    window.addEventListener("create-user", handleCreateUser);
+    return () => window.removeEventListener("create-user", handleCreateUser);
+  }, []);
 
   const handleDelete = async () => {
     if (!selectedUser) return;
 
     setIsDeleting(true);
     try {
-      // TODO: 实现删除用户的功能
+      await deleteUser(selectedUser.id);
       toast.success("User deleted successfully");
       setShowDeleteDialog(false);
       setSelectedUser(null);
@@ -66,6 +106,34 @@ export function UsersList({ users }: UsersListProps) {
       toast.error("An error occurred while deleting the user");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setShowUserDialog(true);
+  };
+
+  const handleCreateOrUpdateUser = async (data: any) => {
+    try {
+      if (editingUser) {
+        await updateUser(editingUser.id, {
+          ...data,
+          role: data.role || editingUser.role,
+        });
+        toast.success("User updated successfully");
+      } else {
+        await createUser({
+          ...data,
+          role: data.role || "USER",
+        });
+        toast.success("User created successfully");
+      }
+      setShowUserDialog(false);
+      setEditingUser(null);
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error(editingUser ? "Failed to update user" : "Failed to create user");
     }
   };
 
@@ -98,9 +166,9 @@ export function UsersList({ users }: UsersListProps) {
                 <TableRow key={user.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{user.name}</div>
+                      <div className="font-medium">{user.name || "-"}</div>
                       <div className="text-sm text-muted-foreground">
-                        {user.email}
+                        {user.email || "-"}
                       </div>
                     </div>
                   </TableCell>
@@ -152,15 +220,10 @@ export function UsersList({ users }: UsersListProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/users/${user.id}`}>
-                            <Eye className="mr-2 h-4 w-4" /> View Details
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/users/${user.id}/edit`}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </Link>
+                        <DropdownMenuItem
+                          onClick={() => handleEditUser(user)}
+                        >
+                          <Pencil className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
@@ -192,7 +255,23 @@ export function UsersList({ users }: UsersListProps) {
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this user? This action cannot be undone.
-              All related data including orders, licenses, and affiliate information will be deleted.
+              {relatedData && (
+                <div className="mt-4 space-y-2">
+                  <div>This will also delete:</div>
+                  <ul className="list-disc pl-5">
+                    <li>{relatedData.ordersCount} orders</li>
+                    <li>{relatedData.licensesCount} licenses</li>
+                    <li>{relatedData.downloadTokensCount} download tokens</li>
+                    {relatedData.affiliateData && (
+                      <>
+                        <li>Affiliate account with ${relatedData.affiliateData.totalEarnings.toFixed(2)} earnings</li>
+                        <li>{relatedData.affiliateData.referredOrdersCount} referred orders</li>
+                        <li>{relatedData.affiliateData.paymentsCount} affiliate payments</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -213,6 +292,32 @@ export function UsersList({ users }: UsersListProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UserDialog
+        key={editingUser?.id || "create"}
+        open={showUserDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingUser(null);
+          }
+          setShowUserDialog(open);
+        }}
+        initialData={editingUser ? {
+          name: editingUser.name || undefined,
+          email: editingUser.email || undefined,
+          role: editingUser.role,
+          billingCompany: editingUser.billingCompany || undefined,
+          billingName: editingUser.billingName || undefined,
+          billingAddress: editingUser.billingAddress || undefined,
+          billingCity: editingUser.billingCity || undefined,
+          billingState: editingUser.billingState || undefined,
+          billingCountry: editingUser.billingCountry || undefined,
+          billingZip: editingUser.billingZip || undefined,
+          billingPhone: editingUser.billingPhone || undefined,
+        } : undefined}
+        onSubmit={handleCreateOrUpdateUser}
+        mode={editingUser ? "edit" : "create"}
+      />
     </>
   );
 }

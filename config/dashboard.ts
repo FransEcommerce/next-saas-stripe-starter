@@ -32,6 +32,12 @@ export const sidebarLinks: SidebarNavItem[] = [
         authorizeOnly: UserRole.ADMIN,
       },
       {
+        href: "/admin/licenses",
+        icon: "package",
+        title: "Licenses",
+        authorizeOnly: UserRole.ADMIN,
+      },
+      {
         href: "/admin/coupons",
         icon: "package",
         title: "Coupons",

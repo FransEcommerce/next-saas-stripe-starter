@@ -2,9 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Plus } from "lucide-react";
+import { CreateUserButton } from "./components/create-user-button";
 import { UsersList } from "./components/users-list";
 import { getUsers } from "./queries";
 
@@ -28,12 +26,7 @@ export default async function UsersPage() {
             text="Manage user accounts, roles and permissions."
           />
           <div className="flex items-center space-x-2">
-            <Link href="/admin/users/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add User
-              </Button>
-            </Link>
+            <CreateUserButton />
           </div>
         </div>
         <UsersList users={users} />
