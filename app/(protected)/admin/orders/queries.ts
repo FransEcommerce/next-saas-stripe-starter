@@ -225,10 +225,16 @@ export async function getOrders() {
       subtotal: convertDecimalToNumber(order.subtotal),
       discountAmount: convertDecimalToNumber(order.discountAmount),
       tax: convertDecimalToNumber(order.tax),
+      affiliateCommission: convertDecimalToNumber(order.affiliateCommission),
       product: order.product ? {
         ...order.product,
         price: convertDecimalToNumber(order.product.price),
         comparePrice: convertDecimalToNumber(order.product.comparePrice),
+      } : null,
+      affiliate: order.affiliate ? {
+        ...order.affiliate,
+        commissionValue: convertDecimalToNumber(order.affiliate.commissionValue),
+        totalEarnings: convertDecimalToNumber(order.affiliate.totalEarnings),
       } : null,
     }));
   } catch (error) {
@@ -454,5 +460,9 @@ export async function getAffiliates() {
       }
     }
   });
-  return affiliates;
+  return affiliates.map(affiliate => ({
+    ...affiliate,
+    commissionValue: Number(affiliate.commissionValue),
+    totalEarnings: Number(affiliate.totalEarnings)
+  }));
 }

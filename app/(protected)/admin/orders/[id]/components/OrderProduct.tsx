@@ -36,7 +36,7 @@ export function OrderProduct({ order }: OrderProductProps) {
         <CardDescription>Product details and information</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-start space-x-4 p-3 bg-muted/50 rounded-xl">
+        <div className="flex items-start space-x-4 p-3 bg-muted/50 rounded-xl border">
           {product.plugin.avatar && (
             <div className="relative h-16 w-16 overflow-hidden rounded-lg">
               <Image

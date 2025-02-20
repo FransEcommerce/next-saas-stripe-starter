@@ -87,8 +87,8 @@ export default async function OrderPage({
           <OrderCustomer order={order} />
         </div>
         <div className="space-y-6">
-          <OrderPayment order={order} />
           <OrderLicense order={order} />
+          <OrderPayment order={order} />
         </div>
       </div>
     </div>

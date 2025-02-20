@@ -77,6 +77,7 @@ interface OrderPaymentUpdateInput {
   discountAmount?: number;
   tax?: number;
   affiliateCommission?: number;
+  affiliateId?: string;
   paymentMethod?: string;
   paymentNote?: string;
   paymentProof?: string;
@@ -170,6 +171,7 @@ export async function createOrder(data: CreateOrderInput) {
       subtotal: convertDecimalToNumber(order.subtotal),
       discountAmount: convertDecimalToNumber(order.discountAmount),
       tax: convertDecimalToNumber(order.tax),
+      affiliateCommission: order.affiliateCommission ? convertDecimalToNumber(order.affiliateCommission) : null,
       product: order.product ? {
         ...order.product,
         price: convertDecimalToNumber(order.product.price),
@@ -381,7 +383,8 @@ export async function updateOrderStatus(orderId: string, status: string) {
       where: { id: orderId },
       data: { status },
       include: {
-        product: true
+        product: true,
+        coupon: true
       }
     });
 
@@ -396,6 +399,10 @@ export async function updateOrderStatus(orderId: string, status: string) {
         ...updatedOrder.product,
         price: convertDecimalToNumber(updatedOrder.product.price),
         comparePrice: convertDecimalToNumber(updatedOrder.product.comparePrice),
+      } : null,
+      coupon: updatedOrder.coupon ? {
+        ...updatedOrder.coupon,
+        value: convertDecimalToNumber(updatedOrder.coupon.value),
       } : null,
     };
 
@@ -570,7 +577,26 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
       where: { id: orderId },
       include: {
         coupon: true,
-        product: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            comparePrice: true,
+            active: true,
+            duration: true,
+            features: true,
+            createdAt: true,
+            updatedAt: true,
+            pluginId: true
+          }
+        },
+        affiliate: {
+          include: {
+            user: true
+          }
+        }
       },
     });
 
@@ -590,6 +616,21 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
       paymentProof: data.paymentProof,
     };
 
+    // 处理 affiliate 变更
+    if (data.affiliateId) {
+      if (data.affiliateId === "none") {
+        updateData = { ...updateData, affiliateId: null, affiliateCommission: null };
+      } else {
+        const affiliate = await prisma.affiliate.findUnique({
+          where: { id: data.affiliateId },
+        });
+        if (!affiliate) {
+          return { error: "Affiliate not found" };
+        }
+        updateData = { ...updateData, affiliateId: data.affiliateId };
+      }
+    }
+
     // 处理优惠券变更
     if (data.couponCode) {
       const coupon = await prisma.coupon.findFirst({
@@ -597,16 +638,13 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
       });
 
       if (coupon) {
-        // 如果优惠券不同于当前使用的优惠券
         if (coupon.id !== order.couponId) {
-          // 如果之前有使用优惠券,减少原优惠券的使用次数
           if (order.couponId) {
             await prisma.coupon.update({
               where: { id: order.couponId },
               data: { usedCount: { decrement: 1 } }
             });
           }
-          // 增加新优惠券的使用次数
           await prisma.coupon.update({
             where: { id: coupon.id },
             data: { usedCount: { increment: 1 } }
@@ -615,7 +653,6 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
         }
       }
     } else if (order.couponId) {
-      // 如果移除了优惠券,减少优惠券使用次数
       await prisma.coupon.update({
         where: { id: order.couponId },
         data: { usedCount: { decrement: 1 } }
@@ -629,7 +666,26 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
       data: updateData,
       include: {
         coupon: true,
-        product: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            comparePrice: true,
+            active: true,
+            duration: true,
+            features: true,
+            createdAt: true,
+            updatedAt: true,
+            pluginId: true
+          }
+        },
+        affiliate: {
+          include: {
+            user: true
+          }
+        }
       },
     });
 
@@ -641,6 +697,21 @@ export async function updateOrderPayment(orderId: string, data: OrderPaymentUpda
       discountAmount: updatedOrder.discountAmount ? Number(updatedOrder.discountAmount) : null,
       tax: updatedOrder.tax ? Number(updatedOrder.tax) : null,
       affiliateCommission: updatedOrder.affiliateCommission ? Number(updatedOrder.affiliateCommission) : null,
+      product: updatedOrder.product ? {
+        ...updatedOrder.product,
+        price: Number(updatedOrder.product.price),
+        comparePrice: updatedOrder.product.comparePrice ? Number(updatedOrder.product.comparePrice) : null
+      } : null,
+      coupon: updatedOrder.coupon ? {
+        ...updatedOrder.coupon,
+        value: Number(updatedOrder.coupon.value)
+      } : null,
+      affiliate: updatedOrder.affiliate ? {
+        ...updatedOrder.affiliate,
+        commissionValue: Number(updatedOrder.affiliate.commissionValue),
+        totalEarnings: Number(updatedOrder.affiliate.totalEarnings),
+        user: updatedOrder.affiliate.user
+      } : null
     };
 
     revalidatePath(`/admin/orders/${orderId}`);

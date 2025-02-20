@@ -22,6 +22,13 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   const [product, plugins] = await Promise.all([
     prisma.product.findUnique({
       where: { id: params.id },
+    }).then(product => {
+      if (!product) return null;
+      return {
+        ...product,
+        price: product.price.toNumber(),
+        comparePrice: product.comparePrice?.toNumber() || null
+      };
     }),
     prisma.plugin.findMany({
       orderBy: {

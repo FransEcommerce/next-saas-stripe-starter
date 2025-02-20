@@ -29,8 +29,15 @@ export async function createProduct(data: ProductInput) {
       },
     });
 
+    // Convert Decimal to number before returning
+    const serializedProduct = {
+      ...product,
+      price: Number(product.price),
+      comparePrice: product.comparePrice ? Number(product.comparePrice) : null,
+    };
+
     revalidatePath("/admin/products");
-    return { success: true, product };
+    return { success: true, product: serializedProduct };
   } catch (error) {
     console.error("Error creating product:", error);
     return { success: false, error: "Failed to create product" };
@@ -53,8 +60,15 @@ export async function updateProduct(id: string, data: Partial<ProductInput>) {
       },
     });
 
+    // Convert Decimal to number before returning
+    const serializedProduct = {
+      ...product,
+      price: Number(product.price),
+      comparePrice: product.comparePrice ? Number(product.comparePrice) : null,
+    };
+
     revalidatePath("/admin/products");
-    return { success: true, product };
+    return { success: true, product: serializedProduct };
   } catch (error) {
     console.error("Error updating product:", error);
     return { success: false, error: "Failed to update product" };

@@ -38,7 +38,7 @@ interface UpdatePaymentStatusInput {
   proofUrl?: string;
 }
 
-export async function createAffiliate(data: CreateAffiliateInput) {
+export async function  createAffiliate(data: CreateAffiliateInput) {
   try {
     const affiliate = await prisma.affiliate.create({
       data: {
@@ -60,8 +60,15 @@ export async function createAffiliate(data: CreateAffiliateInput) {
       }
     });
 
+    // 将 Decimal 类型转换为普通数字
+    const serializedAffiliate = {
+      ...affiliate,
+      commissionValue: Number(affiliate.commissionValue),
+      totalEarnings: affiliate.totalEarnings ? Number(affiliate.totalEarnings) : 0
+    };
+
     revalidatePath('/admin/affiliates');
-    return { success: true, data: affiliate };
+    return { success: true, data: serializedAffiliate };
   } catch (error) {
     console.error('Error creating affiliate:', error);
     return { success: false, error: 'Failed to create affiliate' };
@@ -114,8 +121,15 @@ export async function updateAffiliate(id: string, data: UpdateAffiliateInput) {
       });
     }
 
+    // 将 Decimal 类型转换为普通数字
+    const serializedAffiliate = {
+      ...updatedAffiliate,
+      commissionValue: Number(updatedAffiliate.commissionValue),
+      totalEarnings: updatedAffiliate.totalEarnings ? Number(updatedAffiliate.totalEarnings) : 0
+    };
+
     revalidatePath('/admin/affiliates');
-    return { success: true, data: updatedAffiliate };
+    return { success: true, data: serializedAffiliate };
   } catch (error) {
     console.error('Error updating affiliate:', error);
     return { success: false, error: 'Failed to update affiliate' };
@@ -218,8 +232,27 @@ export async function createAffiliatePayment(data: CreateAffiliatePaymentInput) 
       }
     });
 
+    // 序列化 Decimal 类型数据
+    const serializedPayment = {
+      ...payment,
+      amount: Number(payment.amount),
+      affiliate: {
+        ...payment.affiliate,
+        commissionValue: Number(payment.affiliate.commissionValue),
+        totalEarnings: payment.affiliate.totalEarnings ? Number(payment.affiliate.totalEarnings) : 0
+      },
+      orders: payment.orders.map(order => ({
+        ...order,
+        amount: Number(order.amount),
+        subtotal: Number(order.subtotal),
+        discountAmount: Number(order.discountAmount),
+        tax: Number(order.tax),
+        affiliateCommission: Number(order.affiliateCommission)
+      }))
+    };
+
     revalidatePath('/admin/affiliates/payments');
-    return { success: true, data: payment };
+    return { success: true, data: serializedPayment };
   } catch (error) {
     console.error('Error creating affiliate payment:', error);
     return { success: false, error: 'Failed to create affiliate payment' };
@@ -240,12 +273,32 @@ export async function updatePaymentStatus(id: string, data: UpdatePaymentStatusI
           include: {
             user: true
           }
-        }
+        },
+        orders: true
       }
     });
 
+    // 序列化 Decimal 类型数据
+    const serializedPayment = {
+      ...payment,
+      amount: Number(payment.amount),
+      affiliate: {
+        ...payment.affiliate,
+        commissionValue: Number(payment.affiliate.commissionValue),
+        totalEarnings: payment.affiliate.totalEarnings ? Number(payment.affiliate.totalEarnings) : 0
+      },
+      orders: payment.orders.map(order => ({
+        ...order,
+        amount: Number(order.amount),
+        subtotal: Number(order.subtotal),
+        discountAmount: Number(order.discountAmount),
+        tax: Number(order.tax),
+        affiliateCommission: Number(order.affiliateCommission)
+      }))
+    };
+
     revalidatePath('/admin/affiliates/payments');
-    return { success: true, data: payment };
+    return { success: true, data: serializedPayment };
   } catch (error) {
     console.error('Error updating payment status:', error);
     return { success: false, error: 'Failed to update payment status' };

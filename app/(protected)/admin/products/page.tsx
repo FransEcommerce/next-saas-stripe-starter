@@ -29,7 +29,13 @@ export default async function ProductsPage() {
     orderBy: {
       createdAt: "desc",
     },
-  });
+  }).then((products) =>
+    products.map((product) => ({
+      ...product,
+      price: product.price.toNumber(),
+      comparePrice: product.comparePrice?.toNumber() || null,
+    }))
+  );
 
   return (
     <div className="flex-1 space-y-4">

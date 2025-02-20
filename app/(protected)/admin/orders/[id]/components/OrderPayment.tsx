@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils";
@@ -104,7 +104,10 @@ export function OrderPayment({ order }: OrderPaymentProps) {
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Payment Information</CardTitle>
+          <div>
+            <CardTitle>Payment</CardTitle>
+            <CardDescription>Payment information and status</CardDescription>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -142,9 +145,9 @@ export function OrderPayment({ order }: OrderPaymentProps) {
                   )}
                 </div>
               )}
-              {order.tax && order.tax > 0 && (
-                <PriceRow label="Tax" amount={order.tax} />
-              )}
+ 
+              <PriceRow label="Tax" amount={order.tax} />
+
               <Separator className="my-2" />
               <PriceRow label="Total" amount={order.amount} type="total" />
             </div>

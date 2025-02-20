@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { validateCoupon } from "../../actions";
+import { getAffiliates } from "../../queries";
+import { FileUpload } from "@/components/file-upload";
 
 const formSchema = z.object({
   amount: z.number().min(0),
@@ -39,6 +41,7 @@ const formSchema = z.object({
   discountAmount: z.number().min(0).optional(),
   tax: z.number().min(0).optional(),
   affiliateCommission: z.number().min(0).optional(),
+  affiliateId: z.string().optional(),
   paymentMethod: z.string().optional(),
   paymentNote: z.string().optional(),
   paymentProof: z.string().url().optional(),
@@ -72,21 +75,66 @@ export function EditPaymentDialog({
   onSubmit,
 }: EditPaymentDialogProps) {
   const [isPending, setIsPending] = useState(false);
+  const [proofUrl, setProofUrl] = useState(initialData.paymentProof || "");
+  const [affiliates, setAffiliates] = useState<Array<{
+    id: string;
+    user: {
+      name: string;
+      email: string;
+    };
+    commissionValue: number;
+    totalEarnings: number;
+  }>>([]);
+
+  useEffect(() => {
+    const loadAffiliates = async () => {
+      const data = await getAffiliates();
+      setAffiliates(data);
+    };
+    loadAffiliates();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: Number(initialData.amount) || 0,
-      subtotal: Number(initialData.subtotal) || 0,
-      discountAmount: initialData.discountAmount ? Number(initialData.discountAmount) : undefined,
-      tax: initialData.tax ? Number(initialData.tax) : undefined,
-      affiliateCommission: initialData.affiliateCommission ? Number(initialData.affiliateCommission) : undefined,
-      paymentMethod: initialData.paymentMethod,
-      paymentNote: initialData.paymentNote,
-      paymentProof: initialData.paymentProof,
-      couponCode: initialData.couponCode
+      ...initialData,
+      affiliateId: initialData.affiliate?.id || "none",
+      paymentProof: proofUrl,
     },
   });
+
+  const affiliateId = form.watch("affiliateId");
+
+  const handleAffiliateChange = (value: string) => {
+    form.setValue("affiliateId", value);
+    if (value === "none") {
+      form.setValue("affiliateCommission", undefined);
+    } else {
+      // 找到选中的 affiliate
+      const selectedAffiliate = affiliates.find((a) => a.id === value);
+      if (selectedAffiliate) {
+        // 获取当前订单金额
+        const subtotal = form.getValues("subtotal");
+        // 计算佣金
+        const commission = (selectedAffiliate.commissionValue / 100) * subtotal;
+        // 设置佣金值，保留两位小数
+        form.setValue("affiliateCommission", Number(commission.toFixed(2)));
+      }
+    }
+  };
+
+  // 监听 subtotal 变化，如果有选中的 affiliate，重新计算佣金
+  const subtotal = form.watch("subtotal");
+  useEffect(() => {
+    const currentAffiliateId = form.getValues("affiliateId");
+    if (currentAffiliateId && currentAffiliateId !== "none") {
+      const selectedAffiliate = affiliates.find((a) => a.id === currentAffiliateId);
+      if (selectedAffiliate) {
+        const commission = (selectedAffiliate.commissionValue / 100) * subtotal;
+        form.setValue("affiliateCommission", Number(commission.toFixed(2)));
+      }
+    }
+  }, [subtotal, affiliates, form]);
 
   const handleSubmit = async (data: FormValues) => {
     try {
@@ -101,7 +149,9 @@ export function EditPaymentDialog({
           return;
         }
         // 使用验证后的折扣金额
-        data.discountAmount = validationResult.data.discountAmount;
+        if (validationResult.data) {
+          data.discountAmount = validationResult.data.discountAmount;
+        }
       }
 
       await onSubmit(data);
@@ -116,8 +166,9 @@ export function EditPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="max-w-[99%] h-[100%] mt-6 overflow-y-auto flex items-center justify-center">
+        <div className="container mx-auto max-w-[900px]">
+        <DialogHeader className="pb-6">
           <DialogTitle>Edit Payment Information</DialogTitle>
           <DialogDescription>
             Update the order&apos;s payment details and pricing information.
@@ -125,135 +176,177 @@ export function EditPaymentDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              <div className="grid gap-4">
-                <FormField
-                  control={form.control}
-                  name="subtotal"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subtotal</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
+              {/* 左列 - 价格信息 */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Pricing Information</h4>
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="discountAmount"
+                    name="subtotal"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Discount</FormLabel>
+                        <FormLabel>Subtotal</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
                             step="0.01"
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? parseFloat(e.target.value) : undefined
-                              )
-                            }
-                            value={field.value || ""}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="couponCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Coupon Code</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value || ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="discountAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Discount</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              step="0.01"
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value ? parseFloat(e.target.value) : undefined
+                                )
+                              }
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="couponCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Coupon Code</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="tax"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tax</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              step="0.01"
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value ? parseFloat(e.target.value) : undefined
+                                )
+                              }
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Total Amount</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              step="0.01"
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="tax"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tax</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            step="0.01"
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? parseFloat(e.target.value) : undefined
-                              )
-                            }
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="affiliateCommission"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Affiliate Commission</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            step="0.01"
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? parseFloat(e.target.value) : undefined
-                              )
-                            }
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Affiliate Information</h4>
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="affiliateId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Affiliate</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={handleAffiliateChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select affiliate" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="none">No Affiliate</SelectItem>
+                              {affiliates.map((affiliate) => (
+                                <SelectItem key={affiliate.id} value={affiliate.id}>
+                                  {affiliate.user.name} ({affiliate.user.email})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="affiliateCommission"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Affiliate Commission</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              step="0.01"
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value ? parseFloat(e.target.value) : undefined
+                                )
+                              }
+                              value={field.value || ""}
+                              disabled={affiliateId === "none"}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
+              {/* 右列 - 支付信息 */}
               <div className="space-y-4">
                 <h4 className="text-sm font-medium">Payment Details</h4>
-                <div className="grid gap-4">
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="paymentMethod"
@@ -299,9 +392,19 @@ export function EditPaymentDialog({
                     name="paymentProof"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Payment Proof URL</FormLabel>
+                        <FormLabel>Payment Proof</FormLabel>
                         <FormControl>
-                          <Input {...field} type="url" value={field.value || ""} />
+                          <FileUpload
+                            id="order-payments"
+                            parentId="903f8177-8654-41f8-bab9-f8cbaf5c2d7a"
+                            onUploadComplete={(data) => {
+                              setProofUrl(data.downloadUrl);
+                              field.onChange(data.downloadUrl);
+                            }}
+                            accept="image/*,.pdf"
+                            placeholderText="Upload payment receipt or screenshot"
+                            value={proofUrl}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -310,6 +413,7 @@ export function EditPaymentDialog({
                 </div>
               </div>
             </div>
+
             <DialogFooter>
               <Button
                 type="button"
@@ -325,6 +429,7 @@ export function EditPaymentDialog({
             </DialogFooter>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

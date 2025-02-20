@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 
 export async function getAffiliates() {
-  return await prisma.affiliate.findMany({
+  const affiliates = await prisma.affiliate.findMany({
     include: {
       user: {
         select: {
@@ -27,6 +27,12 @@ export async function getAffiliates() {
       createdAt: 'desc'
     }
   });
+
+  return affiliates.map(affiliate => ({
+    ...affiliate,
+    commissionValue: Number(affiliate.commissionValue),
+    totalEarnings: Number(affiliate.totalEarnings)
+  }));
 }
 
 export async function getUsers() {
@@ -43,7 +49,7 @@ export async function getUsers() {
 }
 
 export async function getPendingPayments() {
-  return await prisma.order.findMany({
+  const orders = await prisma.order.findMany({
     where: {
       status: 'COMPLETED',
       affiliateId: { not: null },
@@ -71,10 +77,25 @@ export async function getPendingPayments() {
       createdAt: 'desc'
     }
   });
+
+  return orders.map(order => ({
+    ...order,
+    amount: Number(order.amount),
+    subtotal: Number(order.subtotal),
+    discountAmount: Number(order.discountAmount),
+    tax: Number(order.tax),
+    affiliateCommission: Number(order.affiliateCommission),
+    affiliate: order.affiliate ? {
+      ...order.affiliate,
+      commissionValue: Number(order.affiliate.commissionValue),
+      totalEarnings: Number(order.affiliate.totalEarnings)
+    } : null
+  }));
+
 }
 
 export async function getAffiliatePayments() {
-  return await prisma.affiliatePayment.findMany({
+  const payments = await prisma.affiliatePayment.findMany({
     include: {
       affiliate: {
         include: {
@@ -99,6 +120,21 @@ export async function getAffiliatePayments() {
       createdAt: 'desc'
     }
   });
+
+  return payments.map(payment => ({
+    ...payment,
+    amount: Number(payment.amount),
+    affiliate: payment.affiliate ? {
+      ...payment.affiliate,
+      commissionValue: Number(payment.affiliate.commissionValue),
+      totalEarnings: Number(payment.affiliate.totalEarnings)
+    } : null,
+    orders: payment.orders.map(order => ({
+      ...order,
+      amount: Number(order.amount),
+      affiliateCommission: Number(order.affiliateCommission)
+    }))
+  }));
 }
 
 export async function getAffiliateStats(affiliateId: string) {
@@ -134,13 +170,14 @@ export async function getAffiliateStats(affiliateId: string) {
     }),
   ]);
 
-  const pendingAmount = pendingCommissions._sum.affiliateCommission || 0;
-  const paidAmount = paidCommissions._sum.amount || 0;
+  const pendingAmount = Number(pendingCommissions._sum.affiliateCommission || 0);
+  const paidAmount = Number(paidCommissions._sum.amount || 0);
+  const totalAmount = Number(affiliate?.totalEarnings || 0);
 
   return {
     pendingAmount,
     paidAmount,
-    totalAmount: affiliate?.totalEarnings || 0,
+    totalAmount,
     currency: "USD",
   };
 }

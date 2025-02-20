@@ -54,9 +54,9 @@ export function OrderCustomer({ order }: OrderCustomerProps) {
   const InfoRow = ({ label, value }: { label: string; value: string | null | undefined }) => {
     if (!value) return null;
     return (
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{value}</span>
+      <div className="flex flex-col space-y-1">
+        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm font-medium break-words">{value}</span>
       </div>
     );
   };
@@ -86,10 +86,10 @@ export function OrderCustomer({ order }: OrderCustomerProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <div className="space-y-1">
+            <div className="space-y-2">
               <h3 className="text-sm font-medium">Contact Information</h3>
-              <div className="border-b bg-card p-3 text-card-foreground">
-                <div className="space-y-2">
+              <div className="rounded-lg border bg-muted/50 p-4">
+                <div className="grid gap-4 md:grid-cols-2">
                   <InfoRow label="Name" value={order.user.name} />
                   <InfoRow label="Email" value={order.user.email} />
                 </div>
@@ -98,13 +98,15 @@ export function OrderCustomer({ order }: OrderCustomerProps) {
 
             {(order.billingName || order.billingCompany || order.billingAddress || order.billingCity || 
               order.billingState || order.billingCountry || order.billingZip || order.billingPhone) && (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <h3 className="text-sm font-medium">Billing Information</h3>
-                <div className="rounded-lg border border-gray-50 bg-card p-3 text-card-foreground bg-muted/50 rounded-xl">
-                  <div className="grid gap-2 md:grid-cols-2">
+                <div className="rounded-lg border bg-muted/50 p-4">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <InfoRow label="Name" value={order.billingName} />
                     <InfoRow label="Company" value={order.billingCompany} />
-                    <InfoRow label="Address" value={order.billingAddress} />
+                    <div className="md:col-span-2">
+                      <InfoRow label="Address" value={order.billingAddress} />
+                    </div>
                     <InfoRow label="City" value={order.billingCity} />
                     <InfoRow label="State" value={order.billingState} />
                     <InfoRow label="Country" value={order.billingCountry} />
