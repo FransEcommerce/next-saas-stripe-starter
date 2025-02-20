@@ -162,7 +162,7 @@ export function PaymentList({ payments, onSuccess }: PaymentListProps) {
                     >
                       {paymentStatusMap[payment.status as keyof typeof paymentStatusMap]?.label}
                     </span>
-                    {payment.status === "PROCESSING" && (
+                    {/* {payment.status === "PROCESSING" && ( */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild disabled={isUpdating}>
                           <Button variant="ghost" className="p-0">
@@ -187,7 +187,7 @@ export function PaymentList({ payments, onSuccess }: PaymentListProps) {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    )}
+                    {/* )} */}
                   </div>
                 </TableCell>
                 <TableCell>

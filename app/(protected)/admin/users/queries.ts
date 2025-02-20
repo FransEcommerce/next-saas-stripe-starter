@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 
 export async function getUsers() {
-  return await prisma.user.findMany({
+  const users = await prisma.user.findMany({
     include: {
       orders: {
         select: {
@@ -25,6 +25,16 @@ export async function getUsers() {
       createdAt: "desc",
     },
   });
+
+  return users.map(user => ({
+    ...user,
+    affiliate: user.affiliate
+      ? {
+          ...user.affiliate,
+          totalEarnings: Number(user.affiliate.totalEarnings)
+        }
+      : null
+  }));
 }
 
 export async function getUserById(id: string) {
@@ -49,4 +59,14 @@ export async function getUserById(id: string) {
       },
     },
   });
+
+  return users.map(user => ({
+    ...user,
+    affiliate: user.affiliate
+      ? {
+          ...user.affiliate,
+          totalEarnings: Number(user.affiliate.totalEarnings)
+        }
+      : null
+  }));
 }
