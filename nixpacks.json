@@ -4,13 +4,10 @@
         "nixPkgs": ["nodejs_20", "pnpm-8_x", "openssl"]
       },
       "install": {
-        "cmds": [
-          "pnpm install --frozen-lockfile",
-          "ls -la node_modules/.bin/next"
-        ]
+        "cmds": ["pnpm install --frozen-lockfile"]
       },
       "build": {
-        "cmds": ["pnpm run build"],
+        "cmds": ["./node_modules/.bin/next build"],
         "cache": {
           "enable": true,
           "paths": [".next/cache", "node_modules/.cache"]
