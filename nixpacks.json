@@ -1,0 +1,43 @@
+{
+    "phases": {
+        "setup": {
+            "nixPkgs": [
+                "nodejs_20",
+                "openssl"
+            ]
+        },
+        "install": {
+            "cmds": [
+                "pnpm install --frozen-lockfile"
+            ]
+        },
+        "prisma": {
+            "cmds": [
+                "npx prisma db push --accept-data-loss",
+                "npx prisma generate"
+            ]
+        },
+        "build": {
+            "dependsOn": [
+                "prisma"
+            ],
+            "cmds": [
+                "pnpm run build"
+            ],
+            "cache": {
+                "enable": true,
+                "paths": [
+                    ".next/cache",
+                    "node_modules/.cache"
+                ]
+            }
+        }
+    },
+    "start": {
+        "cmd": "pnpm run start"
+    },
+    "variables": {
+        "NODE_ENV": "production",
+        "NEXT_TELEMETRY_DISABLED": "1"
+    }
+}
