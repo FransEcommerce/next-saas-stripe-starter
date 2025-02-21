@@ -50,13 +50,17 @@ export function PluginsList({ plugins }: PluginsListProps) {
     if (!selectedPlugin) return;
 
     try {
-      await deletePlugin(selectedPlugin.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedPlugin(null);
-      router.refresh();
-      toast.success("Plugin deleted successfully");
+      const result = await deletePlugin(selectedPlugin.id);
+      if (result.success) {
+        setIsDeleteDialogOpen(false);
+        setSelectedPlugin(null);
+        router.refresh();
+        toast.success("Plugin deleted successfully");
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete plugin");
+      toast.error("An unexpected error occurred");
     }
   };
 

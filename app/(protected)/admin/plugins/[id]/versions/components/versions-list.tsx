@@ -41,13 +41,17 @@ export function VersionsList({ versions }: VersionsListProps) {
     if (!selectedVersion) return;
 
     try {
-      await deletePluginVersion(selectedVersion.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedVersion(null);
-      toast.success("Version deleted successfully");
-      router.refresh();
+      const result = await deletePluginVersion(selectedVersion.id);
+      if (result.success) {
+        setIsDeleteDialogOpen(false);
+        setSelectedVersion(null);
+        router.refresh();
+        toast.success("Version deleted successfully");
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete version");
+      toast.error("An unexpected error occurred");
     }
   };
 
