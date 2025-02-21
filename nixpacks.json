@@ -3,6 +3,7 @@
         "setup": {
             "nixPkgs": [
                 "nodejs_20",
+                "pnpm-8_x",
                 "openssl"
             ]
         },
@@ -12,9 +13,7 @@
             ]
         },
         "build": {
-            "dependsOn": [
-                "prisma"
-            ],
+            "dependsOn": [],
             "cmds": [
                 "pnpm run build"
             ],
