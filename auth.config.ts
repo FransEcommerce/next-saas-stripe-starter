@@ -17,4 +17,5 @@ export default {
       // sendVerificationRequest,
     }),
   ],
+  trustHost: true,
 } satisfies NextAuthConfig;
