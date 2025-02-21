@@ -11,12 +11,6 @@
                 "pnpm install --frozen-lockfile"
             ]
         },
-        "prisma": {
-            "cmds": [
-                "npx prisma db push --accept-data-loss",
-                "npx prisma generate"
-            ]
-        },
         "build": {
             "dependsOn": [
                 "prisma"
