@@ -31,7 +31,7 @@
         }
     },
     "start": {
-        "cmd": "echo NEXTAUTH_URL=$NEXTAUTH_URL && pnpm run start"
+        "cmd": "pnpm run start"
     },
     "variables": {
         "NODE_ENV": "production",
