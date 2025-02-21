@@ -262,7 +262,10 @@ model Coupon {
 
   // 关联
   orders      Order[]
+  affiliateId String?
+  affiliate   Affiliate?  @relation(fields: [affiliateId], references: [id])
 
+  @@index([affiliateId])
   @@map(name: "coupons")
 }
 
@@ -322,6 +325,7 @@ model Affiliate {
   referredOrders  Order[]   @relation("AffiliateOrders")
   paymentMethod   AffiliatePaymentMethod?
   payments        AffiliatePayment[]
+  coupons         Coupon[]
 
   @@map(name: "affiliates")
 }

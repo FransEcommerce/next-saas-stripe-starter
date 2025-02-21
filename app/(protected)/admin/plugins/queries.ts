@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 
 export async function getPlugins() {
-  return await prisma.plugin.findMany({
+  const plugins = await prisma.plugin.findMany({
     where: {
       isLatest: true,
     },
@@ -21,10 +21,11 @@ export async function getPlugins() {
       parentId: true,
     }
   });
+  return JSON.parse(JSON.stringify(plugins));
 }
 
 export async function getPluginById(id: string) {
-  return await prisma.plugin.findUnique({
+  const plugin = await prisma.plugin.findUnique({
     where: { id },
     select: {
       id: true,
@@ -49,6 +50,7 @@ export async function getPluginById(id: string) {
       licenses: true,
     }
   });
+  return plugin ? JSON.parse(JSON.stringify(plugin)) : null;
 }
 
 export async function getPluginVersions(pluginId: string) {
@@ -63,7 +65,7 @@ export async function getPluginVersions(pluginId: string) {
   const targetId = plugin.parentId || plugin.id;
 
   // 获取所有相关版本（包括原始版本和所有子版本）
-  return await prisma.plugin.findMany({
+  const versions = await prisma.plugin.findMany({
     where: {
       OR: [
         { id: targetId },
@@ -87,4 +89,5 @@ export async function getPluginVersions(pluginId: string) {
       parentId: true,
     }
   });
+  return JSON.parse(JSON.stringify(versions));
 }

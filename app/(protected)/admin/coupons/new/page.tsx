@@ -1,15 +1,18 @@
-import { HeaderSection } from "@/components/shared/header-section";
+import { DashboardHeader } from "@/components/dashboard/header";
 import { CouponForm } from "../components/coupon-form";
+import { getAffiliates } from "../queries";
 
-export default function NewCouponPage() {
+export default async function NewCouponPage() {
+  const affiliates = await getAffiliates();
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <HeaderSection
+      <DashboardHeader
         heading="Create Coupon"
         text="Create a new discount coupon."
       />
       <div className="grid gap-4 grid-cols-1">
-        <CouponForm />
+        <CouponForm affiliates={affiliates} />
       </div>
     </div>
   );

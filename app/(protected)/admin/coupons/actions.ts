@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 
-function convertDecimalToNumber(decimal: Prisma.Decimal | null): number {
-  if (decimal === null) return 0;
-  return Number(decimal.toString());
+function convertToPlainObject(data: any) {
+  return JSON.parse(JSON.stringify(data));
 }
 
 export async function createCoupon(data: any) {
@@ -21,16 +20,25 @@ export async function createCoupon(data: any) {
         minAmount: data.minAmount ? new Prisma.Decimal(data.minAmount) : null,
         startDate: data.startDate || null,
         endDate: data.endDate || null,
+        affiliateId: data.affiliateId || null,
         usedCount: 0
+      },
+      include: {
+        affiliate: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
 
     revalidatePath("/admin/coupons");
-    return { success: true, data: {
-      ...coupon,
-      value: convertDecimalToNumber(coupon.value),
-      minAmount: convertDecimalToNumber(coupon.minAmount)
-    }};
+    return { success: true, data: convertToPlainObject(coupon) };
   } catch (error) {
     console.error("Error creating coupon:", error);
     return { success: false, error: "Failed to create coupon" };
@@ -50,15 +58,24 @@ export async function updateCoupon(id: string, data: any) {
         minAmount: data.minAmount ? new Prisma.Decimal(data.minAmount) : null,
         startDate: data.startDate,
         endDate: data.endDate,
+        affiliateId: data.affiliateId || null,
+      },
+      include: {
+        affiliate: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
 
     revalidatePath("/admin/coupons");
-    return { success: true, data: {
-      ...coupon,
-      value: convertDecimalToNumber(coupon.value),
-      minAmount: convertDecimalToNumber(coupon.minAmount)
-    }};
+    return { success: true, data: convertToPlainObject(coupon) };
   } catch (error) {
     console.error("Error updating coupon:", error);
     return { success: false, error: "Failed to update coupon" };
@@ -67,12 +84,12 @@ export async function updateCoupon(id: string, data: any) {
 
 export async function deleteCoupon(id: string) {
   try {
-    await prisma.coupon.delete({
+    const coupon = await prisma.coupon.delete({
       where: { id },
     });
 
     revalidatePath("/admin/coupons");
-    return { success: true };
+    return { success: true, data: convertToPlainObject(coupon) };
   } catch (error) {
     console.error("Error deleting coupon:", error);
     return { success: false, error: "Failed to delete coupon" };

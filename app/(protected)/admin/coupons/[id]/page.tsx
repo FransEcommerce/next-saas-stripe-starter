@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { HeaderSection } from "@/components/shared/header-section";
+import { DashboardHeader } from "@/components/dashboard/header";
 import { CouponForm } from "../components/coupon-form";
-import { getCouponById } from "../queries";
+import { getCouponById, getAffiliates } from "../queries";
 
 interface EditCouponPageProps {
   params: {
@@ -10,7 +10,10 @@ interface EditCouponPageProps {
 }
 
 export default async function EditCouponPage({ params }: EditCouponPageProps) {
-  const coupon = await getCouponById(params.id);
+  const [coupon, affiliates] = await Promise.all([
+    getCouponById(params.id),
+    getAffiliates(),
+  ]);
 
   if (!coupon) {
     notFound();
@@ -18,12 +21,12 @@ export default async function EditCouponPage({ params }: EditCouponPageProps) {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <HeaderSection
+      <DashboardHeader
         heading="Edit Coupon"
-        text="Modify existing coupon details."
+        text="Update an existing discount coupon."
       />
       <div className="grid gap-4 grid-cols-1">
-        <CouponForm initialData={coupon} />
+        <CouponForm initialData={coupon} affiliates={affiliates} />
       </div>
     </div>
   );

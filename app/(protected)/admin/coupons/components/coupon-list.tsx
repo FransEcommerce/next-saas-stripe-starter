@@ -31,7 +31,14 @@ import { deleteCoupon } from "../actions";
 import { toast } from "sonner";
 
 interface CouponListProps {
-  coupons: Coupon[];
+  coupons: Array<Coupon & {
+    affiliate?: {
+      user: {
+        name: string;
+        email: string;
+      };
+    };
+  }>;
 }
 
 export function CouponList({ coupons = [] }: CouponListProps) {
@@ -72,6 +79,7 @@ export function CouponList({ coupons = [] }: CouponListProps) {
           <TableHead>Value</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Usage</TableHead>
+          <TableHead>Affiliate</TableHead>
           <TableHead>Valid Period</TableHead>
           <TableHead>Created At</TableHead>
           <TableHead>Actions</TableHead>
@@ -80,7 +88,7 @@ export function CouponList({ coupons = [] }: CouponListProps) {
       <TableBody>
         {coupons.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={8} className="text-center">
+            <TableCell colSpan={9} className="text-center">
               No coupons found
             </TableCell>
           </TableRow>
@@ -108,6 +116,18 @@ export function CouponList({ coupons = [] }: CouponListProps) {
               <TableCell>
                 {coupon.usedCount}
                 {coupon.maxUses ? `/${coupon.maxUses}` : ""}
+              </TableCell>
+              <TableCell>
+                {coupon.affiliate ? (
+                  <div className="flex flex-col">
+                    <span>{coupon.affiliate.user.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {coupon.affiliate.user.email}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">No affiliate</span>
+                )}
               </TableCell>
               <TableCell>
                 {coupon.startDate && coupon.endDate
