@@ -201,3 +201,20 @@ export function generateProjectId(): string {
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   return `${year}${month}${day}${random}`;
 }
+
+/**
+ * 比较两个版本号的大小
+ * @returns 如果 version1 > version2 返回 1，如果 version1 < version2 返回 -1，如果相等返回 0
+ */
+export function compareVersions(version1: string, version2: string): number {
+  const v1 = version1.split('.').map(Number);
+  const v2 = version2.split('.').map(Number);
+
+  for (let i = 0; i < Math.max(v1.length, v2.length); i++) {
+    const num1 = v1[i] || 0;
+    const num2 = v2[i] || 0;
+    if (num1 > num2) return 1;
+    if (num1 < num2) return -1;
+  }
+  return 0;
+}
