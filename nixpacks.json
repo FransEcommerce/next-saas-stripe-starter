@@ -1,40 +1,29 @@
 {
     "phases": {
-        "setup": {
-            "nixPkgs": [
-                "nodejs_20",
-                "pnpm-8_x",
-                "openssl"
-            ]
-        },
-        "install": {
-            "cmds": [
-                "pnpm install --frozen-lockfile"
-            ]
-        },
-        "prisma": {
-            "cmds": [
-                "npx prisma db push --accept-data-loss"
-            ]
-        },
-        "build": {
-            "cmds": [
-                "./node_modules/.bin/next build"
-            ],
-            "cache": {
-                "enable": true,
-                "paths": [
-                    ".next/cache",
-                    "node_modules/.cache"
-                ]
-            }
+      "setup": {
+        "nixPkgs": ["nodejs_20", "pnpm-8_x", "openssl"]
+      },
+      "install": {
+        "cmds": ["pnpm install --frozen-lockfile"],
+        "cacheDirectories": ["/app/node_modules"]
+      },
+      "prisma": {
+        "cmds": ["npx prisma db push --accept-data-loss"]
+      },
+      "build": {
+        "dependsOn": ["prisma"],
+        "cmds": ["./node_modules/.bin/next build"],
+        "cache": {
+          "enable": true,
+          "paths": [".next/cache", "node_modules/.cache"]
         }
+      }
     },
     "start": {
-        "cmd": "pnpm run start"
+      "cmd": "pnpm run start"
     },
     "variables": {
-        "NODE_ENV": "production",
-        "NEXT_TELEMETRY_DISABLED": "1"
+      "NODE_ENV": "production",
+      "NEXT_TELEMETRY_DISABLED": "1"
     }
-}
+  }

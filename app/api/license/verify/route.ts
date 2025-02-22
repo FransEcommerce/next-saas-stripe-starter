@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       success: true,
       data: {
         status: license.status,
-        activationFields: license.plugin.activationFields,
+        pluginConfig: license.plugin.activationFields,
         plugin: {
           name: license.plugin.name,
           version: license.plugin.version,
