@@ -19,6 +19,7 @@ export async function getPlugins() {
       createdAt: true,
       isLatest: true,
       parentId: true,
+      project_id: true,
     }
   });
   return JSON.parse(JSON.stringify(plugins));
@@ -44,6 +45,7 @@ export async function getPluginById(id: string) {
       createdAt: true,
       isLatest: true,
       parentId: true,
+      project_id: true,
       activationFields: true,
       uiFields: true,
       products: true,
@@ -87,6 +89,7 @@ export async function getPluginVersions(pluginId: string) {
       createdAt: true,
       isLatest: true,
       parentId: true,
+      project_id: true,
     }
   });
   return JSON.parse(JSON.stringify(versions));

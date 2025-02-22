@@ -70,6 +70,7 @@ export function PluginsList({ plugins }: PluginsListProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
+            <TableHead>Project ID</TableHead>
             <TableHead>Version</TableHead>
             <TableHead>Chatpion Version</TableHead>
             <TableHead>Created</TableHead>
@@ -79,7 +80,7 @@ export function PluginsList({ plugins }: PluginsListProps) {
         <TableBody>
           {plugins.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center">
+              <TableCell colSpan={6} className="text-center">
                 No plugins found
               </TableCell>
             </TableRow>
@@ -93,6 +94,9 @@ export function PluginsList({ plugins }: PluginsListProps) {
                       {plugin.description || "No description"}
                     </span>
                   </div>
+                </TableCell>
+                <TableCell>
+                  <span className="font-mono">{plugin.project_id || "N/A"}</span>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">

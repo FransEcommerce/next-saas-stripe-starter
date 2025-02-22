@@ -25,10 +25,15 @@ export default async function VersionsPage({ params }: VersionsPageProps) {
 
   return (
     <>
-      <DashboardHeader
-        heading={`${versions[0].name} - Version History`}
-        text="Manage and view all versions of this plugin."
-      />
+      <div className="flex justify-between items-end">
+        <DashboardHeader
+          heading={`${versions[0].name} - Version History`}
+          text="Manage and view all versions of this plugin."
+        />
+        <span className="text-sm bg-secondary px-2 py-1 rounded-md font-mono">
+          Project ID: {versions[0].project_id || "N/A"}
+        </span>
+      </div>
 
       <div className="grid gap-8">
         <VersionsList versions={versions} />

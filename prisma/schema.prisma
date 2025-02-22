@@ -141,6 +141,7 @@ model VerificationToken {
 
 model Plugin {
   id              String          @id @default(uuid())
+  project_id      String?         // 项目ID，格式为：YYMMDD + 3位随机数
   name            String          // 插件名称
   description     String?         // 插件描述
   version         String          // 插件版本

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { generateProjectId } from "@/lib/utils";
 
 // 自定义业务逻辑错误类
 class BusinessError extends Error {
@@ -55,10 +56,14 @@ export async function createPlugin(data: CreatePluginInput) {
       changelog: data.changelog || "Initial version",
     });
 
+    // 生成新的 project_id
+    const project_id = generateProjectId();
+
     // 创建插件
     const plugin = await prisma.plugin.create({
       data: {
         ...validatedData,
+        project_id,
         isLatest: true,
         versionNumber: 1,
       },
@@ -77,9 +82,16 @@ export async function createPlugin(data: CreatePluginInput) {
 
 export async function createPluginVersion(pluginId: string, data: CreatePluginInput) {
   try {
-    // 获取原始插件
+    // 获取原始插件，包括 version 和 project_id
     const originalPlugin = await prisma.plugin.findUnique({
       where: { id: pluginId },
+      select: {
+        id: true,
+        version: true,
+        project_id: true,
+        versionNumber: true,
+        parentId: true,
+      }
     });
 
     if (!originalPlugin) {
@@ -115,10 +127,11 @@ export async function createPluginVersion(pluginId: string, data: CreatePluginIn
       data: { isLatest: false },
     });
 
-    // 创建新版本
+    // 创建新版本，继承 project_id
     const newPluginVersion = await prisma.plugin.create({
       data: {
         ...data,
+        project_id: originalPlugin.project_id, // 继承 project_id
         parentId: originalPlugin.parentId || originalPlugin.id,
         isLatest: true,
         versionNumber: (originalPlugin.versionNumber || 1) + 1,
