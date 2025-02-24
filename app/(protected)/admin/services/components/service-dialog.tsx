@@ -19,6 +19,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   handlerId: z.string().min(1, "Handler is required"),
   active: z.boolean().default(true),
+  color: z.string().default("#1C9488"),
   planLimits: z.array(z.object({
     planId: z.string(),
     enabled: z.boolean(),
@@ -53,6 +54,7 @@ export function ServiceDialog({
       description: "",
       handlerId: "",
       active: true,
+      color: "#1C9488",
       planLimits: availablePlans.map(plan => ({
         planId: plan.id,
         enabled: false,
@@ -71,6 +73,7 @@ export function ServiceDialog({
           description: service.description || "",
           handlerId: service.handlerId,
           active: service.active,
+          color: service.color || "#1C9488",
           planLimits: availablePlans.map(plan => {
             const existingLimit = service.planLimits.find((l: any) => l.planId === plan.id);
             return {
@@ -91,6 +94,7 @@ export function ServiceDialog({
           description: "",
           handlerId: "",
           active: true,
+          color: "#1C9488",
           planLimits: availablePlans.map(plan => ({
             planId: plan.id,
             enabled: false,

@@ -10,13 +10,15 @@ interface ServiceConfigFormProps {
 }
 
 export function ServiceConfigForm({ form, selectedHandler }: ServiceConfigFormProps) {
+  const configFields = selectedHandler?.configSchema?.fields || [];
+
   return (
     <div className="flex flex-col h-full">
       <h2 className="text-lg font-semibold mb-6">Handler Configuration</h2>
       
-      {selectedHandler ? (
+      {configFields.length > 0 ? (
         <div className="space-y-4">
-          {selectedHandler.configSchema.fields.map((field: any) => (
+          {configFields.map((field: any) => (
             <FormField
               key={field.name}
               control={form.control}
@@ -44,10 +46,10 @@ export function ServiceConfigForm({ form, selectedHandler }: ServiceConfigFormPr
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-2">
             <p className="text-muted-foreground text-lg">
-              Select a handler from the service information
+              No configuration options available
             </p>
             <p className="text-muted-foreground text-sm">
-              Handler configuration options will appear here
+              This handler doesn't require any additional configuration
             </p>
           </div>
         </div>

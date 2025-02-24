@@ -407,6 +407,7 @@ model Service {
   description String?
   handlerId   String?
   config      Json?
+  color       String?  @default("#1C9488")
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

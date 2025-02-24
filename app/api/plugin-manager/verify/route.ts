@@ -191,6 +191,95 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // 获取所有活跃的服务
+    const activeServices = await prisma.service.findMany({
+      where: {
+        active: true
+      },
+      select: {
+        id: true,
+        name: true,
+        color: true
+      }
+    });
+
+    // 获取最近14天的日期范围
+    const today = new Date();
+    const fourteenDaysAgo = new Date(today);
+    fourteenDaysAgo.setDate(today.getDate() - 13); // 设为13是因为要包含今天
+
+    // 获取每个服务的使用统计
+    const servicesWithStats = await Promise.all(
+      activeServices.map(async (service) => {
+        // 获取总使用量
+        const totalUsage = await prisma.serviceUsage.aggregate({
+          where: {
+            serviceId: service.id,
+            userId: license.user.id
+          },
+          _sum: {
+            count: true
+          }
+        });
+
+        // 获取本月使用量
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthUsage = await prisma.serviceUsage.aggregate({
+          where: {
+            serviceId: service.id,
+            userId: license.user.id,
+            date: {
+              gte: firstDayOfMonth
+            }
+          },
+          _sum: {
+            count: true
+          }
+        });
+
+        // 获取最近14天的每日使用量
+        const dailyUsage = await prisma.serviceUsage.groupBy({
+          by: ['date'],
+          where: {
+            serviceId: service.id,
+            userId: license.user.id,
+            date: {
+              gte: fourteenDaysAgo,
+              lte: today
+            }
+          },
+          _sum: {
+            count: true
+          }
+        });
+
+        // 生成最近14天的日期数组
+        const dailyUsageData = Array.from({ length: 14 }, (_, i) => {
+          const date = new Date(fourteenDaysAgo);
+          date.setDate(date.getDate() + i);
+          const dateStr = date.toISOString().split('T')[0];
+          
+          const usage = dailyUsage.find(u => 
+            u.date.toISOString().split('T')[0] === dateStr
+          );
+
+          return {
+            date: dateStr,
+            count: usage ? usage._sum.count || 0 : 0
+          };
+        });
+
+        return {
+          serviceName: service.name || 'Unnamed Service',
+          color: service.color || '#1C9488',
+          date: today.toISOString().split('T')[0],
+          totalCount: totalUsage._sum.count || 0,
+          monthCount: monthUsage._sum.count || 0,
+          dailyUsage: dailyUsageData
+        };
+      })
+    );
+
     // 构建响应数据
     const response = {
       success: true,
@@ -205,7 +294,7 @@ export async function POST(req: NextRequest) {
           chatpionVersion: compatibleVersion.chatpionVersion,
           changelogUrl: `https://your-domain.com/plugins/${PLUGIN_MANAGER_PROJECT_ID}/changelog`,
         },
-        service: [],
+        service: servicesWithStats,
         purchasedPlugin: [{
           pluginsList: pluginsWithVersions.map(license => ({
             projectId: license.plugin.project_id,

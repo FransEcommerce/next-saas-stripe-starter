@@ -17,6 +17,7 @@ interface ServiceFormData {
   handlerId: string;
   config?: any;
   active: boolean;
+  color: string;
   planLimits: PlanLimit[];
 }
 
@@ -36,6 +37,7 @@ export async function createService(data: ServiceFormData) {
         handlerId: data.handlerId,
         config: data.config || {},
         active: data.active,
+        color: data.color,
         planLimits: {
           create: data.planLimits.map(limit => ({
             planId: limit.planId,
@@ -85,6 +87,7 @@ export async function updateService(id: string, data: ServiceFormData) {
           handlerId: data.handlerId,
           config: data.config || {},
           active: data.active,
+          color: data.color,
           planLimits: {
             create: data.planLimits.map(limit => ({
               planId: limit.planId,

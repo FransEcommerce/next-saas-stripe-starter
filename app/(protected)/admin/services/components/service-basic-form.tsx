@@ -1,14 +1,13 @@
 "use client";
 
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { UseFormReturn } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ColorPicker from "@/components/ui/color-picker";
 
 interface ServiceBasicFormProps {
-  form: UseFormReturn<any>;
+  form: any;
   availableServices: any[];
   onHandlerChange: (handlerId: string) => void;
 }
@@ -19,15 +18,20 @@ export function ServiceBasicForm({
   onHandlerChange
 }: ServiceBasicFormProps) {
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">Service Information</h2>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <h3 className="text-lg font-medium">Basic Information</h3>
+        <p className="text-sm text-muted-foreground">
+          Configure the basic settings for your service.
+        </p>
+      </div>
 
       <FormField
         control={form.control}
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Service Name</FormLabel>
+            <FormLabel>Name</FormLabel>
             <FormControl>
               <Input placeholder="Enter service name" {...field} />
             </FormControl>
@@ -43,11 +47,7 @@ export function ServiceBasicForm({
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <Textarea 
-                placeholder="Describe your service" 
-                className="resize-none" 
-                {...field} 
-              />
+              <Input placeholder="Enter service description" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -61,11 +61,11 @@ export function ServiceBasicForm({
           <FormItem>
             <FormLabel>Handler</FormLabel>
             <Select
+              value={field.value}
               onValueChange={(value) => {
                 field.onChange(value);
                 onHandlerChange(value);
               }}
-              defaultValue={field.value}
             >
               <FormControl>
                 <SelectTrigger>
@@ -85,24 +85,42 @@ export function ServiceBasicForm({
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="active"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">Active Status</FormLabel>
-              <FormDescription>Enable or disable this service</FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="color"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Color</FormLabel>
+              <FormControl>
+                <ColorPicker default_value={field.value} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="active"
+          render={({ field }) => (
+            <FormItem>
+              <div className="space-y-0.5">
+                <FormLabel>Active</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Enable or disable this service
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }
