@@ -61,6 +61,22 @@ enum PaymentStatus {
   CANCELLED  // 已取消
 }
 
+enum ServiceType {
+  FREE      // 免费服务
+  PAID      // 付费服务
+}
+
+enum ServiceLimitType {
+  DAILY     // 每日限制
+  MONTHLY   // 每月限制
+  UNLIMITED // 无限制
+}
+
+enum PlanInterval {
+  MONTHLY
+  YEARLY
+}
+
 model Account {
   id                String   @id @default(uuid())
   userId            String
@@ -121,6 +137,8 @@ model User {
   downloadTokens DownloadToken[]
   orders Order[]
   affiliate     Affiliate?
+  serviceUsages ServiceUsage[]
+  plan Plan[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -368,4 +386,74 @@ model AffiliatePayment {
   @@index([affiliateId])
   @@index([methodId])
   @@map(name: "affiliate_payments")
+}
+
+// 服务定义表
+model Service {
+  id          String   @id @default(uuid())
+  name        String?
+  description String?
+  handlerId   String?
+  config      Json?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  planLimits ServicePlanLimit[]
+
+  ServiceUsage ServiceUsage[]
+
+  Plan Plan[]
+}
+
+model ServicePlanLimit {
+  id        String   @id @default(uuid())
+  serviceId String
+  planId    String
+  limitType String   // UNLIMITED, DAILY, MONTHLY
+  limitValue Int?    // null means unlimited
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, planId])
+}
+
+// 用户服务使用记录表
+model ServiceUsage {
+  id        String   @id @default(uuid())
+  userId    String
+  serviceId String
+  count     Int      // 使用次数
+  date      DateTime @default(now())
+  
+  // 关联
+  user      User     @relation(fields: [userId], references: [id])
+  service   Service  @relation(fields: [serviceId], references: [id])
+
+  @@index([userId])
+  @@index([serviceId])
+  @@index([date])
+  @@map(name: "service_usages")
+}
+
+// 平台订阅计划表
+model Plan {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  interval    PlanInterval
+  features    Json?
+  active      Boolean  @default(true)
+  isFree      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]   // 使用此计划的用户
+  services    Service[] // 此计划可以使用的服务
+
+  @@map(name: "plans")
+  ServicePlanLimit ServicePlanLimit[]
 }

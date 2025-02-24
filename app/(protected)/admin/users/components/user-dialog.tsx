@@ -85,7 +85,7 @@ export function UserDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[99%] h-[100%] mt-6 overflow-y-auto flex items-center justify-center">
+      <DialogContent className="max-w-[95%] h-[100%] mt-12 overflow-y-auto flex items-center justify-center">
         <div className="container mx-auto max-w-[900px]">
           <DialogHeader className="pb-6">
             <DialogTitle>{mode === "create" ? "Create User" : "Edit User"}</DialogTitle>
