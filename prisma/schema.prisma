@@ -77,6 +77,17 @@ enum PlanInterval {
   YEARLY
 }
 
+enum SubscriptionStatus {
+  TRIALING   // 试用中
+  ACTIVE     // 活跃
+  PAST_DUE   // 逾期
+  CANCELED   // 已取消
+  INCOMPLETE // 未完成
+  INCOMPLETE_EXPIRED // 未完成已过期
+  UNPAID     // 未支付
+  EXPIRED    // 已过期
+}
+
 model Account {
   id                String   @id @default(uuid())
   userId            String
@@ -139,6 +150,7 @@ model User {
   affiliate     Affiliate?
   serviceUsages ServiceUsage[]
   plan Plan[]
+  subscriptions Subscription[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -400,10 +412,11 @@ model Service {
   updatedAt   DateTime @updatedAt
 
   planLimits ServicePlanLimit[]
-
   ServiceUsage ServiceUsage[]
-
   Plan Plan[]
+  usageRecords SubscriptionUsageRecord[]
+
+  @@map(name: "services")
 }
 
 model ServicePlanLimit {
@@ -453,7 +466,65 @@ model Plan {
   updatedAt   DateTime @updatedAt
   users       User[]   // 使用此计划的用户
   services    Service[] // 此计划可以使用的服务
+  subscriptions Subscription[]
 
   @@map(name: "plans")
   ServicePlanLimit ServicePlanLimit[]
+}
+
+// 新增订阅表
+model Subscription {
+  id                String            @id @default(uuid())
+  userId            String
+  planId            String
+  status            SubscriptionStatus
+  startDate         DateTime
+  endDate           DateTime?
+  canceledAt        DateTime?
+  trialStartDate    DateTime?
+  trialEndDate      DateTime?
+  currentPeriodStart DateTime
+  currentPeriodEnd  DateTime
+  cancelAtPeriodEnd Boolean          @default(false)
+  
+  // 价格相关
+  quantity          Int              @default(1)
+  priceAmount       Decimal          @db.Decimal(10, 2)
+  currency          String           @default("USD")
+  
+  // 支付相关
+  stripeSubscriptionId String?        @unique
+  stripePriceId       String?
+  stripeCustomerId    String?
+  
+  // 元数据
+  metadata          Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // 关联
+  user              User             @relation(fields: [userId], references: [id])
+  plan              Plan             @relation(fields: [planId], references: [id])
+  usageRecords      SubscriptionUsageRecord[]
+
+  @@index([userId])
+  @@index([planId])
+  @@map(name: "subscriptions")
+}
+
+// 订阅使用记录表
+model SubscriptionUsageRecord {
+  id              String      @id @default(uuid())
+  subscriptionId  String
+  serviceId       String
+  quantity        Int        // 使用量
+  timestamp       DateTime   @default(now())
+  
+  // 关联
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+  service         Service      @relation(fields: [serviceId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([serviceId])
+  @@map(name: "subscription_usage_records")
 }

@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { getPlans } from "./queries";
 import { PlanList } from "./components/plan-list";
+import { DashboardHeader } from "@/components/dashboard/header";
 
 export const metadata: Metadata = {
   title: "Plans Management",
@@ -14,9 +15,12 @@ export default async function PlansPage() {
   const plans = await getPlans();
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Plans</h2>
+        <DashboardHeader
+          heading="Plans"
+          text="Manage subscription plans."
+        />
         <div className="flex items-center space-x-2">
           <Link href="/admin/plans/new">
             <Button>

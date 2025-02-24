@@ -35,14 +35,19 @@ export async function getServices() {
     }
   });
 
-  return services.map(service => ({
+  return JSON.parse(JSON.stringify(services.map(service => ({
     ...service,
     usageCount: service._count.ServiceUsage
-  }));
+  }))), (key, value) => {
+    if ((key === 'price') && value !== null && value !== undefined) {
+      return Number(value);
+    }
+    return value;
+  });
 }
 
 export async function getServiceById(id: string) {
-  return prisma.service.findUnique({
+  return JSON.parse(JSON.stringify(prisma.service.findUnique({
     where: { id },
     include: {
       planLimits: {
@@ -66,6 +71,11 @@ export async function getServiceById(id: string) {
         }
       }
     }
+  })), (key, value) => {
+    if ((key === 'price') && value !== null && value !== undefined) {
+      return Number(value);
+    }
+    return value;
   });
 }
 
