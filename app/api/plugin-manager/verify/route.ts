@@ -178,6 +178,7 @@ export async function POST(req: NextRequest) {
         }
       },
       select: {
+        id: true, 
         name: true,
         description: true,
         price: true,
@@ -280,19 +281,46 @@ export async function POST(req: NextRequest) {
       })
     );
 
+    // 获取用户的当前订阅计划
+    const userSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: license.user.id,
+        status: {
+          in: ['ACTIVE', 'TRIALING']
+        }
+      },
+      include: {
+        plan: true
+      },
+      orderBy: {
+        startDate: 'desc'
+      }
+    });
+
+    // 构建用户信息
+    const userInfo = {
+      name: license.user.name,
+      email: license.user.email,
+      image: license.user.image,
+      plan: userSubscription ? {
+        name: userSubscription.plan.name,
+        status: userSubscription.status,
+        startDate: userSubscription.startDate,
+        endDate: userSubscription.endDate,
+        trialStartDate: userSubscription.trialStartDate,
+        trialEndDate: userSubscription.trialEndDate
+      } : null
+    };
+
     // 构建响应数据
     const response = {
       success: true,
       data: {
-        user: {
-          name: license.user.name,
-          email: license.user.email,
-          image: license.user.image,
-        },
+        user: userInfo,
         pluginManager: {
           latestVersion: compatibleVersion.version,
           chatpionVersion: compatibleVersion.chatpionVersion,
-          changelogUrl: `https://your-domain.com/plugins/${PLUGIN_MANAGER_PROJECT_ID}/changelog`,
+          changelogUrl: `${process.env.NEXT_PUBLIC_APP_URL}/changelog/plugin/${PLUGIN_MANAGER_PROJECT_ID}`,
         },
         service: servicesWithStats,
         purchasedPlugin: [{
@@ -300,10 +328,10 @@ export async function POST(req: NextRequest) {
             projectId: license.plugin.project_id,
             name: license.plugin.name,
             description: license.plugin.description,
-            avatar: license.plugin.avatar || `https://your-domain.com/plugins/${license.plugin.project_id}/image`,
+            avatar: `${process.env.NEXT_PUBLIC_APP_URL}/api/image/plugin/${license.plugin.id}`,
             latestVersion: license.compatibleVersion?.version || '0.0.0',
             license: license.status.toLowerCase(),
-            changelogUrl: `https://example.com/plugins/${license.plugin.project_id}/changelog`,
+            changelogUrl: `${process.env.NEXT_PUBLIC_APP_URL}/changelog/plugin/${license.plugin.project_id}`,
             uiFields: license.plugin.uiFields,
           }))
         }],
@@ -313,7 +341,7 @@ export async function POST(req: NextRequest) {
             description: product.description,
             price: product.comparePrice?.toString(),
             discountPrice: product.price.toString(),
-            avatar: product.plugin.avatar || `https://your-domain.com/products/${product.name}/image`,
+            avatar: `${process.env.NEXT_PUBLIC_APP_URL}/api/image/product/${product.id}`,
             features: product.features,
           }))
         }],
