@@ -143,7 +143,7 @@ export function CreatePluginForm() {
                   <FormControl>
                     <Textarea
                       placeholder="Describe your plugin"
-                      className="resize-none h-[38px]"
+                      className="resize-none h-[70px]"
                       {...field}
                     />
                   </FormControl>
@@ -154,40 +154,41 @@ export function CreatePluginForm() {
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="version"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Version</FormLabel>
+                    <FormControl>
+                      <Input placeholder="1.0.0" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The version number of your plugin.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="version"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Version</FormLabel>
-                  <FormControl>
-                    <Input placeholder="1.0.0" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The version number of your plugin.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="chatpionVersion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Required Chatpion Version</FormLabel>
-                  <FormControl>
-                    <Input placeholder="1.0.0" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The minimum Chatpion version required for this plugin.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="chatpionVersion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Required Chatpion Version</FormLabel>
+                    <FormControl>
+                      <Input placeholder="1.0.0" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The minimum Chatpion version required for this plugin.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
           {/* 第二列 */}
@@ -307,7 +308,7 @@ export function CreatePluginForm() {
                 <FormControl>
                   <Textarea
                     placeholder="{}"
-                    className="font-mono h-32"
+                    className="font-mono h-64"
                     {...field}
                   />
                 </FormControl>
@@ -328,7 +329,7 @@ export function CreatePluginForm() {
                 <FormControl>
                   <Textarea
                     placeholder="{}"
-                    className="font-mono h-32"
+                    className="font-mono h-64"
                     {...field}
                   />
                 </FormControl>
