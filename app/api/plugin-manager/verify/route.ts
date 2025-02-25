@@ -3,8 +3,8 @@ import { prisma } from "@/lib/db";
 import { LicenseStatus, Plugin } from "@prisma/client";
 import { compareVersions } from "@/lib/utils";
 
-// 插件管理器的固定 project_id
-const PLUGIN_MANAGER_PROJECT_ID = "250222024";
+// 从环境变量中获取插件管理器的固定 project_id
+const PLUGIN_MANAGER_PROJECT_ID = process.env.NEXT_PUBLIC_PLUGIN_MANAGER_PROJECT_ID;
 
 export async function POST(req: NextRequest) {
   try {
