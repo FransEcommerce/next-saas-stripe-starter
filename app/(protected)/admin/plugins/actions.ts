@@ -180,7 +180,8 @@ export async function deletePlugin(pluginId: string) {
           include: {
             orders: true
           }
-        }
+        },
+        downloadTokens: true
       }
     });
 
@@ -216,7 +217,8 @@ export async function deletePlugin(pluginId: string) {
           include: {
             orders: true
           }
-        }
+        },
+        downloadTokens: true
       }
     });
 
@@ -237,6 +239,11 @@ export async function deletePlugin(pluginId: string) {
 
     // 逐个删除所有版本
     for (const version of allVersions) {
+      // 先删除关联的 DownloadToken
+      await prisma.downloadToken.deleteMany({
+        where: { pluginId: version.id }
+      });
+
       await prisma.plugin.delete({
         where: { id: version.id }
       });
@@ -262,7 +269,8 @@ export async function deletePluginVersion(versionId: string) {
           include: {
             orders: true
           }
-        }
+        },
+        downloadTokens: true
       }
     });
 
@@ -305,6 +313,11 @@ export async function deletePluginVersion(versionId: string) {
         });
       }
     }
+
+    // 先删除关联的 DownloadToken
+    await prisma.downloadToken.deleteMany({
+      where: { pluginId: versionId }
+    });
 
     await prisma.plugin.delete({
       where: { id: versionId }
