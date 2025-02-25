@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
             { versionNumber: 'desc' }
           ],
         });
-
+    
         // 找到兼容的最新版本
         let compatiblePluginVersion: Plugin | undefined;
         for (const version of pluginVersions) {
@@ -145,10 +145,11 @@ export async function POST(req: NextRequest) {
             break;
           }
         }
-
+    
         return {
           ...license,
-          compatibleVersion: compatiblePluginVersion
+          compatibleVersion: compatiblePluginVersion,
+          uiFields: compatiblePluginVersion?.uiFields || license.plugin.uiFields
         };
       })
     );
@@ -332,7 +333,7 @@ export async function POST(req: NextRequest) {
             latestVersion: license.compatibleVersion?.version || '0.0.0',
             license: license.status.toLowerCase(),
             changelogUrl: `${process.env.NEXT_PUBLIC_APP_URL}/changelog/plugin/${license.plugin.project_id}`,
-            uiFields: license.plugin.uiFields,
+            uiFields: license.uiFields,
           }))
         }],
         notPurchasedPlugin: [{
