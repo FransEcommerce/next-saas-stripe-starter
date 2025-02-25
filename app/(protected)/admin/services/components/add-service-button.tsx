@@ -8,11 +8,13 @@ import { useState } from "react";
 interface AddServiceButtonProps {
   availableServices: any[];
   availablePlans: any[];
+  plugins: any[];
 }
 
 export function AddServiceButton({
   availableServices,
   availablePlans,
+  plugins
 }: AddServiceButtonProps) {
   const [open, setOpen] = useState(false);
 
@@ -28,6 +30,7 @@ export function AddServiceButton({
         service={null}
         availableServices={availableServices}
         availablePlans={availablePlans}
+        plugins={plugins}
       />
     </>
   );

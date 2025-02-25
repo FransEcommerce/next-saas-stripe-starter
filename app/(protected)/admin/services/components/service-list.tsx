@@ -39,12 +39,14 @@ interface ServiceListProps {
   services: any[];
   availableServices: any[];
   availablePlans: any[];
+  plugins: any[];
 }
 
 export function ServiceList({
   services = [],
   availableServices,
   availablePlans,
+  plugins,
 }: ServiceListProps) {
   const [selectedService, setSelectedService] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -191,6 +193,7 @@ export function ServiceList({
         service={selectedService}
         availableServices={availableServices}
         availablePlans={availablePlans}
+        plugins={plugins}
       />
     </div>
   );

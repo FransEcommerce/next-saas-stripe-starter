@@ -20,62 +20,69 @@ const formSchema = z.object({
   handlerId: z.string().min(1, "Handler is required"),
   active: z.boolean().default(true),
   color: z.string().default("#1C9488"),
+  pluginIds: z.array(z.string()).optional(),
   planLimits: z.array(z.object({
     planId: z.string(),
     enabled: z.boolean(),
     limitType: z.enum(["UNLIMITED", "DAILY", "MONTHLY"]),
     limitValue: z.number().nullable(),
   })),
-  config: z.record(z.any()),
+  config: z.any().optional(),
 });
 
 interface ServiceDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   service?: any;
   availableServices: any[];
   availablePlans: any[];
+  plugins: any[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+interface ServiceFormData {
+  name: string;
+  description: string;
+  handlerId: string;
+  config: any;
+  active: boolean;
+  color: string;
+  pluginIds: string[];
+  planLimits: {
+    planId: string;
+    enabled: boolean;
+    limitType: "UNLIMITED" | "DAILY" | "MONTHLY";
+    limitValue: number | null;
+  }[];
 }
 
 export function ServiceDialog({
-  open,
-  onOpenChange,
   service,
   availableServices,
   availablePlans,
+  plugins,
+  open,
+  onOpenChange,
 }: ServiceDialogProps) {
   const [selectedHandler, setSelectedHandler] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ServiceFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      handlerId: "",
-      active: true,
-      color: "#1C9488",
-      planLimits: availablePlans.map(plan => ({
-        planId: plan.id,
-        enabled: false,
-        limitType: "UNLIMITED",
-        limitValue: null,
-      })),
-      config: {},
-    },
   });
 
   useEffect(() => {
     if (open) {
       if (service) {
         const values = {
-          name: service.name,
+          name: service.name || "",
           description: service.description || "",
-          handlerId: service.handlerId,
+          handlerId: service.handlerId || "",
+          config: service.config || {},
           active: service.active,
           color: service.color || "#1C9488",
+          pluginIds: service.plugins?.map((p: any) => p.pluginId) || [],
           planLimits: availablePlans.map(plan => {
-            const existingLimit = service.planLimits.find((l: any) => l.planId === plan.id);
+            const existingLimit = service.planLimits?.find((l: any) => l.planId === plan.id);
             return {
               planId: plan.id,
               enabled: !!existingLimit,
@@ -83,7 +90,6 @@ export function ServiceDialog({
               limitValue: existingLimit?.limitValue || null,
             };
           }),
-          config: service.config || {},
         };
         form.reset(values);
         const handler = availableServices.find(h => h.id === service.handlerId);
@@ -93,22 +99,23 @@ export function ServiceDialog({
           name: "",
           description: "",
           handlerId: "",
+          config: {},
           active: true,
           color: "#1C9488",
+          pluginIds: [],
           planLimits: availablePlans.map(plan => ({
             planId: plan.id,
             enabled: false,
             limitType: "UNLIMITED",
             limitValue: null,
           })),
-          config: {},
         });
         setSelectedHandler(null);
       }
     }
   }, [service, open, form, availablePlans, availableServices]);
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (values: ServiceFormData) => {
     try {
       setIsSubmitting(true);
       const formattedValues = {
@@ -122,7 +129,7 @@ export function ServiceDialog({
 
       if (result.success) {
         toast.success(result.message);
-        onOpenChange(false);
+        onOpenChange?.(false);
       } else {
         toast.error(result.message);
       }
@@ -144,7 +151,7 @@ export function ServiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90%] h-[90%] p-0">
+      <DialogContent className="max-w-[96%] h-[96%] p-0">
         <div className="flex h-full">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col h-full w-full">
@@ -171,7 +178,7 @@ export function ServiceDialog({
               </div>
 
               <div className="grid grid-cols-3 h-full">
-                <div className="border-r p-6">
+                <div className="border-r">
                   <ServiceBasicForm
                     form={form}
                     availableServices={availableServices}
@@ -179,9 +186,10 @@ export function ServiceDialog({
                   />
                 </div>
 
-                <div className="border-r p-6">
+                <div className="border-r">
                   <ServicePlansForm
                     form={form}
+                    plugins={plugins}
                     availablePlans={availablePlans}
                   />
                 </div>

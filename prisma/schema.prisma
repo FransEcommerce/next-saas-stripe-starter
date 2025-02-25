@@ -201,6 +201,7 @@ model Plugin {
   products        Product[]
   licenses        License[]
   downloadTokens  DownloadToken[]
+  services        ServicePlugin[]
 
   @@index([parentId])
   @@map(name: "plugins")
@@ -416,6 +417,7 @@ model Service {
   ServiceUsage ServiceUsage[]
   Plan Plan[]
   usageRecords SubscriptionUsageRecord[]
+  plugins ServicePlugin[]
 
   @@map(name: "services")
 }
@@ -468,9 +470,9 @@ model Plan {
   users       User[]   // 使用此计划的用户
   services    Service[] // 此计划可以使用的服务
   subscriptions Subscription[]
+  ServicePlanLimit ServicePlanLimit[]
 
   @@map(name: "plans")
-  ServicePlanLimit ServicePlanLimit[]
 }
 
 // 新增订阅表
@@ -528,4 +530,19 @@ model SubscriptionUsageRecord {
   @@index([subscriptionId])
   @@index([serviceId])
   @@map(name: "subscription_usage_records")
+}
+
+// 服务与插件的关联表
+model ServicePlugin {
+  id        String   @id @default(uuid())
+  serviceId String
+  pluginId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  plugin  Plugin  @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, pluginId])
+  @@map(name: "service_plugins")
 }

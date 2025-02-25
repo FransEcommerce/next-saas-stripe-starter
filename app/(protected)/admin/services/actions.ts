@@ -19,6 +19,7 @@ interface ServiceFormData {
   active: boolean;
   color: string;
   planLimits: PlanLimit[];
+  pluginIds?: string[];
 }
 
 export async function createService(data: ServiceFormData) {
@@ -38,6 +39,11 @@ export async function createService(data: ServiceFormData) {
         config: data.config || {},
         active: data.active,
         color: data.color,
+        plugins: {
+          create: (data.pluginIds || []).map(pluginId => ({
+            pluginId
+          }))
+        },
         planLimits: {
           create: data.planLimits.map(limit => ({
             planId: limit.planId,
@@ -51,7 +57,8 @@ export async function createService(data: ServiceFormData) {
           include: {
             plan: true
           }
-        }
+        },
+        plugins: true
       }
     });
 
@@ -78,7 +85,12 @@ export async function updateService(id: string, data: ServiceFormData) {
         where: { serviceId: id }
       });
 
-      // 更新服务并创建新的计划限制
+      // 删除现有的插件关联
+      await tx.servicePlugin.deleteMany({
+        where: { serviceId: id }
+      });
+
+      // 更新服务并创建新的计划限制和插件关联
       return await tx.service.update({
         where: { id },
         data: {
@@ -88,6 +100,12 @@ export async function updateService(id: string, data: ServiceFormData) {
           config: data.config || {},
           active: data.active,
           color: data.color,
+          plugins: {
+            deleteMany: {},
+            create: (data.pluginIds || []).map(pluginId => ({
+              pluginId
+            }))
+          },
           planLimits: {
             create: data.planLimits.map(limit => ({
               planId: limit.planId,
@@ -101,7 +119,8 @@ export async function updateService(id: string, data: ServiceFormData) {
             include: {
               plan: true
             }
-          }
+          },
+          plugins: true
         }
       });
     });
@@ -117,6 +136,10 @@ export async function updateService(id: string, data: ServiceFormData) {
 export async function deleteService(id: string) {
   try {
     await prisma.servicePlanLimit.deleteMany({
+      where: { serviceId: id }
+    });
+
+    await prisma.servicePlugin.deleteMany({
       where: { serviceId: id }
     });
 

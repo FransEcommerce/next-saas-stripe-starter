@@ -28,6 +28,11 @@ export async function getServices() {
           name: true,
           isFree: true
         }
+      },
+      plugins: {
+        include: {
+          plugin: true
+        }
       }
     },
     orderBy: {
@@ -97,4 +102,31 @@ export async function getServiceUsage(serviceId: string, userId: string, period:
       date: "desc"
     }
   });
+}
+
+export async function getPlugins() {
+  const plugins = await prisma.plugin.findMany({
+    include: {
+      childVersions: {
+        select: {
+          id: true,
+          name: true,
+          version: true,
+          avatar: true,
+          versionNumber: true,
+        },
+        orderBy: {
+          versionNumber: 'desc'
+        }
+      }
+    },
+    where: {
+      parentId: null, // 只获取主插件
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+
+  return JSON.parse(JSON.stringify(plugins));
 }

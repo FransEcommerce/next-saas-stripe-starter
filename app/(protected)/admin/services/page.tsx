@@ -1,4 +1,4 @@
-import { getServices } from "./queries";
+import { getServices, getPlugins } from "./queries";
 import { ServiceList } from "./components/service-list";
 import { getAvailableServices } from "@/app/services/registry";
 import { prisma } from "@/lib/db";
@@ -7,7 +7,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 
 export default async function ServicesPage() {
   // 确保等待所有服务加载完成
-  const [services, availableServices, plans] = await Promise.all([
+  const [services, availableServices, plans, plugins] = await Promise.all([
     getServices(),
     getAvailableServices(),
     prisma.plan.findMany({
@@ -18,7 +18,8 @@ export default async function ServicesPage() {
       where: {
         active: true
       }
-    })
+    }),
+    getPlugins()
   ]);
 
   return (
@@ -31,12 +32,14 @@ export default async function ServicesPage() {
         <AddServiceButton
           availableServices={availableServices}
           availablePlans={plans}
+          plugins={plugins}
         />
       </div>
       <ServiceList
         services={services}
         availableServices={availableServices}
         availablePlans={plans}
+        plugins={plugins}
       />
     </div>
   );
