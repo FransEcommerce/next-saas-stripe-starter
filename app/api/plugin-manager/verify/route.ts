@@ -319,6 +319,7 @@ export async function POST(req: NextRequest) {
       data: {
         user: userInfo,
         pluginManager: {
+          projectId: PLUGIN_MANAGER_PROJECT_ID,
           latestVersion: compatibleVersion.version,
           chatpionVersion: compatibleVersion.chatpionVersion,
           changelogUrl: `${process.env.NEXT_PUBLIC_APP_URL}/changelog/plugin/${PLUGIN_MANAGER_PROJECT_ID}`,
