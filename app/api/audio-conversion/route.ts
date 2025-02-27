@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
           serviceId: limit.serviceId,
           date: limit.limitType === "DAILY" 
             ? new Date(new Date().setHours(0, 0, 0, 0)) 
-            : new Date(new Date().setDate(1))
+            : new Date(new Date().getFullYear(), new Date().getMonth(), 1, 0, 0, 0, 0)
         }
       },
       update: {
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
         count: 1,
         date: limit.limitType === "DAILY" 
           ? new Date(new Date().setHours(0, 0, 0, 0)) 
-          : new Date(new Date().setDate(1))
+          : new Date(new Date().getFullYear(), new Date().getMonth(), 1, 0, 0, 0, 0)
       }
     });
 
