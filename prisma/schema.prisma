@@ -449,6 +449,7 @@ model ServiceUsage {
   user      User     @relation(fields: [userId], references: [id])
   service   Service  @relation(fields: [serviceId], references: [id])
 
+  @@unique([userId, serviceId, date], name: "userId_serviceId_date")
   @@index([userId])
   @@index([serviceId])
   @@index([date])

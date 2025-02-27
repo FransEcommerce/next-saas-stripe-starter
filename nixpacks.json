@@ -4,7 +4,8 @@
             "nixPkgs": [
                 "nodejs_20",
                 "pnpm-8_x",
-                "openssl"
+                "openssl",
+                "ffmpeg"
             ]
         },
         "install": {
