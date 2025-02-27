@@ -137,7 +137,9 @@ export async function POST(req: NextRequest) {
         userId_serviceId_date: {
           userId: license.userId,
           serviceId: limit.serviceId,
-          date: limit.limitType === "DAILY" ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          date: limit.limitType === "DAILY" 
+            ? new Date(new Date().setHours(0, 0, 0, 0)) 
+            : new Date(new Date().setDate(1))
         }
       },
       update: {
@@ -149,7 +151,9 @@ export async function POST(req: NextRequest) {
         userId: license.userId,
         serviceId: limit.serviceId,
         count: 1,
-        date: limit.limitType === "DAILY" ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        date: limit.limitType === "DAILY" 
+          ? new Date(new Date().setHours(0, 0, 0, 0)) 
+          : new Date(new Date().setDate(1))
       }
     });
 
