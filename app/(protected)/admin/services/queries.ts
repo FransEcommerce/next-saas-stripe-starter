@@ -4,11 +4,6 @@ import { Service } from "@prisma/client";
 export async function getServices() {
   const services = await prisma.service.findMany({
     include: {
-      _count: {
-        select: {
-          ServiceUsage: true
-        }
-      },
       planLimits: {
         include: {
           plan: {
@@ -40,9 +35,19 @@ export async function getServices() {
     }
   });
 
+  // 获取每个服务的总使用次数
+  const usageCounts = await prisma.serviceUsage.groupBy({
+    by: ['serviceId'],
+    _sum: {
+      count: true
+    }
+  });
+
+  const usageMap = new Map(usageCounts.map(uc => [uc.serviceId, uc._sum.count || 0]));
+
   return JSON.parse(JSON.stringify(services.map(service => ({
     ...service,
-    usageCount: service._count.ServiceUsage
+    usageCount: usageMap.get(service.id) || 0
   }))), (key, value) => {
     if ((key === 'price') && value !== null && value !== undefined) {
       return Number(value);
