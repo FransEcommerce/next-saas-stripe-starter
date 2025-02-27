@@ -82,11 +82,7 @@ export async function POST(req: NextRequest) {
     // 获取音频转换服务的限制
     const serviceLimits = activeSubscriptions
       .flatMap(sub => sub.plan.ServicePlanLimit)
-      .filter(
-        limit =>
-          limit.service.handlerId === "audio-conversion" &&
-          limit.limitType !== "UNLIMITED"
-      );
+      .filter(limit => limit.service.handlerId === "audio-conversion");
 
     if (serviceLimits.length === 0) {
       return NextResponse.json(
