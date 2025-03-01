@@ -34,8 +34,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash, Plus, History } from "lucide-react";
-import { deletePlugin } from "../actions";
+import { deletePlugin, updatePluginProjectId } from "../actions";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface PluginsListProps {
   plugins: Plugin[];
@@ -45,6 +46,10 @@ export function PluginsList({ plugins }: PluginsListProps) {
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null);
+
+  const [isProjectIdDialogOpen, setIsProjectIdDialogOpen] = useState(false);
+  const [editingPlugin, setEditingPlugin] = useState<Plugin | null>(null);
+  const [newProjectId, setNewProjectId] = useState("");
 
   const handleDelete = async () => {
     if (!selectedPlugin) return;
@@ -95,8 +100,65 @@ export function PluginsList({ plugins }: PluginsListProps) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <span className="font-mono">{plugin.project_id || "N/A"}</span>
+                </TableCell> */}
+                {/* <TableCell>
+                  {editingProjectId === plugin.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={newProjectId}
+                        onChange={(e) => setNewProjectId(e.target.value)}
+                        className="w-32 h-8"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          const result = await updatePluginProjectId(plugin.id, newProjectId);
+                          if (result.success) {
+                            setEditingProjectId(null);
+                            router.refresh();
+                            toast.success("Project ID updated successfully");
+                          } else {
+                            toast.error(result.message);
+                          }
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingProjectId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      className="flex items-center gap-1 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+                      onClick={() => {
+                        setEditingProjectId(plugin.id);
+                        setNewProjectId(plugin.project_id || "");
+                      }}
+                    >
+                      <span className="font-mono">{plugin.project_id || "N/A"}</span>
+                      <Pencil className="h-3 w-3 opacity-50 hover:opacity-100" />
+                    </div>
+                  )}
+                </TableCell> */}
+                <TableCell>
+                  <div
+                    className="flex items-center gap-1 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+                    onClick={() => {
+                      setEditingPlugin(plugin);
+                      setNewProjectId(plugin.project_id || "");
+                      setIsProjectIdDialogOpen(true);
+                    }}
+                  >
+                    <span className="font-mono">{plugin.project_id || "N/A"}</span>
+                    <Pencil className="h-3 w-3 opacity-50 hover:opacity-100" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
@@ -106,6 +168,7 @@ export function PluginsList({ plugins }: PluginsListProps) {
                     </span>
                   </div>
                 </TableCell>
+
                 <TableCell>
                   {plugin.chatpionVersion || "Not specified"}
                 </TableCell>
@@ -184,6 +247,54 @@ export function PluginsList({ plugins }: PluginsListProps) {
               onClick={handleDelete}
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={isProjectIdDialogOpen}
+        onOpenChange={setIsProjectIdDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update Project ID</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-4">
+                <p className="text-red-600 font-medium">
+                  Warning: Changing the Project ID will affect all versions of this plugin and may invalidate existing licenses. Proceed with caution!
+                </p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={newProjectId}
+                    onChange={(e) => setNewProjectId(e.target.value)}
+                    className="w-full"
+                    placeholder="Enter 9-digit Project ID (YYMMDDXXX)"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">
+                  Format: YYMMDDXXX (e.g. 250224012)
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!editingPlugin) return;
+
+                const result = await updatePluginProjectId(editingPlugin.id, newProjectId);
+                if (result.success) {
+                  setIsProjectIdDialogOpen(false);
+                  router.refresh();
+                  toast.success("Project ID updated successfully");
+                } else {
+                  toast.error(result.message);
+                }
+              }}
+            >
+              Confirm Update
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

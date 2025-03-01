@@ -332,3 +332,69 @@ export async function deletePluginVersion(versionId: string) {
     throw error;
   }
 }
+
+
+export async function updatePluginProjectId(pluginId: string, newProjectId: string) {
+  try {
+    // 验证 Project ID 格式
+    if (!/^\d{9}$/.test(newProjectId)) {
+      throw new BusinessError("Project ID must be a 9-digit number (YYMMDDXXX)");
+    }
+
+    // 获取前6位作为日期部分
+    const datePart = newProjectId.slice(0, 6);
+    const year = parseInt(datePart.slice(0, 2), 10) + 2000;
+    const month = parseInt(datePart.slice(2, 4), 10) - 1; // JavaScript months are 0-based
+    const day = parseInt(datePart.slice(4, 6), 10);
+
+    // 验证日期是否有效
+    const date = new Date(year, month, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month ||
+      date.getDate() !== day
+    ) {
+      throw new BusinessError("The date part of Project ID is invalid");
+    }
+
+    // 获取原始插件
+    const originalPlugin = await prisma.plugin.findUnique({
+      where: { id: pluginId },
+      select: { parentId: true }
+    });
+
+    if (!originalPlugin) {
+      throw new BusinessError("Plugin not found");
+    }
+
+    // 获取所有相关版本
+    const targetId = originalPlugin.parentId || pluginId;
+    const allVersions = await prisma.plugin.findMany({
+      where: {
+        OR: [
+          { id: targetId },
+          { parentId: targetId }
+        ]
+      }
+    });
+
+    // 批量更新所有版本的 project_id
+    await prisma.$transaction(
+      allVersions.map(plugin => 
+        prisma.plugin.update({
+          where: { id: plugin.id },
+          data: { project_id: newProjectId }
+        })
+      )
+    );
+
+    revalidatePath("/admin/plugins");
+    return { success: true };
+  } catch (error) {
+    if (error instanceof BusinessError) {
+      return { success: false, message: error.message };
+    }
+    console.error("Error updating project ID:", error);
+    throw error;
+  }
+}
