@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/shared/icons"
 import { UserAuthForm } from "@/components/forms/user-auth-form"
 import { Suspense } from "react"
+import Image from "next/image"
 
 export const metadata = {
   title: "Create an account",
@@ -13,7 +14,7 @@ export const metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="container grid h-screen w-screen flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container grid h-screen w-screen flex-col items-center justify-center">
       <Link
         href="/login"
         className={cn(
@@ -23,11 +24,15 @@ export default function RegisterPage() {
       >
         Login
       </Link>
-      <div className="hidden h-full bg-muted lg:block" />
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <Icons.logo className="mx-auto size-6" />
+            <div className="flex justify-center">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <Image src="/favicon.png" alt="Logo" width={500} height={500} className="dark:hidden" />
+                <Image src="/favicon-white.png" alt="Logo" width={500} height={500} className="hidden dark:block" />
+              </div>
+            </div>
             <h1 className="text-2xl font-semibold tracking-tight">
               Create an account
             </h1>

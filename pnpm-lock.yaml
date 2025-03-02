@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@auth/prisma-adapter':
     specifier: ^2.4.1
-    version: 2.7.4(@prisma/client@5.22.0)
+    version: 2.7.4(@prisma/client@5.22.0)(nodemailer@6.10.0)
   '@hookform/resolvers':
     specifier: ^3.9.0
     version: 3.10.0(react-hook-form@7.54.2)
@@ -107,6 +107,9 @@ dependencies:
   '@react-email/html':
     specifier: 0.0.8
     version: 0.0.8(react@18.3.1)
+  '@react-email/render':
+    specifier: ^1.0.5
+    version: 1.0.5(react-dom@18.3.1)(react@18.3.1)
   '@t3-oss/env-nextjs':
     specifier: ^0.11.0
     version: 0.11.1(typescript@5.5.3)(zod@3.24.2)
@@ -157,13 +160,16 @@ dependencies:
     version: 14.2.5(@babel/core@7.24.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
   next-auth:
     specifier: 5.0.0-beta.19
-    version: 5.0.0-beta.19(next@14.2.5)(react@18.3.1)
+    version: 5.0.0-beta.19(next@14.2.5)(nodemailer@6.10.0)(react@18.3.1)
   next-contentlayer2:
     specifier: ^0.5.0
     version: 0.5.4(acorn@8.14.0)(contentlayer2@0.5.4)(esbuild@0.25.0)(next@14.2.5)(react-dom@18.3.1)(react@18.3.1)
   next-themes:
     specifier: ^0.3.0
     version: 0.3.0(react-dom@18.3.1)(react@18.3.1)
+  nodemailer:
+    specifier: ^6.10.0
+    version: 6.10.0
   prop-types:
     specifier: ^15.8.1
     version: 15.8.1
@@ -322,7 +328,7 @@ packages:
       '@jridgewell/trace-mapping': 0.3.25
     dev: false
 
-  /@auth/core@0.32.0:
+  /@auth/core@0.32.0(nodemailer@6.10.0):
     resolution: {integrity: sha512-3+ssTScBd+1fd0/fscAyQN1tSygXzuhysuVVzB942ggU4mdfiTbv36P0ccVnExKWYJKvu3E2r3/zxXCCAmTOrg==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -340,12 +346,13 @@ packages:
       '@types/cookie': 0.6.0
       cookie: 0.6.0
       jose: 5.10.0
+      nodemailer: 6.10.0
       oauth4webapi: 2.17.0
       preact: 10.11.3
       preact-render-to-string: 5.2.3(preact@10.11.3)
     dev: false
 
-  /@auth/core@0.37.4:
+  /@auth/core@0.37.4(nodemailer@6.10.0):
     resolution: {integrity: sha512-HOXJwXWXQRhbBDHlMU0K/6FT1v+wjtzdKhsNg0ZN7/gne6XPsIrjZ4daMcFnbq0Z/vsAbYBinQhhua0d77v7qw==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -361,17 +368,18 @@ packages:
     dependencies:
       '@panva/hkdf': 1.2.1
       jose: 5.10.0
+      nodemailer: 6.10.0
       oauth4webapi: 3.2.0
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
     dev: false
 
-  /@auth/prisma-adapter@2.7.4(@prisma/client@5.22.0):
+  /@auth/prisma-adapter@2.7.4(@prisma/client@5.22.0)(nodemailer@6.10.0):
     resolution: {integrity: sha512-3T/X94R9J1sxOLQtsD3ijIZ0JGHPXlZQxRr/8NpnZBJ3KGxun/mNsZ1MwMRhTxy0mmn9JWXk7u9+xCcVn0pu3A==}
     peerDependencies:
       '@prisma/client': '>=2.26.0 || >=3 || >=4 || >=5'
     dependencies:
-      '@auth/core': 0.37.4
+      '@auth/core': 0.37.4(nodemailer@6.10.0)
       '@prisma/client': 5.22.0(prisma@5.22.0)
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
@@ -4173,6 +4181,20 @@ packages:
     dependencies:
       html-to-text: 9.0.5
       js-beautify: 1.15.3
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-promise-suspense: 0.3.4
+    dev: false
+
+  /@react-email/render@1.0.5(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-CA69HYXPk21HhtAXATIr+9JJwpDNmAFCvdMUjWmeoD1+KhJ9NAxusMRxKNeibdZdslmq3edaeOKGbdQ9qjK8LQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^18.0 || ^19.0 || ^19.0.0-rc
+    dependencies:
+      html-to-text: 9.0.5
+      prettier: 3.4.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-promise-suspense: 0.3.4
@@ -8734,7 +8756,7 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
     dev: false
 
-  /next-auth@5.0.0-beta.19(next@14.2.5)(react@18.3.1):
+  /next-auth@5.0.0-beta.19(next@14.2.5)(nodemailer@6.10.0)(react@18.3.1):
     resolution: {integrity: sha512-YHu1igcAxZPh8ZB7GIM93dqgY6gcAzq66FOhQFheAdOx1raxNcApt05nNyNCSB6NegSiyJ4XOPsaNow4pfDmsg==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -8750,8 +8772,9 @@ packages:
       nodemailer:
         optional: true
     dependencies:
-      '@auth/core': 0.32.0
+      '@auth/core': 0.32.0(nodemailer@6.10.0)
       next: 14.2.5(@babel/core@7.24.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1)(react@18.3.1)
+      nodemailer: 6.10.0
       react: 18.3.1
     dev: false
 
@@ -8879,6 +8902,11 @@ packages:
 
   /node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
+
+  /nodemailer@6.10.0:
+    resolution: {integrity: sha512-SQ3wZCExjeSatLE/HBaXS5vqUOQk6GtBdIIKxiFdmm01mOQZX/POJkO3SUX1wDiYcwUOJwT23scFSC9fY2H8IA==}
+    engines: {node: '>=6.0.0'}
+    dev: false
 
   /nopt@8.1.0:
     resolution: {integrity: sha512-ieGu42u/Qsa4TFktmaKEwM6MQH0pOWnaB3htzh0JRtx84+Mebc0cbZYN5bC+6WTZ4+77xrL9Pn5m7CV6VIkV7A==}
@@ -9369,6 +9397,12 @@ packages:
       '@ianvs/prettier-plugin-sort-imports': 4.4.1(prettier@3.5.1)
       prettier: 3.5.1
     dev: true
+
+  /prettier@3.4.2:
+    resolution: {integrity: sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: false
 
   /prettier@3.5.1:
     resolution: {integrity: sha512-hPpFQvHwL3Qv5AdRvBFMhnKo4tYxp0ReXiPn2bxkiohEX6mBeBwEpBSQTkD458RaaDKQMYSp4hX4UtfUTA5wDw==}

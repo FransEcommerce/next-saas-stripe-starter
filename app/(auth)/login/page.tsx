@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAuthForm } from "@/components/forms/user-auth-form";
 import { Icons } from "@/components/shared/icons";
-
+import Image from "next/image";
 export const metadata: Metadata = {
   title: "Login",
   description: "Login to your account",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Link
+      {/* <Link
         href="/"
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
@@ -26,10 +26,15 @@ export default function LoginPage() {
           <Icons.chevronLeft className="mr-2 size-4" />
           Back
         </>
-      </Link>
+      </Link> */}
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <Icons.logo className="mx-auto size-6" />
+        <div className="flex flex-col space-y-2 text-center justify-center">
+          <div className="flex justify-center">
+            <div className="relative w-16 h-16 flex items-center justify-center">
+              <Image src="/favicon.png" alt="Logo" width={500} height={500} className="dark:hidden" />
+              <Image src="/favicon-white.png" alt="Logo" width={500} height={500} className="hidden dark:block" />
+            </div>
+          </div>
           <h1 className="text-2xl font-semibold tracking-tight">
             Welcome back
           </h1>
@@ -52,3 +57,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+

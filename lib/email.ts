@@ -1,51 +1,40 @@
 import { MagicLinkEmail } from "@/emails/magic-link-email";
-import { EmailConfig } from "next-auth/providers/email";
-import { Resend } from "resend";
-
 import { env } from "@/env.mjs";
-import { siteConfig } from "@/config/site";
 
-import { getUserByEmail } from "./user";
+export const sendVerificationRequest = async ({ identifier, url }: { identifier: string; url: string }) => {
+  const html = MagicLinkEmail({
+    firstName: "User",
+    actionUrl: url,
+    mailType: "login",
+    siteName: "Your App",
+  });
 
-export const resend = new Resend(env.RESEND_API_KEY);
-
-export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
-  async ({ identifier, url, provider }) => {
-    const user = await getUserByEmail(identifier);
-    if (!user || !user.name) return;
-
-    const userVerified = user?.emailVerified ? true : false;
-    const authSubject = userVerified
-      ? `Sign-in link for ${siteConfig.name}`
-      : "Activate your account";
-
+  let retries = 3;
+  while (retries > 0) {
     try {
-      const { data, error } = await resend.emails.send({
-        from: provider.from,
-        to:
-          process.env.NODE_ENV === "development"
-            ? "delivered@resend.dev"
-            : identifier,
-        subject: authSubject,
-        react: MagicLinkEmail({
-          firstName: user?.name as string,
-          actionUrl: url,
-          mailType: userVerified ? "login" : "register",
-          siteName: siteConfig.name,
-        }),
-        // Set this to prevent Gmail from threading emails.
-        // More info: https://resend.com/changelog/custom-email-headers
+      const response = await fetch(`${env.NEXTAUTH_URL}/api/send-email`, {
+        method: "POST",
         headers: {
-          "X-Entity-Ref-ID": new Date().getTime() + "",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          to: identifier,
+          subject: "Your Sign-In Link",
+          html,
+        }),
       });
 
-      if (error || !data) {
-        throw new Error(error?.message);
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to send verification email.");
       }
-
-      // console.log(data)
+      return;
     } catch (error) {
-      throw new Error("Failed to send verification email.");
+      retries--;
+      if (retries === 0) {
+        throw new Error("Failed to send verification email after multiple attempts.");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 等待1秒后重试
     }
-  };
+  }
+};

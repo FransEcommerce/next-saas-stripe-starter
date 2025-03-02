@@ -22,6 +22,7 @@ import {
 import ProjectSwitcher from "@/components/dashboard/project-switcher";
 import { UpgradeCard } from "@/components/dashboard/upgrade-card";
 import { Icons } from "@/components/shared/icons";
+import Image from "next/image";
 
 interface DashboardSidebarProps {
   links: SidebarNavItem[];
@@ -71,29 +72,42 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
             )}
           >
             <div className="flex h-full max-h-screen flex-1 flex-col gap-2">
-              <div className="flex h-14 items-center p-4 lg:h-[60px]">
-                {isSidebarExpanded ? <ProjectSwitcher /> : null}
+              {isSidebarExpanded ? (
+                <div className="flex h-14 items-center p-4 lg:h-[60px]">
+                  <div className="flex items-center w-full">
+                    <div className="flex items-center justify-center w-40 h-40">
+                      <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden"/>
+                      <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block"/>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-auto size-9 lg:size-8"
+                      onClick={toggleSidebar}
+                    >
+                      <PanelLeftClose size={18} className="stroke-muted-foreground" />
+                      <span className="sr-only">Toggle Sidebar</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center pt-4 gap-2">
+                  <div className="flex items-center justify-center w-10 h-10">
+                    <Image src="/favicon.png" alt="Favicon" width={96} height={96} className="dark:hidden"/>
+                    <Image src="/favicon-white.png" alt="Favicon" width={96} height={96} className="hidden dark:block"/>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-9 lg:size-8"
+                    onClick={toggleSidebar}
+                  >
+                    <PanelRightClose size={18} className="stroke-muted-foreground" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                  </Button>
+                </div>
+              )}
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="ml-auto size-9 lg:size-8"
-                  onClick={toggleSidebar}
-                >
-                  {isSidebarExpanded ? (
-                    <PanelLeftClose
-                      size={18}
-                      className="stroke-muted-foreground"
-                    />
-                  ) : (
-                    <PanelRightClose
-                      size={18}
-                      className="stroke-muted-foreground"
-                    />
-                  )}
-                  <span className="sr-only">Toggle Sidebar</span>
-                </Button>
-              </div>
 
               <nav className="flex flex-1 flex-col gap-8 px-4 pt-4">
                 {links.map((section) => (
@@ -123,7 +137,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                                     ? "bg-muted"
                                     : "text-muted-foreground hover:text-accent-foreground",
                                   item.disabled &&
-                                    "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
+                                  "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
                                 )}
                               >
                                 <Icon className="size-5" />
@@ -146,7 +160,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                                         ? "bg-muted"
                                         : "text-muted-foreground hover:text-accent-foreground",
                                       item.disabled &&
-                                        "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
+                                      "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
                                     )}
                                   >
                                     <span className="flex size-full items-center justify-center">
@@ -174,7 +188,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
           </aside>
         </ScrollArea>
       </div>
-    </TooltipProvider>
+    </TooltipProvider >
   );
 }
 
@@ -238,7 +252,7 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
                                   ? "bg-muted"
                                   : "text-muted-foreground hover:text-accent-foreground",
                                 item.disabled &&
-                                  "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
+                                "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
                               )}
                             >
                               <Icon className="size-5" />
