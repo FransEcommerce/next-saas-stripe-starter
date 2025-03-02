@@ -6,7 +6,7 @@ export const sendVerificationRequest = async ({ identifier, url }: { identifier:
     firstName: "User",
     actionUrl: url,
     mailType: "login",
-    siteName: "Your App",
+    siteName: "NextPion",
   });
 
   let retries = 3;
