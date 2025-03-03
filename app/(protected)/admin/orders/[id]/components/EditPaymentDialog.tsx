@@ -80,8 +80,8 @@ export function EditPaymentDialog({
   const [affiliates, setAffiliates] = useState<Array<{
     id: string;
     user: {
-      name: string;
-      email: string;
+      name: string | null;
+      email: string | null;
     };
     commissionValue: number;
     totalEarnings: number;
@@ -99,7 +99,7 @@ export function EditPaymentDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...initialData,
-      affiliateId: initialData.affiliate?.id || "none",
+      affiliateId: initialData.affiliateId || "none",
       paymentProof: proofUrl,
     },
   });
