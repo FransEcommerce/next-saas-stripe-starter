@@ -16,6 +16,7 @@ import { DocsSearch } from "@/components/docs/search";
 import { ModalContext } from "@/components/modals/providers";
 import { Icons } from "@/components/shared/icons";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
+import Image from "next/image";
 
 interface NavBarProps {
   scroll?: boolean;
@@ -39,9 +40,8 @@ export function NavBar({ scroll = false }: NavBarProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 flex w-full justify-center bg-background/60 backdrop-blur-xl transition-all ${
-        scroll ? (scrolled ? "border-b" : "bg-transparent") : "border-b"
-      }`}
+      className={`sticky top-0 z-40 flex w-full justify-center bg-background/60 backdrop-blur-xl transition-all ${scroll ? (scrolled ? "border-b" : "bg-transparent") : "border-b"
+        }`}
     >
       <MaxWidthWrapper
         className="flex h-14 items-center justify-between py-4"
@@ -49,13 +49,13 @@ export function NavBar({ scroll = false }: NavBarProps) {
       >
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-1.5">
-            <Icons.logo />
-            <span className="font-urban text-xl font-bold">
-              {siteConfig.name}
-            </span>
+            <div className="flex items-center justify-center w-40 h-40">
+              <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
+              <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
+            </div>
           </Link>
 
-          {links && links.length > 0 ? (
+          {/* {links && links.length > 0 ? (
             <nav className="hidden gap-6 md:flex">
               {links.map((item, index) => (
                 <Link
@@ -74,7 +74,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
                 </Link>
               ))}
             </nav>
-          ) : null}
+          ) : null} */}
         </div>
 
         <div className="flex items-center space-x-3">
@@ -87,7 +87,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
               <div className="flex lg:hidden">
                 <Icons.search className="size-6 text-muted-foreground" />
               </div>
-              <div className="flex space-x-4">
+              {/* <div className="flex space-x-4">
                 <Link
                   href={siteConfig.links.github}
                   target="_blank"
@@ -96,7 +96,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
                   <Icons.gitHub className="size-7" />
                   <span className="sr-only">GitHub</span>
                 </Link>
-              </div>
+              </div> */}
             </div>
           ) : null}
 
