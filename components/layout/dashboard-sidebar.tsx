@@ -76,8 +76,8 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                 <div className="flex h-14 items-center p-4 lg:h-[60px]">
                   <div className="flex items-center w-full">
                     <div className="flex items-center justify-center w-40 h-40">
-                      <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden"/>
-                      <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block"/>
+                      <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
+                      <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
                     </div>
                     <Button
                       variant="ghost"
@@ -93,8 +93,8 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
               ) : (
                 <div className="flex flex-col items-center justify-center pt-4 gap-2">
                   <div className="flex items-center justify-center w-10 h-10">
-                    <Image src="/favicon.png" alt="Favicon" width={96} height={96} className="dark:hidden"/>
-                    <Image src="/favicon-white.png" alt="Favicon" width={96} height={96} className="hidden dark:block"/>
+                    <Image src="/favicon.png" alt="Favicon" width={96} height={96} className="dark:hidden" />
+                    <Image src="/favicon-white.png" alt="Favicon" width={96} height={96} className="hidden dark:block" />
                   </div>
                   <Button
                     variant="ghost"
@@ -181,9 +181,9 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                 ))}
               </nav>
 
-              <div className="mt-auto xl:p-4">
+              {/* <div className="mt-auto xl:p-4">
                 {isSidebarExpanded ? <UpgradeCard /> : null}
-              </div>
+              </div> */}
             </div>
           </aside>
         </ScrollArea>
@@ -214,18 +214,10 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
           <ScrollArea className="h-full overflow-y-auto">
             <div className="flex h-screen flex-col">
               <nav className="flex flex-1 flex-col gap-y-8 p-6 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="flex items-center gap-2 text-lg font-semibold"
-                >
-                  <Icons.logo className="size-6" />
-                  <span className="font-urban text-xl font-bold">
-                    {siteConfig.name}
-                  </span>
-                </Link>
-
-                <ProjectSwitcher large />
-
+                <div className="flex items-center justify-center w-40">
+                  <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
+                  <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
+                </div>
                 {links.map((section) => (
                   <section
                     key={section.title}
@@ -270,9 +262,9 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
                   </section>
                 ))}
 
-                <div className="mt-auto">
+                {/* <div className="mt-auto">
                   <UpgradeCard />
-                </div>
+                </div> */}
               </nav>
             </div>
           </ScrollArea>

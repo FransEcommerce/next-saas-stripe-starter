@@ -27,10 +27,14 @@ import {
   Puzzle,
   Search,
   Settings,
+  ShoppingCart,
   SunMedium,
+  Tag,
   Trash,
   User,
+  Users,
   X,
+  Repeat,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -112,8 +116,10 @@ export const Icons = {
   post: FileText,
   search: Search,
   settings: Settings,
+  shoppingCart: ShoppingCart,
   spinner: Loader2,
   sun: SunMedium,
+  tag: Tag,
   trash: Trash,
   twitter: ({ ...props }: LucideProps) => (
     <svg
@@ -133,5 +139,7 @@ export const Icons = {
     </svg>
   ),
   user: User,
+  users: Users,
   warning: AlertTriangle,
+  repeat: Repeat,
 };

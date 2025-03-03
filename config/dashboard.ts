@@ -1,5 +1,4 @@
 import { UserRole } from "@prisma/client";
-
 import { SidebarNavItem } from "types";
 
 export const sidebarLinks: SidebarNavItem[] = [
@@ -13,8 +12,14 @@ export const sidebarLinks: SidebarNavItem[] = [
         authorizeOnly: UserRole.ADMIN,
       },
       {
+        href: "/admin/users",
+        icon: "user",
+        title: "Users",
+        authorizeOnly: UserRole.ADMIN,
+      },
+      {
         href: "/admin/orders",
-        icon: "package",
+        icon: "shoppingCart",
         title: "Orders",
         badge: 2,
         authorizeOnly: UserRole.ADMIN,
@@ -27,49 +32,43 @@ export const sidebarLinks: SidebarNavItem[] = [
       },
       {
         href: "/admin/plugins",
-        icon: "package",
+        icon: "logo",
         title: "Plugins",
         authorizeOnly: UserRole.ADMIN,
       },
       {
         href: "/admin/licenses",
-        icon: "package",
+        icon: "post",
         title: "Licenses",
         authorizeOnly: UserRole.ADMIN,
       },
       {
         href: "/admin/coupons",
-        icon: "package",
+        icon: "tag",
         title: "Coupons",
         authorizeOnly: UserRole.ADMIN,
       },
       {
         href: "/admin/affiliates",
-        icon: "package",
+        icon: "users",
         title: "Affiliates",
         authorizeOnly: UserRole.ADMIN,
       },
       {
-        href: "/admin/users",
-        icon: "package",
-        title: "Users",
-        authorizeOnly: UserRole.ADMIN,
-      },
-      {
         href: "/admin/services",
-        icon: "package",
+        icon: "settings",
         title: "Services",
         authorizeOnly: UserRole.ADMIN,
       },
       {
         href: "/admin/plans",
-        icon: "package",
+        icon: "billing",
         title: "Plan",
         authorizeOnly: UserRole.ADMIN,
       },
       {
         href: "/admin/subscriptions",
-        icon: "package",
+        icon: "repeat",
         title: "Subscription",
         authorizeOnly: UserRole.ADMIN,
       },
@@ -79,35 +78,59 @@ export const sidebarLinks: SidebarNavItem[] = [
     title: "MENU",
     items: [
       { href: "/dashboard", icon: "dashboard", title: "Dashboard" },
+      // {
+      //   href: "/dashboard/billing",
+      //   icon: "billing",
+      //   title: "Billing",
+      //   authorizeOnly: UserRole.USER,
+      // },
       {
-        href: "/dashboard/billing",
-        icon: "billing",
-        title: "Billing",
+        href: "/dashboard/plugins",
+        icon: "logo",
+        title: "Plugins",
         authorizeOnly: UserRole.USER,
       },
-      { href: "/dashboard/charts", icon: "lineChart", title: "Charts" },
       {
-        href: "#/dashboard/posts",
+        href: "/dashboard/orders",
+        icon: "shoppingCart",
+        title: "Orders",
+        authorizeOnly: UserRole.USER,
+      },
+      {
+        href: "/dashboard/licenses",
         icon: "post",
-        title: "User Posts",
+        title: "Licenses",
         authorizeOnly: UserRole.USER,
-        disabled: true,
       },
+      {
+        href: "/dashboard/subscriptions",
+        icon: "repeat",
+        title: "Subscription",
+        authorizeOnly: UserRole.USER,
+      },
+      // { href: "/dashboard/charts", icon: "lineChart", title: "Charts" },
+      // {
+      //   href: "#/dashboard/posts",
+      //   icon: "post",
+      //   title: "User Posts",
+      //   authorizeOnly: UserRole.USER,
+      //   disabled: true,
+      // },
     ],
   },
   {
     title: "OPTIONS",
     items: [
       { href: "/dashboard/settings", icon: "settings", title: "Settings" },
-      { href: "/", icon: "home", title: "Homepage" },
-      { href: "/docs", icon: "bookOpen", title: "Documentation" },
-      {
-        href: "#",
-        icon: "messages",
-        title: "Support",
-        authorizeOnly: UserRole.USER,
-        disabled: true,
-      },
+      // { href: "/", icon: "home", title: "Homepage" },
+      // { href: "/docs", icon: "bookOpen", title: "Documentation" },
+      // {
+      //   href: "#",
+      //   icon: "messages",
+      //   title: "Support",
+      //   authorizeOnly: UserRole.USER,
+      //   disabled: true,
+      // },
     ],
   },
 ];
