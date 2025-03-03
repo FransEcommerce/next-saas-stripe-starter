@@ -1,24 +1,32 @@
-import { MagicLinkEmail } from "@/emails/magic-link-email";
 import { EmailConfig } from "next-auth/providers/email";
 import { env } from "@/env.mjs";
 import { siteConfig } from "@/config/site";
-import { render } from "@react-email/render";
 
 export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
   async ({ identifier, url, provider }) => {
     const authSubject = `Sign-in link for ${siteConfig.name}`;
 
     try {
-      const html = await render(
-        MagicLinkEmail({
-          firstName: identifier.split("@")[0], // 使用邮箱前缀作为用户名
-          actionUrl: url,
-          mailType: "login", // 默认登录类型
-          siteName: siteConfig.name,
-        })
-      );
+      // 调用 API 路由生成邮件模板
+      const response = await fetch(`${env.NEXTAUTH_URL}/api/send-magic-link`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identifier,
+          url,
+        }),
+      });
 
-      const response = await fetch(`${env.NEXTAUTH_URL}/api/send-email`, {
+      if (!response.ok) {
+        throw new Error("Failed to generate email template");
+      }
+
+      const { html } = await response.json();
+
+      // 发送邮件
+      const sendEmailResponse = await fetch(`${env.NEXTAUTH_URL}/api/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,7 +38,7 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
         }),
       });
 
-      if (!response.ok) {
+      if (!sendEmailResponse.ok) {
         throw new Error("Failed to send email");
       }
     } catch (error) {
