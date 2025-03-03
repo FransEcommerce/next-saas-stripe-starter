@@ -1,17 +1,23 @@
 import { MagicLinkEmail } from "@/emails/magic-link-email";
+import { EmailConfig } from "next-auth/providers/email";
 import { env } from "@/env.mjs";
+import { siteConfig } from "@/config/site";
+import { render } from "@react-email/render";
 
-export const sendVerificationRequest = async ({ identifier, url }: { identifier: string; url: string }) => {
-  const html = MagicLinkEmail({
-    firstName: "User",
-    actionUrl: url,
-    mailType: "login",
-    siteName: "NextPion",
-  });
+export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
+  async ({ identifier, url, provider }) => {
+    const authSubject = `Sign-in link for ${siteConfig.name}`;
 
-  let retries = 3;
-  while (retries > 0) {
     try {
+      const html = await render(
+        MagicLinkEmail({
+          firstName: identifier.split("@")[0], // 使用邮箱前缀作为用户名
+          actionUrl: url,
+          mailType: "login", // 默认登录类型
+          siteName: siteConfig.name,
+        })
+      );
+
       const response = await fetch(`${env.NEXTAUTH_URL}/api/send-email`, {
         method: "POST",
         headers: {
@@ -19,22 +25,15 @@ export const sendVerificationRequest = async ({ identifier, url }: { identifier:
         },
         body: JSON.stringify({
           to: identifier,
-          subject: "Your Sign-In Link",
+          subject: authSubject,
           html,
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to send verification email.");
+      if (!response.ok) {
+        throw new Error("Failed to send email");
       }
-      return;
     } catch (error) {
-      retries--;
-      if (retries === 0) {
-        throw new Error("Failed to send verification email after multiple attempts.");
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 等待1秒后重试
+      throw new Error("Failed to send verification email.");
     }
-  }
-};
+  };

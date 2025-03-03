@@ -69,7 +69,7 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
       changelog: plugin.changelog || "",
       avatar: plugin.avatar || "",
       cover: plugin.cover || "",
-      fileId: plugin.fileId,
+      fileId: plugin.fileId || undefined,
       fileName: plugin.fileName || "",
       fileSize: plugin.fileSize || "",
       downloadUrl: plugin.downloadUrl,

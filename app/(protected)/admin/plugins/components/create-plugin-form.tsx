@@ -92,6 +92,7 @@ export function CreatePluginForm() {
         ...data,
         activationFields: JSON.parse(data.activationFields),
         uiFields: JSON.parse(data.uiFields),
+        downloadUrl: data.downloadUrl || '',
       };
 
       await createPlugin(parsedData);

@@ -36,13 +36,14 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
   const [magicLinkSent, setMagicLinkSent] = React.useState<boolean>(false);
   const [email, setEmail] = React.useState<string>("");
   const searchParams = useSearchParams();
+  const error = searchParams.get("error");
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     setEmail(data.email.toLowerCase());
 
     try {
-      const signInResult = await signIn("resend", {
+      const signInResult = await signIn("email", {
         email: data.email.toLowerCase(),
         redirect: false,
         callbackUrl: searchParams?.get("from") || "/dashboard",
@@ -82,6 +83,11 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
         </div>
       ) : (
         <div className="space-y-6">
+          {error === "Verification" && (
+            <div className="bg-red-50 p-4 rounded-lg text-red-600 text-sm">
+              The sign in link is no longer valid. It may have been used already or it may have expired.
+            </div>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">

@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useState, useTransition } from "react";
-import { updateUserBilling, type BillingFormData } from "@/actions/update-user-billing";
+import { updateUserBilling } from '@/actions/update-user-billing';
+import type { BillingFormData } from '@/lib/validations/billing';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@prisma/client";
 import { useSession } from "next-auth/react";

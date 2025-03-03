@@ -2,7 +2,8 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { billingInfoSchema, type BillingFormData } from "@/lib/validations/billing";
+import { billingInfoSchema } from '@/lib/validations/billing';
+import type { BillingFormData } from '@/lib/validations/billing';
 import { revalidatePath } from "next/cache";
 
 export async function updateUserBilling(userId: string, data: BillingFormData) {
