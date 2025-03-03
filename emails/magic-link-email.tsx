@@ -38,7 +38,7 @@ export const MagicLinkEmail = ({
           <Img
             src="https://nextpion.frs.com.my/logo.png"
             alt="Logo"
-            className="m-auto mb-6 block w-64"
+            className="m-auto mb-6 block w-48"
           />
           <Text className="text-center text-xl font-semibold text-gray-900">
             Hi {firstName},

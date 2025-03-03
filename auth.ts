@@ -23,7 +23,7 @@ export const {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
-    // error: "/auth/error",
+    error: "/login",
   },
   callbacks: {
     async session({ token, session }) {

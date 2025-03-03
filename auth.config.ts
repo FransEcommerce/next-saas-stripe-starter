@@ -19,8 +19,5 @@ export default {
       sendVerificationRequest,
     },
   ],
-  pages: {
-    error: "/login", // 将错误页面重定向到登录页面
-  },
   trustHost: true,
 } satisfies NextAuthConfig;
