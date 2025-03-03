@@ -21,6 +21,7 @@ import { FileUpload } from "@/components/file-upload";
 import { updatePlugin } from "../actions";
 import { Plugin } from "@prisma/client";
 import { toast } from "sonner";
+import { env } from "@/env.mjs";
 
 const pluginFormSchema = z.object({
   name: z.string().min(2, {
@@ -207,7 +208,7 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
                   <FormLabel>Plugin File</FormLabel>
                   <FormControl>
                     <FileUpload
-                      parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+                      parentId={env.PLUGIN_PARENT_ID}
                       onUploadComplete={(data) => {
                         form.setValue("fileId", data.fileId);
                         form.setValue("fileName", data.fileName);
@@ -237,7 +238,7 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
                     <FormControl>
                       <FileUpload
                         id="plugin-avatar"
-                        parentId="ccccffb9-a335-4091-aac2-2a24ba3b9883"
+                        parentId={env.IMAGE_PARENT_ID}
                         onUploadComplete={(data) => {
                           form.setValue("avatar", data.downloadUrl);
                         }}
@@ -263,7 +264,7 @@ export function EditPluginForm({ plugin, returnPath }: EditPluginFormProps) {
                     <FormControl>
                       <FileUpload
                         id="plugin-cover"
-                        parentId="ccccffb9-a335-4091-aac2-2a24ba3b9883"
+                        parentId={env.IMAGE_PARENT_ID}
                         onUploadComplete={(data) => {
                           form.setValue("cover", data.downloadUrl);
                         }}

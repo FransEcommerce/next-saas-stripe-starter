@@ -22,6 +22,10 @@ export const env = createEnv({
     SMTP_FROM_NAME: z.string().min(1),
     SMTP_FROM: z.string().min(1),
     SMTP_SECURE: z.string().min(1),
+    FREE_PLAN_ID: z.string().min(1),
+    PAYMENT_PARENT_ID: z.string().min(1),
+    IMAGE_PARENT_ID: z.string().min(1),
+    PLUGIN_PARENT_ID: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -59,5 +63,9 @@ export const env = createEnv({
     SMTP_FROM_NAME: process.env.SMTP_FROM_NAME,
     SMTP_FROM: process.env.SMTP_FROM,
     SMTP_SECURE: process.env.SMTP_SECURE,
+    FREE_PLAN_ID: process.env.FREE_PLAN_ID,
+    PAYMENT_PARENT_ID: process.env.PAYMENT_PARENT_ID,
+    IMAGE_PARENT_ID: process.env.IMAGE_PARENT_ID,
+    PLUGIN_PARENT_ID: process.env.PLUGIN_PARENT_ID,
   },
 });

@@ -64,6 +64,8 @@ export function UsersList({ users }: UsersListProps) {
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [relatedData, setRelatedData] = useState<{
+    subscriptionsCount: number;
+    serviceUsageCount: number;
     ordersCount: number;
     licensesCount: number;
     downloadTokensCount: number;
@@ -200,7 +202,7 @@ export function UsersList({ users }: UsersListProps) {
                   <TableCell>
                     {user.affiliate ? (
                       <div className="text-sm">
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="default">Active</Badge>
                       </div>
                     ) : (
                       <Badge variant="outline">Not Affiliated</Badge>
@@ -208,7 +210,7 @@ export function UsersList({ users }: UsersListProps) {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {formatDate(user.createdAt)}
+                      {formatDate(user.createdAt.getTime())}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -262,6 +264,8 @@ export function UsersList({ users }: UsersListProps) {
                     <li>{relatedData.ordersCount} orders</li>
                     <li>{relatedData.licensesCount} licenses</li>
                     <li>{relatedData.downloadTokensCount} download tokens</li>
+                    <li>{relatedData.serviceUsageCount} service usage records</li>
+                    <li>{relatedData.subscriptionsCount} subscriptions</li>
                     {relatedData.affiliateData && (
                       <>
                         <li>Affiliate account with ${relatedData.affiliateData.totalEarnings.toFixed(2)} earnings</li>
@@ -305,7 +309,7 @@ export function UsersList({ users }: UsersListProps) {
         initialData={editingUser ? {
           name: editingUser.name || undefined,
           email: editingUser.email || undefined,
-          role: editingUser.role,
+          role: editingUser.role as "ADMIN" | "USER",
           billingCompany: editingUser.billingCompany || undefined,
           billingName: editingUser.billingName || undefined,
           billingAddress: editingUser.billingAddress || undefined,

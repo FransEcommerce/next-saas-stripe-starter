@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/file-upload";
 import { createPluginVersion } from "../../../actions";
+import { env } from "@/env.mjs";
 
 // 在组件外部添加这个辅助函数
 function compareVersions(v1: string, v2: string): number {
@@ -111,6 +112,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
         ...data,
         activationFields: JSON.parse(data.activationFields),
         uiFields: JSON.parse(data.uiFields),
+        downloadUrl: data.downloadUrl || '',
       };
 
       await createPluginVersion(plugin.id, parsedData);
@@ -209,7 +211,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
                   <FormLabel>Plugin File</FormLabel>
                   <FormControl>
                     <FileUpload
-                      parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+                      parentId={env.PLUGIN_PARENT_ID}
                       onUploadComplete={(data) => {
                         form.setValue("fileId", data.fileId);
                         form.setValue("fileName", data.fileName);
@@ -238,7 +240,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
                     <FormControl>
                       <FileUpload
                         id="plugin-avatar"
-                        parentId="ccccffb9-a335-4091-aac2-2a24ba3b9883"
+                        parentId={env.IMAGE_PARENT_ID}
                         onUploadComplete={(data) => {
                           form.setValue("avatar", data.downloadUrl);
                         }}
@@ -264,7 +266,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
                     <FormControl>
                       <FileUpload
                         id="plugin-cover"
-                        parentId="ccccffb9-a335-4091-aac2-2a24ba3b9883"
+                        parentId={env.IMAGE_PARENT_ID}
                         onUploadComplete={(data) => {
                           form.setValue("cover", data.downloadUrl);
                         }}

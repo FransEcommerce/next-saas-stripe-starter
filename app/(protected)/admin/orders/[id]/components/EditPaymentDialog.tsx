@@ -34,6 +34,7 @@ import {
 import { validateCoupon } from "../../actions";
 import { getAffiliates } from "../../queries";
 import { FileUpload } from "@/components/file-upload";
+import { env } from "@/env.mjs";
 
 const formSchema = z.object({
   amount: z.number().min(0),
@@ -396,7 +397,7 @@ export function EditPaymentDialog({
                         <FormControl>
                           <FileUpload
                             id="order-payments"
-                            parentId="903f8177-8654-41f8-bab9-f8cbaf5c2d7a"
+                            parentId={env.PAYMENT_PARENT_ID}
                             onUploadComplete={(data) => {
                               setProofUrl(data.downloadUrl);
                               field.onChange(data.downloadUrl);

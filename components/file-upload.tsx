@@ -54,7 +54,7 @@ export function FileUpload({
       const response = await fetch("https://drive.frs.com.my/api/upload", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DRIVE_API_KEY}`,
+          Authorization: `Bearer ${process.env.FRS_DRIVE_API_KEY}`,
         },
         body: formData,
       });

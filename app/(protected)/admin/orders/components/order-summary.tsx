@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { formatPrice } from "@/lib/utils";
 import { FileUpload } from "@/components/file-upload";
+import { env } from "@/env.mjs";
 
 interface OrderCalculation {
   subtotal: number;
@@ -113,7 +114,7 @@ export function OrderSummary({
               <div className="space-y-2">
                 <Label htmlFor="paymentProof">Payment Proof</Label>
                 <FileUpload
-                  parentId="903f8177-8654-41f8-bab9-f8cbaf5c2d7a"
+                  parentId={env.PAYMENT_PARENT_ID}
                   onUploadComplete={(data) => {
                     onFormDataChange({
                       ...formData,

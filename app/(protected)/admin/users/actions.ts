@@ -57,10 +57,12 @@ export async function updateUser(userId: string, data: z.infer<typeof userSchema
 
 export async function getUserRelatedDataCount(userId: string) {
   try {
-    const [ordersCount, licensesCount, downloadTokensCount, affiliateData] = await Promise.all([
+    const [ordersCount, licensesCount, downloadTokensCount, serviceUsageCount, subscriptionsCount, affiliateData] = await Promise.all([
       prisma.order.count({ where: { userId } }),
       prisma.license.count({ where: { userId } }),
       prisma.downloadToken.count({ where: { userId } }),
+      prisma.serviceUsage.count({ where: { userId } }),
+      prisma.subscription.count({ where: { userId } }), // 通过 subscriptions 获取计划数量
       prisma.affiliate.findUnique({
         where: { userId },
         select: {
@@ -80,6 +82,8 @@ export async function getUserRelatedDataCount(userId: string) {
       ordersCount,
       licensesCount,
       downloadTokensCount,
+      serviceUsageCount,
+      subscriptionsCount,
       affiliateData: affiliateData ? {
         id: affiliateData.id,
         totalEarnings: Number(affiliateData.totalEarnings),
@@ -151,7 +155,17 @@ export async function deleteUser(userId: string) {
         where: { userId },
       });
 
-      // 7. 最后删除用户本身
+      // 7. 删除用户的服务使用记录
+      await tx.serviceUsage.deleteMany({
+        where: { userId },
+      });
+
+      // 8. 删除用户的订阅
+      await tx.subscription.deleteMany({
+        where: { userId },
+      });
+
+      // 9. 最后删除用户本身
       await tx.user.delete({
         where: { id: userId },
       });

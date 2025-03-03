@@ -10,6 +10,7 @@ import { createAffiliatePayment } from "../../actions";
 import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/file-upload";
+import { env } from "@/env.mjs";
 
 interface Payment {
   id: string;
@@ -145,7 +146,7 @@ export function PaymentDialog({ open, onClose, payments }: PaymentDialogProps) {
             <Label>Payment Proof</Label>
             <FileUpload
               id="affiliate-payments"
-              parentId="903f8177-8654-41f8-bab9-f8cbaf5c2d7a"
+              parentId={env.PAYMENT_PARENT_ID}
               onUploadComplete={(data) => {
                 setProofUrl(data.downloadUrl);
               }}
