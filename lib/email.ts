@@ -8,7 +8,7 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
 
     try {
       // 调用 API 路由生成邮件模板
-      const response = await fetch(`${env.NEXTAUTH_URL}/api/send-magic-link`, {
+      const response = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/send-magic-link`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
       const { html } = await response.json();
 
       // 发送邮件
-      const sendEmailResponse = await fetch(`${env.NEXTAUTH_URL}/api/send-email`, {
+      const sendEmailResponse = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
