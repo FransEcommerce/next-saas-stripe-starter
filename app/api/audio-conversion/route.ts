@@ -6,9 +6,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { licenseKey, domain, audio_url, project_id, social_media_type } = body;
+    const socialMediaType = body.social_media_type || 'fb';
 
     // 验证请求参数
-    if (!licenseKey || !domain || !audio_url || !project_id) {
+    if (!licenseKey || !domain || !audio_url || !project_id || !social_media_type) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
@@ -138,7 +139,7 @@ export async function POST(req: NextRequest) {
           userId: license.userId,
           serviceId: limit.serviceId,
           date: new Date(new Date().toDateString()),
-          socialMediaType: body.socialMediaType // 传入的社交媒体类型
+          socialMediaType: socialMediaType  // 传入的社交媒体类型
         }
       },
       update: {
@@ -151,7 +152,7 @@ export async function POST(req: NextRequest) {
         serviceId: limit.serviceId,
         count: 1,
         date: new Date(new Date().toDateString()),
-        socialMediaType: body.socialMediaType // 传入的社交媒体类型
+        socialMediaType: socialMediaType  // 传入的社交媒体类型
       }
     });
 
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
           subscriptionId: activeSubscriptions[0].id,
           serviceId: limit.serviceId,
           period: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // 按月汇总
-          socialMediaType: body.socialMediaType // 传入的社交媒体类型
+          socialMediaType: socialMediaType  // 传入的社交媒体类型
         }
       },
       update: {
@@ -175,7 +176,7 @@ export async function POST(req: NextRequest) {
         serviceId: limit.serviceId,
         quantity: 1,
         period: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // 按月汇总
-        socialMediaType: body.socialMediaType // 传入的社交媒体类型
+        socialMediaType: socialMediaType  // 传入的社交媒体类型
       }
     });
 
