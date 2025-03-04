@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "postgresql"
-  url          = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -16,59 +16,59 @@ enum UserRole {
 }
 
 enum LicenseStatus {
-  PENDING    // 待激活
-  ACTIVE     // 已激活
-  EXPIRED    // 已过期
-  REVOKED    // 已撤销
+  PENDING // 待激活
+  ACTIVE // 已激活
+  EXPIRED // 已过期
+  REVOKED // 已撤销
 }
 
 enum OrderStatus {
-  PENDING    // 待付款
-  PAID       // 已支付
-  CANCELLED  // 已取消
-  REFUNDED   // 已退款
+  PENDING // 待付款
+  PAID // 已支付
+  CANCELLED // 已取消
+  REFUNDED // 已退款
   PROCESSING // 处理中
-  COMPLETED  // 已完成
-  FAILED     // 失败
+  COMPLETED // 已完成
+  FAILED // 失败
 }
 
 enum CouponType {
-  FIXED      // 固定金额
+  FIXED // 固定金额
   PERCENTAGE // 百分比
 }
 
 enum AffiliateCommissionType {
-  FIXED      // 固定金额
+  FIXED // 固定金额
   PERCENTAGE // 百分比
 }
 
 enum PaymentMethodType {
-  BANK_TRANSFER    // Bank Transfer
-  PAYPAL           // PayPal
-  STRIPE           // Stripe
-  CREDIT_CARD      // Credit Card
-  DEBIT_CARD       // Debit Card
-  RAZORPAY         // Razorpay
-  CRYPTO           // Cryptocurrency
-  OTHER            // Other payment methods
+  BANK_TRANSFER // Bank Transfer
+  PAYPAL // PayPal
+  STRIPE // Stripe
+  CREDIT_CARD // Credit Card
+  DEBIT_CARD // Debit Card
+  RAZORPAY // Razorpay
+  CRYPTO // Cryptocurrency
+  OTHER // Other payment methods
 }
 
 enum PaymentStatus {
-  PENDING    // 待处理
+  PENDING // 待处理
   PROCESSING // 处理中
-  COMPLETED  // 已完成
-  FAILED     // 失败
-  CANCELLED  // 已取消
+  COMPLETED // 已完成
+  FAILED // 失败
+  CANCELLED // 已取消
 }
 
 enum ServiceType {
-  FREE      // 免费服务
-  PAID      // 付费服务
+  FREE // 免费服务
+  PAID // 付费服务
 }
 
 enum ServiceLimitType {
-  DAILY     // 每日限制
-  MONTHLY   // 每月限制
+  DAILY // 每日限制
+  MONTHLY // 每月限制
   UNLIMITED // 无限制
 }
 
@@ -78,14 +78,14 @@ enum PlanInterval {
 }
 
 enum SubscriptionStatus {
-  TRIALING   // 试用中
-  ACTIVE     // 活跃
-  PAST_DUE   // 逾期
-  CANCELED   // 已取消
+  TRIALING // 试用中
+  ACTIVE // 活跃
+  PAST_DUE // 逾期
+  CANCELED // 已取消
   INCOMPLETE // 未完成
   INCOMPLETE_EXPIRED // 未完成已过期
-  UNPAID     // 未支付
-  EXPIRED    // 已过期
+  UNPAID // 未支付
+  EXPIRED // 已过期
 }
 
 model Account {
@@ -142,19 +142,20 @@ model User {
   billingZip     String?
   billingPhone   String?
 
-  accounts Account[]
-  sessions Session[]
-  licenses License[]
+  accounts       Account[]
+  sessions       Session[]
+  licenses       License[]
   downloadTokens DownloadToken[]
-  orders Order[]
-  affiliate     Affiliate?
-  serviceUsages ServiceUsage[]
-  subscriptions Subscription[]
+  orders         Order[]
+  affiliate      Affiliate?
+  serviceUsages  ServiceUsage[]
+  subscriptions  Subscription[]
 
-  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
-  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
-  stripePriceId          String?   @map(name: "stripe_price_id")
-  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+  stripeCustomerId       String?           @unique @map(name: "stripe_customer_id")
+  stripeSubscriptionId   String?           @unique @map(name: "stripe_subscription_id")
+  stripePriceId          String?           @map(name: "stripe_price_id")
+  stripeCurrentPeriodEnd DateTime?         @map(name: "stripe_current_period_end")
+  ServiceErrorLog        ServiceErrorLog[]
 
   @@map(name: "users")
 }
@@ -169,105 +170,106 @@ model VerificationToken {
 }
 
 model Plugin {
-  id              String          @id @default(uuid())
-  project_id      String?         // 项目ID，格式为：YYMMDD + 3位随机数
-  name            String          // 插件名称
-  description     String?         // 插件描述
-  version         String          // 插件版本
-  chatpionVersion String?         // Chatpion版本要求
-  avatar          String?         // 插件头像URL
-  cover           String?         // 插件封面URL
-  fileId          String?         // 云存储文件ID
-  fileName        String?         // 原始文件名
-  fileSize        String?         // 文件大小
-  downloadUrl     String          // 云存储下载链接
-  changelog       String?         // 更新日志
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  id              String   @id @default(uuid())
+  project_id      String? // 项目ID，格式为：YYMMDD + 3位随机数
+  name            String // 插件名称
+  description     String? // 插件描述
+  version         String // 插件版本
+  chatpionVersion String? // Chatpion版本要求
+  avatar          String? // 插件头像URL
+  cover           String? // 插件封面URL
+  fileId          String? // 云存储文件ID
+  fileName        String? // 原始文件名
+  fileSize        String? // 文件大小
+  downloadUrl     String // 云存储下载链接
+  changelog       String? // 更新日志
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
   // 插件配置
-  activationFields Json          // 激活时需要返回的字段
-  uiFields        Json          // 返回给中间插件的UI配置字段
-  
+  activationFields Json // 激活时需要返回的字段
+  uiFields         Json // 返回给中间插件的UI配置字段
+
   // 版本管理相关字段
-  isLatest        Boolean        @default(true)    // 是否是最新版本
-  parentId        String?        // 原始插件ID（第一个版本为null）
-  parentPlugin    Plugin?        @relation("PluginVersions", fields: [parentId], references: [id])
-  childVersions   Plugin[]       @relation("PluginVersions")
-  versionNumber   Int           @default(1)        // 版本号数字(1,2,3...)
+  isLatest      Boolean  @default(true) // 是否是最新版本
+  parentId      String? // 原始插件ID（第一个版本为null）
+  parentPlugin  Plugin?  @relation("PluginVersions", fields: [parentId], references: [id])
+  childVersions Plugin[] @relation("PluginVersions")
+  versionNumber Int      @default(1) // 版本号数字(1,2,3...)
 
   // 关联
   products        Product[]
   licenses        License[]
   downloadTokens  DownloadToken[]
   services        ServicePlugin[]
+  ServiceErrorLog ServiceErrorLog[]
 
   @@index([parentId])
   @@map(name: "plugins")
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal  @db.Decimal(10, 2)
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  price        Decimal  @db.Decimal(10, 2)
   comparePrice Decimal? @db.Decimal(10, 2)
-  active      Boolean  @default(true)
-  duration    Int?     // 许可证有效期（天数），null 表示永久
-  features    Json?    // 产品特性列表
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  active       Boolean  @default(true)
+  duration     Int? // 许可证有效期（天数），null 表示永久
+  features     Json? // 产品特性列表
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  pluginId    String
-  plugin      Plugin   @relation(fields: [pluginId], references: [id])
-  orders      Order[]
+  pluginId String
+  plugin   Plugin  @relation(fields: [pluginId], references: [id])
+  orders   Order[]
 
   @@index([pluginId])
   @@map(name: "products")
 }
 
 model Order {
-  id                 String      @id @default(uuid())
-  orderNumber        String      @unique // 订单编号
-  status             OrderStatus @default(PENDING)
-  amount             Decimal     @db.Decimal(10, 2)      // 订单金额
-  subtotal           Decimal     @db.Decimal(10, 2)      // 小计金额
-  discountAmount     Decimal?    @db.Decimal(10, 2)      // 折扣金额
-  tax                Decimal?    @db.Decimal(10, 2)      // 税费
-  paymentId          String?                             // 支付ID
-  paymentMethod      String?                             // 支付方式
-  paymentNote        String?                             // 支付备注
-  paymentProof       String?                             // 支付凭证（如转账截图URL）
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-  paidAt             DateTime?                           // 支付时间
-  refundedAt         DateTime?                           // 退款时间
-  cancelledAt        DateTime?                           // 取消时间
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique // 订单编号
+  status         OrderStatus @default(PENDING)
+  amount         Decimal     @db.Decimal(10, 2) // 订单金额
+  subtotal       Decimal     @db.Decimal(10, 2) // 小计金额
+  discountAmount Decimal?    @db.Decimal(10, 2) // 折扣金额
+  tax            Decimal?    @db.Decimal(10, 2) // 税费
+  paymentId      String? // 支付ID
+  paymentMethod  String? // 支付方式
+  paymentNote    String? // 支付备注
+  paymentProof   String? // 支付凭证（如转账截图URL）
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  paidAt         DateTime? // 支付时间
+  refundedAt     DateTime? // 退款时间
+  cancelledAt    DateTime? // 取消时间
 
   // 账单信息
-  billingCompany     String?
-  billingName        String?
-  billingAddress     String?
-  billingCity        String?
-  billingState       String?
-  billingCountry     String?
-  billingZip         String?
-  billingPhone       String?
-  billingEmail       String?
+  billingCompany String?
+  billingName    String?
+  billingAddress String?
+  billingCity    String?
+  billingState   String?
+  billingCountry String?
+  billingZip     String?
+  billingPhone   String?
+  billingEmail   String?
 
   // 关联
-  userId             String
-  user               User        @relation(fields: [userId], references: [id])
-  productId          String
-  product            Product     @relation(fields: [productId], references: [id])
-  license            License?
-  couponId           String?
-  coupon             Coupon?     @relation(fields: [couponId], references: [id])
-  affiliateId        String?
-  affiliate          Affiliate?  @relation("AffiliateOrders", fields: [affiliateId], references: [id])
-  affiliateCommission Decimal?    @db.Decimal(10, 2)
-  affiliatePayment   AffiliatePayment? @relation(fields: [affiliatePaymentId], references: [id])
-  affiliatePaymentId String?
+  userId              String
+  user                User              @relation(fields: [userId], references: [id])
+  productId           String
+  product             Product           @relation(fields: [productId], references: [id])
+  license             License?
+  couponId            String?
+  coupon              Coupon?           @relation(fields: [couponId], references: [id])
+  affiliateId         String?
+  affiliate           Affiliate?        @relation("AffiliateOrders", fields: [affiliateId], references: [id])
+  affiliateCommission Decimal?          @db.Decimal(10, 2)
+  affiliatePayment    AffiliatePayment? @relation(fields: [affiliatePaymentId], references: [id])
+  affiliatePaymentId  String?
 
   @@index([userId])
   @@index([productId])
@@ -278,23 +280,23 @@ model Order {
 }
 
 model Coupon {
-  id          String      @id @default(uuid())
-  code        String      @unique                    // 优惠码
-  type        CouponType                            // 优惠类型
-  value       Decimal     @db.Decimal(10, 2)        // 优惠值（固定金额或百分比）
-  active      Boolean     @default(true)            // 是否激活
-  maxUses     Int?                                  // 最大使用次数，null 表示无限制
-  usedCount   Int         @default(0)               // 已使用次数
-  minAmount   Decimal?    @db.Decimal(10, 2)        // 最小订单金额
-  startDate   DateTime?                             // 开始时间
-  endDate     DateTime?                             // 结束时间
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id        String     @id @default(uuid())
+  code      String     @unique // 优惠码
+  type      CouponType // 优惠类型
+  value     Decimal    @db.Decimal(10, 2) // 优惠值（固定金额或百分比）
+  active    Boolean    @default(true) // 是否激活
+  maxUses   Int? // 最大使用次数，null 表示无限制
+  usedCount Int        @default(0) // 已使用次数
+  minAmount Decimal?   @db.Decimal(10, 2) // 最小订单金额
+  startDate DateTime? // 开始时间
+  endDate   DateTime? // 结束时间
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   // 关联
   orders      Order[]
   affiliateId String?
-  affiliate   Affiliate?  @relation(fields: [affiliateId], references: [id])
+  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id])
 
   @@index([affiliateId])
   @@map(name: "coupons")
@@ -310,12 +312,12 @@ model License {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  pluginId    String
-  plugin      Plugin        @relation(fields: [pluginId], references: [id])
-  userId      String
-  user        User          @relation(fields: [userId], references: [id])
-  orderId     String?       @unique
-  order       Order?        @relation(fields: [orderId], references: [id])
+  pluginId String
+  plugin   Plugin  @relation(fields: [pluginId], references: [id])
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  orderId  String? @unique
+  order    Order?  @relation(fields: [orderId], references: [id])
 
   @@index([licenseKey])
   @@index([pluginId])
@@ -324,16 +326,16 @@ model License {
 }
 
 model DownloadToken {
-  id          String    @id @default(uuid())
-  token       String    @unique
-  expiresAt   DateTime
-  used        Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  pluginId    String
-  plugin      Plugin    @relation(fields: [pluginId], references: [id])
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
+  pluginId String
+  plugin   Plugin @relation(fields: [pluginId], references: [id])
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
 
   @@index([token])
   @@index([pluginId])
@@ -342,58 +344,58 @@ model DownloadToken {
 }
 
 model Affiliate {
-  id              String    @id @default(uuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id])
+  id              String                  @id @default(uuid())
+  userId          String                  @unique
+  user            User                    @relation(fields: [userId], references: [id])
   commissionType  AffiliateCommissionType
-  commissionValue Decimal   @db.Decimal(10, 2)
-  totalEarnings   Decimal   @default(0) @db.Decimal(10, 2)
-  referralCode    String    @unique
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  commissionValue Decimal                 @db.Decimal(10, 2)
+  totalEarnings   Decimal                 @default(0) @db.Decimal(10, 2)
+  referralCode    String                  @unique
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
   // 关联
-  referredOrders  Order[]   @relation("AffiliateOrders")
-  paymentMethod   AffiliatePaymentMethod?
-  payments        AffiliatePayment[]
-  coupons         Coupon[]
+  referredOrders Order[]                 @relation("AffiliateOrders")
+  paymentMethod  AffiliatePaymentMethod?
+  payments       AffiliatePayment[]
+  coupons        Coupon[]
 
   @@map(name: "affiliates")
 }
 
 model AffiliatePaymentMethod {
-  id          String            @id @default(uuid())
-  type        PaymentMethodType
-  details     Json              // 存储具体的支付信息，如银行账号、PayPal邮箱等
-  isDefault   Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id        String            @id @default(uuid())
+  type      PaymentMethodType
+  details   Json // 存储具体的支付信息，如银行账号、PayPal邮箱等
+  isDefault Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
   // 关联
-  affiliateId String            @unique
-  affiliate   Affiliate         @relation(fields: [affiliateId], references: [id])
+  affiliateId String             @unique
+  affiliate   Affiliate          @relation(fields: [affiliateId], references: [id])
   payments    AffiliatePayment[]
 
   @@map(name: "affiliate_payment_methods")
 }
 
 model AffiliatePayment {
-  id          String         @id @default(uuid())
-  amount      Decimal        @db.Decimal(10, 2)  // 支付金额
-  currency    String         @default("USD")      // 货币类型
-  status      PaymentStatus  @default(PENDING)
-  note        String?                            // 支付备注
-  proofUrl    String?                           // 支付凭证URL
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  processedAt DateTime?                         // 处理时间
-  
+  id          String        @id @default(uuid())
+  amount      Decimal       @db.Decimal(10, 2) // 支付金额
+  currency    String        @default("USD") // 货币类型
+  status      PaymentStatus @default(PENDING)
+  note        String? // 支付备注
+  proofUrl    String? // 支付凭证URL
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  processedAt DateTime? // 处理时间
+
   // 关联
   affiliateId String
-  affiliate   Affiliate     @relation(fields: [affiliateId], references: [id])
+  affiliate   Affiliate              @relation(fields: [affiliateId], references: [id])
   methodId    String
   method      AffiliatePaymentMethod @relation(fields: [methodId], references: [id])
-  orders      Order[]               // 关联的订单（这次支付包含哪些订单的佣金）
+  orders      Order[] // 关联的订单（这次支付包含哪些订单的佣金）
 
   @@index([affiliateId])
   @@index([methodId])
@@ -412,23 +414,24 @@ model Service {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  planLimits ServicePlanLimit[]
-  ServiceUsage ServiceUsage[]
-  Plan Plan[]
-  usageRecords SubscriptionUsageRecord[]
-  plugins ServicePlugin[]
+  planLimits      ServicePlanLimit[]
+  ServiceUsage    ServiceUsage[]
+  Plan            Plan[]
+  usageRecords    SubscriptionUsageRecord[]
+  plugins         ServicePlugin[]
+  ServiceErrorLog ServiceErrorLog[]
 
   @@map(name: "services")
 }
 
 model ServicePlanLimit {
-  id        String   @id @default(uuid())
-  serviceId String
-  planId    String
-  limitType String   // UNLIMITED, DAILY, MONTHLY
-  limitValue Int?    // null means unlimited
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  serviceId  String
+  planId     String
+  limitType  String // UNLIMITED, DAILY, MONTHLY
+  limitValue Int? // null means unlimited
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
@@ -441,13 +444,13 @@ model ServiceUsage {
   id              String   @id @default(uuid())
   userId          String
   serviceId       String
-  count           Int      // 使用次数
+  count           Int // 使用次数
   date            DateTime @default(now())
-  socialMediaType String?   // 社交媒体类型（如 fb 或 ig）
-  
+  socialMediaType String? // 社交媒体类型（如 fb 或 ig）
+
   // 关联
-  user            User     @relation(fields: [userId], references: [id])
-  service         Service  @relation(fields: [serviceId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
 
   @@unique([userId, serviceId, date, socialMediaType], name: "userId_serviceId_date_socialMediaType")
   @@index([userId])
@@ -458,59 +461,61 @@ model ServiceUsage {
 
 // 平台订阅计划表
 model Plan {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
+  price       Decimal      @db.Decimal(10, 2)
   interval    PlanInterval
   features    Json?
-  active      Boolean  @default(true)
-  isFree      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  active      Boolean      @default(true)
+  isFree      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // 关联
-  services    Service[] // 此计划可以使用的服务
-  subscriptions Subscription[]
+  services         Service[] // 此计划可以使用的服务
+  subscriptions    Subscription[]
   ServicePlanLimit ServicePlanLimit[]
+  ServiceErrorLog  ServiceErrorLog[]
 
   @@map(name: "plans")
 }
 
 // 新增订阅表
 model Subscription {
-  id                String            @id @default(uuid())
-  userId            String
-  planId            String
-  status            SubscriptionStatus
-  startDate         DateTime
-  endDate           DateTime?
-  canceledAt        DateTime?
-  trialStartDate    DateTime?
-  trialEndDate      DateTime?
+  id                 String             @id @default(uuid())
+  userId             String
+  planId             String
+  status             SubscriptionStatus
+  startDate          DateTime
+  endDate            DateTime?
+  canceledAt         DateTime?
+  trialStartDate     DateTime?
+  trialEndDate       DateTime?
   currentPeriodStart DateTime
-  currentPeriodEnd  DateTime
-  cancelAtPeriodEnd Boolean          @default(false)
-  
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+
   // 价格相关
-  quantity          Int              @default(1)
-  priceAmount       Decimal          @db.Decimal(10, 2)
-  currency          String           @default("USD")
-  
+  quantity    Int     @default(1)
+  priceAmount Decimal @db.Decimal(10, 2)
+  currency    String  @default("USD")
+
   // 支付相关
-  stripeSubscriptionId String?        @unique
-  stripePriceId       String?
-  stripeCustomerId    String?
-  
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+  stripeCustomerId     String?
+
   // 元数据
-  metadata          Json?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // 关联
-  user              User             @relation(fields: [userId], references: [id])
-  plan              Plan             @relation(fields: [planId], references: [id])
-  usageRecords      SubscriptionUsageRecord[]
+  user            User                      @relation(fields: [userId], references: [id])
+  plan            Plan                      @relation(fields: [planId], references: [id])
+  usageRecords    SubscriptionUsageRecord[]
+  ServiceErrorLog ServiceErrorLog[]
 
   @@index([userId])
   @@index([planId])
@@ -519,16 +524,16 @@ model Subscription {
 
 // 订阅使用记录表
 model SubscriptionUsageRecord {
-  id              String      @id @default(uuid())
+  id              String    @id @default(uuid())
   subscriptionId  String
   serviceId       String
-  quantity        Int        // 使用量
-  period          DateTime?   // 时间段（如每月或每日）
-  socialMediaType String?     // 社交媒体类型（如 fb 或 ig）
-  
+  quantity        Int // 使用量
+  period          DateTime? // 时间段（如每月或每日）
+  socialMediaType String? // 社交媒体类型（如 fb 或 ig）
+
   // 关联
-  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
-  service         Service      @relation(fields: [serviceId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  service      Service      @relation(fields: [serviceId], references: [id])
 
   @@unique([subscriptionId, serviceId, period, socialMediaType]) // 确保每个订阅、服务、时间段和社交媒体类型唯一
   @@index([subscriptionId])
@@ -549,4 +554,31 @@ model ServicePlugin {
 
   @@unique([serviceId, pluginId])
   @@map(name: "service_plugins")
+}
+
+model ServiceErrorLog {
+  id             String   @id @default(uuid())
+  userId         String? // 用户 ID
+  serviceId      String? // 服务 ID
+  pluginId       String? // 插件 ID
+  subscriptionId String? // 订阅 ID
+  planId         String? // 计划 ID
+  errorType      String // 错误类型（如 "VALIDATION", "SERVICE_ERROR" 等）
+  errorMessage   String // 错误信息
+  requestData    Json? // 请求数据（如 licenseKey, domain, audio_url 等）
+  createdAt      DateTime @default(now()) // 错误发生时间
+
+  // 关联
+  user         User?         @relation(fields: [userId], references: [id])
+  service      Service?      @relation(fields: [serviceId], references: [id])
+  plugin       Plugin?       @relation(fields: [pluginId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  plan         Plan?         @relation(fields: [planId], references: [id])
+
+  @@index([userId])
+  @@index([serviceId])
+  @@index([pluginId])
+  @@index([subscriptionId])
+  @@index([planId])
+  @@map(name: "service_error_logs")
 }
