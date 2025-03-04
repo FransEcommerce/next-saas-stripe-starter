@@ -397,7 +397,7 @@ export function EditPaymentDialog({
                         <FormControl>
                           <FileUpload
                             id="order-payments"
-                            parentId={env.PAYMENT_PARENT_ID}
+                            parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
                             onUploadComplete={(data) => {
                               setProofUrl(data.downloadUrl);
                               field.onChange(data.downloadUrl);

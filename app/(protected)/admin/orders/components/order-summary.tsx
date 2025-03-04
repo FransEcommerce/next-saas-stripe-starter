@@ -114,7 +114,7 @@ export function OrderSummary({
               <div className="space-y-2">
                 <Label htmlFor="paymentProof">Payment Proof</Label>
                 <FileUpload
-                  parentId={env.PAYMENT_PARENT_ID}
+                  parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
                   onUploadComplete={(data) => {
                     onFormDataChange({
                       ...formData,

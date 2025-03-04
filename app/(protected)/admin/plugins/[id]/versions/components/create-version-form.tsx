@@ -211,7 +211,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
                   <FormLabel>Plugin File</FormLabel>
                   <FormControl>
                     <FileUpload
-                      parentId={env.PLUGIN_PARENT_ID}
+                      parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
                       onUploadComplete={(data) => {
                         form.setValue("fileId", data.fileId);
                         form.setValue("fileName", data.fileName);
@@ -240,7 +240,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
                     <FormControl>
                       <FileUpload
                         id="plugin-avatar"
-                        parentId={env.IMAGE_PARENT_ID}
+                        parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
                         onUploadComplete={(data) => {
                           form.setValue("avatar", data.downloadUrl);
                         }}
@@ -266,7 +266,7 @@ export function CreateVersionForm({ plugin }: CreateVersionFormProps) {
                     <FormControl>
                       <FileUpload
                         id="plugin-cover"
-                        parentId={env.IMAGE_PARENT_ID}
+                        parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
                         onUploadComplete={(data) => {
                           form.setValue("cover", data.downloadUrl);
                         }}
