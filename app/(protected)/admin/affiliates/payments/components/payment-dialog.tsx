@@ -146,7 +146,7 @@ export function PaymentDialog({ open, onClose, payments }: PaymentDialogProps) {
             <Label>Payment Proof</Label>
             <FileUpload
               id="affiliate-payments"
-              parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+              parentId={process.env.NEXT_PUBLIC_PAYMENT_PARENT_ID}
               onUploadComplete={(data) => {
                 setProofUrl(data.downloadUrl);
               }}

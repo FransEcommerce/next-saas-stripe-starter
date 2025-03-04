@@ -20,7 +20,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { createPlugin } from "../actions";
 import { FileUpload } from "@/components/file-upload";
 import { toast } from "sonner";
-import { env } from "@/env.mjs";
 
 const pluginFormSchema = z.object({
   name: z.string().min(2, {
@@ -203,7 +202,7 @@ export function CreatePluginForm() {
                   <FormLabel>Plugin File</FormLabel>
                   <FormControl>
                     <FileUpload
-                      parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+                      parentId={process.env.NEXT_PUBLIC_PLUGIN_PARENT_ID}
                       onUploadComplete={(data) => {
                         form.setValue("fileId", data.fileId);
                         form.setValue("fileName", data.fileName);
@@ -232,7 +231,7 @@ export function CreatePluginForm() {
                     <FormControl>
                       <FileUpload
                         id="plugin-avatar"
-                        parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+                        parentId={process.env.NEXT_PUBLIC_IMAGE_PARENT_ID}
                         onUploadComplete={(data) => {
                           form.setValue("avatar", data.downloadUrl);
                         }}
@@ -258,7 +257,7 @@ export function CreatePluginForm() {
                     <FormControl>
                       <FileUpload
                         id="plugin-cover"
-                        parentId="fcfe83ce-abae-44ed-9fcb-9f69c8597e22"
+                        parentId={process.env.NEXT_PUBLIC_IMAGE_PARENT_ID} // 修正为 process.env
                         onUploadComplete={(data) => {
                           form.setValue("cover", data.downloadUrl);
                         }}

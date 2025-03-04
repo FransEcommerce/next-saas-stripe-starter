@@ -7,7 +7,7 @@ import { Loader2, Upload } from "lucide-react";
 import Image from "next/image";
 
 interface FileUploadProps {
-  parentId: string;
+  parentId?: string; // 允许 undefined
   onUploadComplete: (data: {
     fileId: string;
     fileName: string;
@@ -34,7 +34,7 @@ export function FileUpload({
   const [isUploading, setIsUploading] = useState(false);
 
   const isImageUpload = accept.startsWith('image/') || accept === 'image/*';
-  const inputId = `${id}-${parentId.split('-')[0]}`;
+  const inputId = `${id}-${parentId}`;
 
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -48,13 +48,18 @@ export function FileUpload({
     formData.append("name", file.name);
     formData.append("extension", file.name.split(".").pop() || "");
     formData.append("share", "1");
-    formData.append("parent_id", parentId);
-
+    formData.append("parent_id", parentId || "");
+    console.log("File upload initiated:", {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      parentId: parentId
+    });
     try {
       const response = await fetch("https://drive.frs.com.my/api/upload", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.FRS_DRIVE_API_KEY}`,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_FRS_DRIVE_API_KEY}`,
         },
         body: formData,
       });
