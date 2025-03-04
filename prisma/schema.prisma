@@ -438,17 +438,18 @@ model ServicePlanLimit {
 
 // 用户服务使用记录表
 model ServiceUsage {
-  id        String   @id @default(uuid())
-  userId    String
-  serviceId String
-  count     Int      // 使用次数
-  date      DateTime @default(now())
+  id              String   @id @default(uuid())
+  userId          String
+  serviceId       String
+  count           Int      // 使用次数
+  date            DateTime @default(now())
+  socialMediaType String?   // 社交媒体类型（如 fb 或 ig）
   
   // 关联
-  user      User     @relation(fields: [userId], references: [id])
-  service   Service  @relation(fields: [serviceId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
+  service         Service  @relation(fields: [serviceId], references: [id])
 
-  @@unique([userId, serviceId, date], name: "userId_serviceId_date")
+  @@unique([userId, serviceId, date, socialMediaType], name: "userId_serviceId_date_socialMediaType")
   @@index([userId])
   @@index([serviceId])
   @@index([date])
@@ -522,12 +523,14 @@ model SubscriptionUsageRecord {
   subscriptionId  String
   serviceId       String
   quantity        Int        // 使用量
-  timestamp       DateTime   @default(now())
+  period          DateTime   // 时间段（如每月或每日）
+  socialMediaType String?     // 社交媒体类型（如 fb 或 ig）
   
   // 关联
   subscription    Subscription @relation(fields: [subscriptionId], references: [id])
   service         Service      @relation(fields: [serviceId], references: [id])
 
+  @@unique([subscriptionId, serviceId, period, socialMediaType]) // 确保每个订阅、服务、时间段和社交媒体类型唯一
   @@index([subscriptionId])
   @@index([serviceId])
   @@map(name: "subscription_usage_records")

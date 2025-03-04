@@ -5,7 +5,7 @@ import { AudioConversionService } from "@/app/services/handlers/audio-conversion
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { licenseKey, domain, audio_url, project_id } = body;
+    const { licenseKey, domain, audio_url, project_id, social_media_type } = body;
 
     // 验证请求参数
     if (!licenseKey || !domain || !audio_url || !project_id) {
@@ -134,10 +134,11 @@ export async function POST(req: NextRequest) {
     // 更新使用记录
     await prisma.serviceUsage.upsert({
       where: {
-        userId_serviceId_date: {
+        userId_serviceId_date_socialMediaType: {
           userId: license.userId,
           serviceId: limit.serviceId,
-          date: new Date(new Date().toDateString())
+          date: new Date(new Date().toDateString()),
+          socialMediaType: body.socialMediaType // 传入的社交媒体类型
         }
       },
       update: {
@@ -149,16 +150,32 @@ export async function POST(req: NextRequest) {
         userId: license.userId,
         serviceId: limit.serviceId,
         count: 1,
-        date: new Date(new Date().toDateString())
+        date: new Date(new Date().toDateString()),
+        socialMediaType: body.socialMediaType // 传入的社交媒体类型
       }
     });
 
     // 更新订阅使用记录
-    await prisma.subscriptionUsageRecord.create({
-      data: {
+    await prisma.subscriptionUsageRecord.upsert({
+      where: {
+        subscriptionId_serviceId_period_socialMediaType: {
+          subscriptionId: activeSubscriptions[0].id,
+          serviceId: limit.serviceId,
+          period: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // 按月汇总
+          socialMediaType: body.socialMediaType // 传入的社交媒体类型
+        }
+      },
+      update: {
+        quantity: {
+          increment: 1
+        }
+      },
+      create: {
         subscriptionId: activeSubscriptions[0].id,
         serviceId: limit.serviceId,
-        quantity: 1
+        quantity: 1,
+        period: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // 按月汇总
+        socialMediaType: body.socialMediaType // 传入的社交媒体类型
       }
     });
 
