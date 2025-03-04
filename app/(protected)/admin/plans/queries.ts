@@ -14,12 +14,12 @@ const serializePlan = async (plan: Plan): Promise<SerializedPlan> => {
   // 获取使用此计划的用户数量
   const userCount = await prisma.user.count({
     where: {
-      plan: {
+      subscriptions: {
         some: {
-          id: plan.id
-        }
-      }
-    }
+          planId: plan.id, // 通过 subscriptions.planId 查询
+        },
+      },
+    },
   });
 
   return {
@@ -27,7 +27,7 @@ const serializePlan = async (plan: Plan): Promise<SerializedPlan> => {
     price: plan.price.toNumber(),
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
-    userCount
+    userCount,
   };
 };
 
