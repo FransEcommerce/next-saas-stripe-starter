@@ -523,7 +523,7 @@ model SubscriptionUsageRecord {
   subscriptionId  String
   serviceId       String
   quantity        Int        // 使用量
-  period          DateTime   // 时间段（如每月或每日）
+  period          DateTime?   // 时间段（如每月或每日）
   socialMediaType String?     // 社交媒体类型（如 fb 或 ig）
   
   // 关联
