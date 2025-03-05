@@ -88,25 +88,21 @@ export const sidebarLinks: SidebarNavItem[] = [
         href: "/dashboard/plugins",
         icon: "logo",
         title: "Plugins",
-        authorizeOnly: UserRole.USER,
       },
       {
         href: "/dashboard/orders",
         icon: "shoppingCart",
         title: "Orders",
-        authorizeOnly: UserRole.USER,
       },
       {
         href: "/dashboard/licenses",
         icon: "post",
         title: "Licenses",
-        authorizeOnly: UserRole.USER,
       },
       {
         href: "/dashboard/subscriptions",
         icon: "repeat",
         title: "Subscription",
-        authorizeOnly: UserRole.USER,
       },
       // { href: "/dashboard/charts", icon: "lineChart", title: "Charts" },
       // {

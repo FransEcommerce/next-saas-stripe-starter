@@ -128,14 +128,14 @@ export function PluginManagerCard({
                     variant="outline"
                     className="border-green-200 bg-green-50 text-green-700"
                   >
-                    <CheckCircle className="mr-1 h-3 w-3" /> Installed
+                    <CheckCircle className="mr-1 h-3 w-3" /> Downloaded
                   </Badge>
                 ) : (
                   <Badge
                     variant="outline"
                     className="border-amber-200 bg-amber-50 text-amber-700"
                   >
-                    <AlertCircle className="mr-1 h-3 w-3" /> Not Installed
+                    <AlertCircle className="mr-1 h-3 w-3" /> Not Downloaded
                   </Badge>
                 )}
               </div>
@@ -248,11 +248,11 @@ export function PluginManagerCard({
                 <Download className="h-4 w-4" />
                 Download Again
               </Button>
-              <Button size="lg" variant="outline" className="gap-2">
+              {/* <Button size="lg" variant="outline" className="gap-2">
                 <FileText className="h-4 w-4" />
                 Documentation
-              </Button>
-              <Button size="lg" className="gap-2">
+              </Button> */}
+              <Button size="lg" className="gap-2" onClick={() => window.location.href = '/dashboard/licenses'}>
                 <Key className="h-4 w-4" />
                 View License
               </Button>

@@ -54,8 +54,8 @@ export const {
                 planId: FREE_PLAN_ID,
                 status: "ACTIVE",
                 startDate: new Date(),
-                currentPeriodStart: new Date(),
-                currentPeriodEnd: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 默认订阅一年
+                // currentPeriodStart: new Date(),
+                // currentPeriodEnd: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 默认订阅一年
                 priceAmount: 0, // 默认免费
                 currency: "USD",
               },

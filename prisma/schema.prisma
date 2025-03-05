@@ -492,8 +492,8 @@ model Subscription {
   canceledAt         DateTime?
   trialStartDate     DateTime?
   trialEndDate       DateTime?
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
   cancelAtPeriodEnd  Boolean            @default(false)
 
   // 价格相关

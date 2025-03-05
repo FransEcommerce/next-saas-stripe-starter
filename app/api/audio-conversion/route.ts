@@ -49,27 +49,28 @@ export async function POST(req: NextRequest) {
 
   // 查找许可证和用户信息，同时获取所有相关信息
   // 集中获取所有必要参数
-const [license, audioConversionService] = await Promise.all([
-  prisma.license.findUnique({
-    where: { licenseKey },
-    include: {
-      plugin: true,
-      user: {
-        include: {
-          subscriptions: {
-            where: {
-              status: "ACTIVE",
-              OR: [
-                { endDate: null },
-                { endDate: { gt: new Date() } }
-              ]
-            },
-            include: {
-              plan: {
-                include: {
-                  ServicePlanLimit: {
-                    include: {
-                      service: true
+  const [license, audioConversionService] = await Promise.all([
+    prisma.license.findUnique({
+      where: { licenseKey },
+      include: {
+        plugin: true,
+        user: {
+          include: {
+            subscriptions: {
+              where: {
+                status: "ACTIVE",
+                OR: [
+                  { endDate: null },
+                  { endDate: { gt: new Date() } }
+                ]
+              },
+              include: {
+                plan: {
+                  include: {
+                    ServicePlanLimit: {
+                      include: {
+                        service: true
+                      }
                     }
                   }
                 }
@@ -77,22 +78,21 @@ const [license, audioConversionService] = await Promise.all([
             }
           }
         }
-      }
-    },
-  }),
-  prisma.service.findFirst({
-    where: { handlerId: "audio-conversion" }
-  })
-]);
+      },
+    }),
+    prisma.service.findFirst({
+      where: { handlerId: "audio-conversion" }
+    })
+  ]);
 
-// 提前提取公共参数
-const commonParams = {
-  userId: license?.userId,
-  pluginId: license?.pluginId,
-  serviceId: audioConversionService?.id,
-  subscriptionId: license?.user.subscriptions[0]?.id,
-  planId: license?.user.subscriptions[0]?.planId
-};
+  // 提前提取公共参数
+  const commonParams = {
+    userId: license?.userId,
+    pluginId: license?.pluginId,
+    serviceId: audioConversionService?.id,
+    subscriptionId: license?.user.subscriptions[0]?.id,
+    planId: license?.user.subscriptions[0]?.planId
+  };
 
   // 如果找不到许可证，记录错误并返回
   if (!license) {
@@ -196,12 +196,15 @@ const commonParams = {
   // 检查使用限制
   const limit = serviceLimits[0];
   if (limit.limitType !== "UNLIMITED") {
+    const startOfMonth = new Date(new Date().setHours(0, 0, 0, 0));
+    startOfMonth.setDate(1); // 设置为当前月的第一天
+
     const usage = await prisma.serviceUsage.findFirst({
       where: {
         userId: license.userId,
         serviceId: limit.serviceId,
         date: {
-          gte: limit.limitType === "DAILY" ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          gte: limit.limitType === "DAILY" ? new Date(new Date().setHours(0, 0, 0, 0)) : activeSubscription.currentPeriodStart || startOfMonth
         }
       }
     });
