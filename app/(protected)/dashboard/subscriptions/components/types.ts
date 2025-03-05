@@ -15,6 +15,7 @@ export interface Service {
     color: string
     limitType: "UNLIMITED" | "DAILY" | "MONTHLY"
     limitValue: number | null
+    currentUsage: number
 }
 
 export interface Plan {
@@ -43,4 +44,3 @@ export interface Subscription {
     currency: string
     plan: Plan
 }
-

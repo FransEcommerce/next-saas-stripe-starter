@@ -51,15 +51,20 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
         return diffDays > 0 ? diffDays : 0
     }
 
-    // Mock service usage data
+    // 获取服务使用情况
     const getServiceUsage = (serviceId: string) => {
-        const usageData = {
-            serv_1: { current: 450, limit: 1000 },
-            serv_2: { current: 78, limit: 100 },
-            serv_3: { current: 12500, limit: null },
-            serv_4: { current: 320, limit: 500 },
+        const service = subscriptions
+            .flatMap(sub => sub.plan.services)
+            .find(s => s.id === serviceId);
+
+        if (!service) {
+            return { current: 0, limit: null };
         }
-        return usageData[serviceId as keyof typeof usageData] || { current: 0, limit: null }
+
+        return {
+            current: service.currentUsage || 0,
+            limit: service.limitValue
+        };
     }
 
     return (
@@ -95,8 +100,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                             <div className="font-medium">
                                                 {subscription.currentPeriodStart && subscription.currentPeriodEnd ? (
                                                     <>
-                                                        {format(new Date(Date.parse(subscription.currentPeriodStart)), "MMM d, yyyy")} -{" "}
-                                                        {format(new Date(Date.parse(subscription.currentPeriodEnd)), "MMM d, yyyy")}
+                                                        {format(new Date(Date.parse(subscription.currentPeriodStart)), "MM/dd/yyyy")} -{" "}
+                                                        {format(new Date(Date.parse(subscription.currentPeriodEnd)), "MM/dd/yyyy")}
                                                     </>
                                                 ) : (
                                                     "No billing period (Free Plan)"
@@ -110,7 +115,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                             </div>
                                             <div className="font-medium">
                                                 {subscription.currentPeriodEnd ? (
-                                                    format(new Date(subscription.currentPeriodEnd), "MMMM d, yyyy")
+                                                    format(new Date(subscription.currentPeriodEnd), "MM/dd/yyyy")
                                                 ) : (
                                                     "N/A (Free Plan)"
                                                 )}
@@ -203,7 +208,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                 <div className="font-medium text-blue-800">Trial Period Active</div>
                                                 <div className="text-sm text-blue-600">
                                                     Your trial ends in {getDaysRemaining(subscription.trialEndDate)} days on{" "}
-                                                    {format(parseISO(subscription.trialEndDate), "MMMM d, yyyy")}
+                                                    {format(parseISO(subscription.trialEndDate), "MM/dd/yyyy")}
                                                 </div>
                                             </div>
                                         </div>
@@ -221,7 +226,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
 
                                         <div className="text-sm text-muted-foreground mb-8">
                                             Next billing date: {subscription.currentPeriodEnd ? (
-                                                format(new Date(subscription.currentPeriodEnd), "MMMM d, yyyy")
+                                                format(new Date(subscription.currentPeriodEnd), "MM/dd/yyyy")
                                             ) : (
                                                 "N/A (Free Plan)"
                                             )}
@@ -230,7 +235,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                         <div className="space-y-5 mb-8">
                                             <h3 className="text-sm font-medium">Plan Features</h3>
                                             <ul className="space-y-3">
-                                                {(subscription.plan.features || []).slice(0, 4).map((feature, index) => (
+                                                {(subscription.plan.features || []).slice(0, 2).map((feature, index) => (
                                                     <li key={index} className="flex items-start gap-3 text-sm">
                                                         <div className="p-1 rounded-full bg-primary/10 mt-0.5">
                                                             <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
@@ -238,9 +243,9 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                         <span>{feature}</span>
                                                     </li>
                                                 ))}
-                                                {(subscription.plan.features || []).length > 4 && (
+                                                {(subscription.plan.features || []).length > 2 && (
                                                     <li className="text-sm text-muted-foreground pl-7">
-                                                        +{(subscription.plan.features || []).length - 4} more features
+                                                        +{(subscription.plan.features || []).length - 2} more features
                                                     </li>
                                                 )}
                                             </ul>
@@ -298,7 +303,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                 <div className="space-y-1">
                                                                     <p className="text-muted-foreground">Start Date</p>
                                                                     <p className="font-medium">
-                                                                        {format(parseISO(subscription.startDate), "MMMM d, yyyy")}
+                                                                        {format(parseISO(subscription.startDate), "MM/dd/yyyy")}
                                                                     </p>
                                                                 </div>
                                                                 <div className="space-y-1">
@@ -306,8 +311,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                     <p className="font-medium">
                                                                         {subscription.currentPeriodStart && subscription.currentPeriodEnd ? (
                                                                             <>
-                                                                                {format(new Date(Date.parse(subscription.currentPeriodStart)), "MMM d, yyyy")} -{" "}
-                                                                                {format(new Date(Date.parse(subscription.currentPeriodEnd)), "MMM d, yyyy")}
+                                                                                {format(new Date(Date.parse(subscription.currentPeriodStart)), "MM/dd/yyyy")} -{" "}
+                                                                                {format(new Date(Date.parse(subscription.currentPeriodEnd)), "MM/dd/yyyy")}
                                                                             </>
                                                                         ) : (
                                                                             "No billing period (Free Plan)"
@@ -319,8 +324,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                         <div className="space-y-1">
                                                                             <p className="text-muted-foreground">Trial Period</p>
                                                                             <p className="font-medium">
-                                                                                {format(parseISO(subscription.trialStartDate!), "MMM d, yyyy")} -{" "}
-                                                                                {format(parseISO(subscription.trialEndDate), "MMM d, yyyy")}
+                                                                                {format(parseISO(subscription.trialStartDate!), "MM/dd/yyyy")} -{" "}
+                                                                                {format(parseISO(subscription.trialEndDate), "MM/dd/yyyy")}
                                                                             </p>
                                                                         </div>
                                                                         <div className="space-y-1">
@@ -336,7 +341,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                     <p className="font-medium">
                                                                         {subscription.cancelAtPeriodEnd ? "Cancels on " : "Renews on "}
                                                                         {subscription.currentPeriodEnd ? (
-                                                                            format(new Date(subscription.currentPeriodEnd), "MMMM d, yyyy")
+                                                                            format(new Date(subscription.currentPeriodEnd), "MM/dd/yyyy")
                                                                         ) : (
                                                                             "N/A (Free Plan)"
                                                                         )}
@@ -461,7 +466,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                         </Card>
                     ))
                 ) : (
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/30">
+                    <Card className="border bg-gradient-to-br from-background to-muted/30">
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                             <div className="p-4 rounded-full bg-primary/10 mb-4">
                                 <Package className="h-10 w-10 text-primary" />
@@ -478,4 +483,3 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
         </div>
     )
 }
-

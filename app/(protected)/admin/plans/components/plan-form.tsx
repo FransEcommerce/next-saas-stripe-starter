@@ -174,6 +174,7 @@ export function PlanForm({ plan }: { plan?: SerializedPlan }) {
                 <SelectContent>
                   <SelectItem value="MONTHLY">Monthly</SelectItem>
                   <SelectItem value="YEARLY">Yearly</SelectItem>
+                  <SelectItem value="UNLIMITED">Unlimited</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>

@@ -18,6 +18,10 @@ interface CreateSubscriptionData {
 
 export async function createSubscription(data: CreateSubscriptionData) {
   try {
+    const plan = await prisma.plan.findUnique({
+      where: { id: data.planId },
+    });
+
     const subscription = await prisma.subscription.create({
       data: {
         userId: data.userId,
@@ -30,8 +34,8 @@ export async function createSubscription(data: CreateSubscriptionData) {
         currency: data.currency,
         trialStartDate: data.trialStartDate,
         trialEndDate: data.trialEndDate,
-        currentPeriodStart: data.startDate,
-        currentPeriodEnd: data.endDate || new Date(data.startDate.getTime() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days
+        currentPeriodStart: plan?.isFree ? null : data.startDate, // 免费计划为 null
+        currentPeriodEnd: plan?.isFree ? null : data.endDate || new Date(data.startDate.getTime() + 30 * 24 * 60 * 60 * 1000), // 免费计划为 null
         cancelAtPeriodEnd: false,
       },
     });
