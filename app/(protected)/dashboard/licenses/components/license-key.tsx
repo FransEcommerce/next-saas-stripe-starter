@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Copy, Check, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 interface LicenseKeyProps {
     licenseKey: string
@@ -14,9 +15,45 @@ export function LicenseKey({ licenseKey, className }: LicenseKeyProps) {
     const [visible, setVisible] = useState(false)
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(licenseKey)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(licenseKey).then(() => {
+                setCopied(true)
+                toast.success("License key copied to clipboard")
+                setTimeout(() => setCopied(false), 2000)
+            }).catch(() => {
+                // Fallback if clipboard API fails
+                const textArea = document.createElement("textarea")
+                textArea.value = licenseKey
+                document.body.appendChild(textArea)
+                textArea.select()
+                try {
+                    document.execCommand("copy")
+                    setCopied(true)
+                    toast.success("License key copied to clipboard")
+                    setTimeout(() => setCopied(false), 2000)
+                } catch (err) {
+                    console.error("Failed to copy text: ", err)
+                    toast.error("Failed to copy license key")
+                }
+                document.body.removeChild(textArea)
+            })
+        } else {
+            // Fallback if clipboard API is not available
+            const textArea = document.createElement("textarea")
+            textArea.value = licenseKey
+            document.body.appendChild(textArea)
+            textArea.select()
+            try {
+                document.execCommand("copy")
+                setCopied(true)
+                toast.success("License key copied to clipboard")
+                setTimeout(() => setCopied(false), 2000)
+            } catch (err) {
+                console.error("Failed to copy text: ", err)
+                toast.error("Failed to copy license key")
+            }
+            document.body.removeChild(textArea)
+        }
     }
 
     const toggleVisibility = () => {
@@ -43,4 +80,3 @@ export function LicenseKey({ licenseKey, className }: LicenseKeyProps) {
         </div>
     )
 }
-
