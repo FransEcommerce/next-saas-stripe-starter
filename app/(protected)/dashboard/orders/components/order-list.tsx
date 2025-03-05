@@ -8,26 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { OrderDetailsDialog } from "./order-details-dialog";
-
-interface OrderListProps {
-    orders: {
-        id: string;
-        orderNumber: string;
-        status: string;
-        amount: number;
-        product: {
-            name: string;
-            plugin: {
-                name: string;
-                avatar?: string | null;
-            };
-        };
-        user: {
-            name?: string | null;
-            email?: string | null;
-        };
-    }[];
-}
+import { OrderListProps } from "./types"; // 导入类型
 
 const orderStatusMap = {
     PENDING: {
