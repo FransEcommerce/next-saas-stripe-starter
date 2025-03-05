@@ -7,7 +7,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
-    switch (status) {
+    switch (status.toLowerCase()) {
         case "active":
             return <Badge className={`bg-green-500 hover:bg-green-600 ${className}`}>Active</Badge>
         case "trialing":
@@ -50,4 +50,3 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
             )
     }
 }
-

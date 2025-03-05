@@ -36,7 +36,7 @@ async function getOrder(orderId: string) {
   const processedOrder = {
     ...order,
     amount: Number(order.amount.toString()),
-    subtotal: order.subtotal ? Number(order.subtotal.toString()) : null,
+    subtotal: order.subtotal ? Number(order.subtotal.toString()) : null, // 确保 subtotal 可以为 null
     discountAmount: order.discountAmount ? Number(order.discountAmount.toString()) : 0,
     tax: order.tax ? Number(order.tax.toString()) : 0,
     affiliateCommission: order.affiliateCommission ? Number(order.affiliateCommission.toString()) : null,

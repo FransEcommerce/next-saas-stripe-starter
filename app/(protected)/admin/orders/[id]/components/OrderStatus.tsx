@@ -30,6 +30,14 @@ const orderStatusMap = {
     label: "Cancelled",
     color: "bg-red-500/20 text-red-700",
   },
+  PAID: {
+    label: "Paid",
+    color: "bg-purple-500/20 text-purple-700",
+  },
+  REFUNDED: {
+    label: "Refunded",
+    color: "bg-gray-500/20 text-gray-700",
+  },
 } as const;
 
 type OrderStatus = keyof typeof orderStatusMap;

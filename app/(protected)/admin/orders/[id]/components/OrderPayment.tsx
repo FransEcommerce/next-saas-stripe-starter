@@ -146,7 +146,7 @@ export function OrderPayment({ order }: OrderPaymentProps) {
                 </div>
               )}
  
-              <PriceRow label="Tax" amount={order.tax} />
+              <PriceRow label="Tax" amount={order.tax || 0} />
 
               <Separator className="my-2" />
               <PriceRow label="Total" amount={order.amount} type="total" />

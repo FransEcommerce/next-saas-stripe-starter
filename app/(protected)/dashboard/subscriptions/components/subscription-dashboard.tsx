@@ -269,7 +269,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                 View Details
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[1500px]">
+                                        <DialogContent className="sm:max-w-[1300px]">
                                             <div className="grid gap-6">
                                                 <div className="flex items-center gap-3">
                                                     <div className="p-2 rounded-full bg-primary/10">
@@ -279,17 +279,17 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                         <h2 className="text-xl font-bold">{subscription.plan.name}</h2>
                                                         <p className="text-muted-foreground">{subscription.plan.description}</p>
                                                     </div>
-                                                    <StatusBadge status={subscription.status} className="ml-auto" />
+                                                    {/* <StatusBadge status={subscription.status} className="ml-auto" /> */}
                                                 </div>
 
                                                 <div className="grid md:grid-cols-2 gap-6">
                                                     <div className="space-y-6">
-                                                        <div className="grid gap-3">
+                                                        <div className="space-y-4 p-4 rounded-lg border bg-background/50">
                                                             <h3 className="text-sm font-medium">Subscription Details</h3>
                                                             <div className="grid grid-cols-2 gap-3 text-sm">
                                                                 <div className="space-y-1">
                                                                     <p className="text-muted-foreground">Status</p>
-                                                                    <p className="font-medium capitalize">{subscription.status}</p>
+                                                                    <StatusBadge status={subscription.status}/>
                                                                 </div>
                                                                 <div className="space-y-1">
                                                                     <p className="text-muted-foreground">Price</p>
@@ -350,7 +350,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                             </div>
                                                         </div>
 
-                                                        <div className="grid gap-3">
+                                                        <div className="space-y-4 p-4 rounded-lg border bg-background/50">
                                                             <h3 className="text-sm font-medium">Plan Features</h3>
                                                             <ul className="grid grid-cols-1 gap-2">
                                                                 {(subscription.plan.features || []).map((feature, index) => (
@@ -447,8 +447,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                     </div>
                                                 </div>
 
-                                                <div className="flex justify-end gap-3 mt-2">
-                                                    {subscription.status === "active" && !subscription.cancelAtPeriodEnd && (
+                                                {/* <div className="flex justify-end gap-3 mt-2">
+                                                    {subscription.status.toLowerCase() === "active" && !subscription.cancelAtPeriodEnd && (
                                                         <Button
                                                             variant="outline"
                                                             className="text-destructive border-destructive hover:bg-destructive/10"
@@ -457,7 +457,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                         </Button>
                                                     )}
                                                     <Button>Manage Billing</Button>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </DialogContent>
                                     </Dialog>
