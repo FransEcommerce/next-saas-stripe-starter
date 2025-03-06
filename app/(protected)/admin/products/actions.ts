@@ -9,7 +9,7 @@ interface ProductInput {
   price: number;
   comparePrice?: number;
   active?: boolean;
-  duration?: number;
+  duration: number | null;
   features?: Record<string, any>;
   pluginId: string;
 }

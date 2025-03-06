@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/session";
 import { Prisma } from "@prisma/client";
 import { generateOrderNumber } from "@/lib/order";
 import { z } from "zod";
+import { formatPrice } from "@/lib/utils";
 
 function generateLicenseKey() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

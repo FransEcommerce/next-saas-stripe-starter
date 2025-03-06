@@ -200,7 +200,7 @@ export function ProductForm({ plugins, product }: ProductFormProps) {
         ...values,
         price: parseFloat(values.price),
         comparePrice: values.comparePrice ? parseFloat(values.comparePrice) : undefined,
-        duration: values.duration ? parseInt(values.duration) : undefined,
+        duration: values.duration ? parseInt(values.duration) : null, // 确保空值传递为 null
         features: values.features ? JSON.parse(values.features) : {},
       };
 
