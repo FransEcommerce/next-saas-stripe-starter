@@ -12,7 +12,7 @@ import { OrderSummary } from "./order-summary"
 import { BillingAddressForm } from "./billing-address-form"
 import { PaymentForm } from "./payment-form"
 import type { Product } from "./types.ts"
-import { validateCoupon } from "../actions"
+import { validateCoupon, createCheckoutOrder } from "../actions"
 
 const CHECKOUT_STEPS = ["Information", "Payment"]
 
@@ -29,7 +29,6 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
     const [couponCode, setCouponCode] = useState("")
     const [couponApplied, setCouponApplied] = useState(false)
     const [couponDiscount, setCouponDiscount] = useState(0)
-    const [uploadedFile, setUploadedFile] = useState<File | null>(null)
 
     const [formData, setFormData] = useState({
         email: "",
@@ -132,13 +131,42 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
         e.preventDefault()
         setIsProcessing(true)
 
-        setTimeout(() => {
-            if (paymentMethod === "manual-transfer") {
-                router.push("/checkout/pending?product=" + product.id)
-            } else {
-                router.push("/checkout/success?product=" + product.id)
+        try {
+            const result = await createCheckoutOrder({
+                productId: product.id,
+                couponCode: couponApplied ? couponCode : undefined,
+                paymentMethod: "manual-transfer",
+                paymentProof: formData.paymentProof,
+                paymentNote: formData.paymentNote,
+                billingInfo: {
+                    name: formData.name,
+                    email: formData.email,
+                    company: formData.company,
+                    address: formData.address,
+                    city: formData.city,
+                    state: formData.state,
+                    zip: formData.zip,
+                    country: formData.country,
+                    phone: formData.phone,
+                },
+            })
+
+            if (result.error) {
+                toast.error(result.error, {
+                    position: isMobile ? "top-center" : "bottom-right"
+                })
+                setIsProcessing(false)
+                return
             }
-        }, 2000)
+
+            router.push(`/checkout/thank-you?orderNumber=${result.orderNumber}`)
+        } catch (error) {
+            console.error("Checkout error:", error)
+            toast.error("Failed to process your order. Please try again.", {
+                position: isMobile ? "top-center" : "bottom-right"
+            })
+            setIsProcessing(false)
+        }
     }
 
     return (
@@ -172,11 +200,9 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
                             formData={formData}
                             paymentMethod={paymentMethod}
                             setPaymentMethod={setPaymentMethod}
-                            handleInputChange={handleInputChange}
                             handleFormDataChange={handleFormDataChange}
                             setFormData={setFormData}
                             isProcessing={isProcessing}
-                            uploadedFile={uploadedFile}
                             total={total}
                             formatPrice={formatPrice}
                             onBack={() => setCurrentStep(1)}

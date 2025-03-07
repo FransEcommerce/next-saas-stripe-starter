@@ -39,12 +39,10 @@ export function OrderPayment({ order }: OrderPaymentProps) {
                             <span className="text-muted-foreground">Subtotal</span>
                             <span className="font-medium">{formatPrice(order.subtotal)}</span>
                         </div>
-                        {order.discountAmount && (
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Discount</span>
-                                <span className="font-medium text-green-600">-{formatPrice(order.discountAmount)}</span>
-                            </div>
-                        )}
+                        <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Discount</span>
+                            <span className="font-medium text-green-600">-{formatPrice(order.discountAmount || 0)}</span>
+                        </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Tax</span>
                             <span className="font-medium">{formatPrice(order.tax || 0)}</span>

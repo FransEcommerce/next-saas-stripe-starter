@@ -44,3 +44,34 @@ export async function getProductById(productId: string) {
     } : null,
   };
 }
+
+export async function getOrderByNumber(orderNumber: string) {
+  return prisma.order.findUnique({
+    where: { orderNumber },
+    include: {
+      product: {
+        select: {
+          id: true,
+          name: true,
+          plugin: {
+            select: {
+              id: true,
+              name: true,
+              version: true,
+              avatar: true,
+            }
+          }
+        }
+      },
+      license: true,
+      coupon: {
+        select: {
+          id: true,
+          code: true,
+          type: true,
+          value: true,
+        }
+      }
+    }
+  });
+}
