@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db"
 import { getCurrentUser } from "@/lib/session"
 import { generateOrderNumber } from "@/lib/order";
 import { redirect } from "next/navigation"
+import { OrderStatus } from "@prisma/client"
 
 interface CheckoutInput {
   productId: string
@@ -22,6 +23,10 @@ interface CheckoutInput {
     country: string
     phone: string
   }
+  razorpayPaymentId?: string
+  razorpayOrderId?: string
+  razorpaySignature?: string
+  status?: OrderStatus
 }
 
 export async function createCheckoutOrder(data: CheckoutInput) {
@@ -75,6 +80,12 @@ export async function createCheckoutOrder(data: CheckoutInput) {
     const subtotal = Number(product.price)
     const total = subtotal - discountAmount
 
+    // 如果是 Razorpay 支付，确保有支付验证信息
+    if (data.paymentMethod === 'razorpay' && 
+        (!data.razorpayPaymentId || !data.razorpayOrderId || !data.razorpaySignature)) {
+      throw new Error("Missing Razorpay payment verification data");
+    }
+
     // 创建订单
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
@@ -86,7 +97,7 @@ export async function createCheckoutOrder(data: CheckoutInput) {
           amount: total,
           subtotal,
           discountAmount,
-          status: data.paymentMethod === "manual-transfer" ? "PENDING" : "COMPLETED",
+          status: (data.status as OrderStatus) || "PENDING",
           paymentMethod: data.paymentMethod,
           paymentNote: data.paymentNote,
           paymentProof: data.paymentProof,
@@ -101,18 +112,19 @@ export async function createCheckoutOrder(data: CheckoutInput) {
           billingPhone: data.billingInfo.phone,
           affiliateId,
           affiliateCommission,
+          razorpayPaymentId: data.razorpayPaymentId,
+          razorpayOrderId: data.razorpayOrderId,
+          razorpaySignature: data.razorpaySignature,
         },
       })
 
-      // 更新优惠券使用次数
-      if (coupon) {
+      if (newOrder.status === "COMPLETED" && coupon) {
         await tx.coupon.update({
           where: { id: coupon.id },
           data: { usedCount: { increment: 1 } },
         })
       }
 
-      // 如果订单完成且有推荐人，更新推荐人收入
       if (newOrder.status === "COMPLETED" && affiliateId && affiliateCommission) {
         await tx.affiliate.update({
           where: { id: affiliateId },
@@ -124,15 +136,31 @@ export async function createCheckoutOrder(data: CheckoutInput) {
         })
       }
 
+      if (newOrder.status === "COMPLETED" && product.plugin) {
+        await tx.license.create({
+          data: {
+            licenseKey: generateLicenseKey(),
+            pluginId: product.plugin.id,
+            userId: user.id,
+            status: "PENDING",
+            expiresAt: product.duration
+              ? new Date(Date.now() + product.duration * 24 * 60 * 60 * 1000)
+              : null,
+            orderId: newOrder.id,
+          },
+        })
+      }
+
       return newOrder
     })
 
     return { success: true, orderNumber: order.orderNumber }
   } catch (error) {
     console.error("Checkout error:", error)
-    return { error: "Failed to process checkout" }
+    return { success: false, error: error.message || "Failed to process checkout" }
   }
 }
+
 export async function validateCoupon(code: string, amount: number) {
     try {
         const coupon = await prisma.coupon.findUnique({
@@ -190,4 +218,22 @@ export async function validateCoupon(code: string, amount: number) {
         console.error("Error validating coupon:", error);
         return { error: "Failed to validate coupon" };
     }
+}
+
+// 添加生成许可证密钥的函数
+function generateLicenseKey() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const segments = 4;
+  const segmentLength = 4;
+  
+  const generateSegment = () => {
+    let segment = "";
+    for (let i = 0; i < segmentLength; i++) {
+      segment += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return segment;
+  };
+
+  const licenseSegments = Array(segments).fill(null).map(generateSegment);
+  return licenseSegments.join("-");
 }

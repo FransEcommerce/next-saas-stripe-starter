@@ -71,12 +71,29 @@ export function BillingAddressForm({
     }
   }, [selectedCountry, formData.state, isInitialized]);
 
+  // 添加一个函数来获取州名
+  const getStateName = (countryCode: string, stateCode: string) => {
+    const state = State.getStateByCodeAndCountry(stateCode, countryCode)
+    return state?.name || stateCode
+  }
+
   return (
     <motion.form
       {...fadeIn}
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault()
+        
+        // 在提交前转换州代码为州名
+        if (selectedCountry?.alpha2 && formData.state) {
+          const stateName = getStateName(selectedCountry.alpha2, formData.state)
+          setFormData(prev => ({
+            ...prev,
+            state: stateName,
+            country: selectedCountry.name  // 使用国家名称而不是代码
+          }))
+        }
+        
         onNext()
       }}
     >
@@ -114,7 +131,7 @@ export function BillingAddressForm({
               onChange={(country) => {
                 setFormData((prev: any) => ({ 
                   ...prev, 
-                  country: country.alpha3,
+                  country: country.name,  // 保存国家名称而不是代码
                   state: "",
                   city: ""
                 }));

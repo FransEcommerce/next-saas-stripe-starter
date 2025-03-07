@@ -46,7 +46,7 @@ export async function getProductById(productId: string) {
 }
 
 export async function getOrderByNumber(orderNumber: string) {
-  return prisma.order.findUnique({
+  const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: {
       product: {
@@ -74,4 +74,20 @@ export async function getOrderByNumber(orderNumber: string) {
       }
     }
   });
+
+  if (!order) return null;
+
+  // 转换 Decimal 为 number
+  return {
+    ...order,
+    amount: order.amount?.toNumber() || 0,
+    subtotal: order.subtotal?.toNumber() || 0,
+    discountAmount: order.discountAmount?.toNumber() || 0,
+    tax: order.tax?.toNumber() || 0,
+    affiliateCommission: order.affiliateCommission?.toNumber() || 0,
+    coupon: order.coupon ? {
+      ...order.coupon,
+      value: order.coupon.value?.toNumber() || 0
+    } : null
+  };
 }

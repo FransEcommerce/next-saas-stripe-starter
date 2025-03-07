@@ -257,6 +257,11 @@ model Order {
   billingPhone   String?
   billingEmail   String?
 
+  // 添加 Razorpay 支付相关字段
+  razorpayPaymentId String?
+  razorpayOrderId   String?
+  razorpaySignature String?
+
   // 关联
   userId              String
   user                User              @relation(fields: [userId], references: [id])

@@ -25,7 +25,6 @@ export default async function SettingsPage() {
         text="Manage account and website settings."
       />
       <div className="divide-y divide-muted pb-10">
-      <pre>{JSON.stringify(user, null, 2)}</pre>
         <UserNameForm user={{ id: user.id, name: user.name || "" }} />
         <UserBillingForm user={{
           id: user.id,

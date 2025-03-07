@@ -128,14 +128,16 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsProcessing(true)
+        e.preventDefault();
+        setIsProcessing(true);
 
         try {
-            const result = await createCheckoutOrder({
+            const formEventData = e as any;
+            const submitData = {
                 productId: product.id,
-                couponCode: couponApplied ? couponCode : undefined,
-                paymentMethod: "manual-transfer",
+                couponCode: couponCode,
+                paymentMethod: paymentMethod,
+                status: formEventData.target?.status,
                 paymentProof: formData.paymentProof,
                 paymentNote: formData.paymentNote,
                 billingInfo: {
@@ -149,25 +151,34 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
                     country: formData.country,
                     phone: formData.phone,
                 },
-            })
-
-            if (result.error) {
-                toast.error(result.error, {
-                    position: isMobile ? "top-center" : "bottom-right"
+                ...(formEventData.target?.razorpayPaymentId && {
+                    razorpayPaymentId: formEventData.target.razorpayPaymentId,
+                    razorpayOrderId: formEventData.target.razorpayOrderId,
+                    razorpaySignature: formEventData.target.razorpaySignature,
                 })
-                setIsProcessing(false)
-                return
-            }
+            };
 
-            router.push(`/checkout/thank-you?orderNumber=${result.orderNumber}`)
+            const result = await createCheckoutOrder(submitData);
+
+            if (result.success) {
+                return {
+                    success: true,
+                    orderNumber: result.orderNumber
+                };
+            } else {
+                throw new Error(result.error);
+            }
         } catch (error) {
-            console.error("Checkout error:", error)
-            toast.error("Failed to process your order. Please try again.", {
-                position: isMobile ? "top-center" : "bottom-right"
-            })
-            setIsProcessing(false)
+            console.error("Checkout error:", error);
+            toast.error(error.message || "Failed to process checkout");
+            return {
+                success: false,
+                error: error.message || "Failed to process checkout"
+            };
+        } finally {
+            setIsProcessing(false);
         }
-    }
+    };
 
     return (
         <CheckoutLayout
@@ -207,6 +218,7 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
                             formatPrice={formatPrice}
                             onBack={() => setCurrentStep(1)}
                             onSubmit={handleSubmit}
+                            productName={product.name}
                         />
                     )}
                 </AnimatePresence>
