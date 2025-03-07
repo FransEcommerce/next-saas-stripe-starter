@@ -8,21 +8,17 @@ import { redirect } from "next/navigation"
 function CheckoutSkeleton() {
     return (
         <div className="min-h-screen grid grid-cols-1 md:grid-cols-[1fr_620px]">
-            {/* 主内容区域 */}
             <main className="relative flex flex-col min-h-screen bg-background">
-                {/* 顶部导航栏骨架 */}
-                <div className="sticky top-0 z-20 bg-background border-b">
-                    <div className="px-4 py-3 flex items-center justify-between mx-auto">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-10 w-40" />
+                <div className="sticky top-0 z-20 bg-background">
+                    <div className="border-b">
+                        <div className="px-4 py-3 flex items-center justify-between mx-auto">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-10 w-40" />
+                        </div>
                     </div>
-                </div>
-
-                {/* 主要内容骨架 */}
-                <div className="flex-1 flex flex-col">
-                    <div className="flex-1 max-w-[580px] mx-auto px-4 sm:px-8 pb-8">
-                        {/* 结账步骤骨架 */}
-                        <div className="sticky top-[57px] bg-background z-10 py-8">
+                    {/* Steps skeleton */}
+                    <div className="bg-background">
+                        <div className="pt-2 pb-4">
                             <div className="flex items-center justify-center gap-4 px-8">
                                 {[1, 2].map((i) => (
                                     <div key={i} className="flex items-center">
@@ -36,49 +32,71 @@ function CheckoutSkeleton() {
                             </div>
                             <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-background to-transparent" />
                         </div>
-
+                    </div>
+                </div>
+                <div className="flex-1 flex flex-col">
+                    <div className="flex-1 max-w-[580px] mx-auto px-4 sm:px-8 pb-8">
                         {/* 表单字段骨架 */}
-                        <div className="pt-4 space-y-4">
-                            <Skeleton className="h-5 w-20" /> {/* 标签 */}
-                            <Skeleton className="h-10 w-full" /> {/* 输入框 */}
-                            
-                            <Skeleton className="h-5 w-20" />
-                            <Skeleton className="h-10 w-full" />
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-20" />
-                                    <Skeleton className="h-10 w-full" />
+                        <div className="pt-4">
+                            <div className="space-y-6 w-[380px] sm:w-[480px]">
+                                <div className="space-y-4">
+                                    {/* Email */}
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-5 w-24" />
+                                        <Skeleton className="h-10 w-full" />
+                                    </div>
+
+                                    {/* Full name */}
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-5 w-32" />
+                                        <Skeleton className="h-10 w-full" />
+                                    </div>
+
+                                    {/* Country & Company */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-5 w-28" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-5 w-36" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                    </div>
+
+                                    {/* Address */}
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-5 w-28" />
+                                        <Skeleton className="h-10 w-full" />
+                                    </div>
+
+                                    {/* State & City */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-5 w-24" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-5 w-16" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                    </div>
+
+                                    {/* ZIP & Phone */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-5 w-36" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-5 w-24" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-20" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
-                            </div>
-                            
-                            <Skeleton className="h-5 w-20" />
-                            <Skeleton className="h-10 w-full" />
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-20" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-20" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-20" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-20" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
+
+                                {/* Submit Button */}
+                                <Skeleton className="h-10 w-full" />
                             </div>
                         </div>
                     </div>

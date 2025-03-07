@@ -7,36 +7,41 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import { Drawer } from "vaul"
 import Image from "next/image"
+import { CheckoutSteps } from "./checkout-steps"
 
 // 更新 CheckoutLayoutProps 接口，添加 totalPrice 属性
 interface CheckoutLayoutProps {
     children: ReactNode
     orderSummary: ReactNode
     totalPrice?: string
+    currentStep: number
 }
 
 // 在函数参数中添加 totalPrice，并设置默认值为 "$0.00"
-export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00" }: CheckoutLayoutProps) {
+export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00", currentStep }: CheckoutLayoutProps) {
     const [drawerOpen, setDrawerOpen] = useState(false)
 
     return (
         <div className="min-h-screen grid md:grid-cols-[1fr_620px]">
             {/* Main Content */}
             <main className="relative flex flex-col min-h-screen bg-background">
-                <div className="sticky top-0 z-20 bg-background border-b">
-                    <div className="px-4 py-3 flex items-center justify-between mx-auto">
-                        <Link
-                            href="/dashboard/plugins"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-1" />
-                            Back to marketplace
-                        </Link>
-                        <div className="flex items-center justify-center w-40 h-10">
-                            <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
-                            <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
+                <div className="sticky top-0 z-20 bg-background">
+                    <div className="border-b">
+                        <div className="px-4 py-3 flex items-center justify-between mx-auto">
+                            <Link
+                                href="/dashboard/plugins"
+                                className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <ArrowLeft className="h-4 w-4 mr-1" />
+                                Back to marketplace
+                            </Link>
+                            <div className="flex items-center justify-center w-40 h-10">
+                                <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
+                                <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
+                            </div>
                         </div>
                     </div>
+                    <CheckoutSteps currentStep={currentStep} />
                 </div>
 
                 <div className="flex-1 flex flex-col">
