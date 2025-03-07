@@ -40,6 +40,7 @@ export async function getProductById(productId: string) {
       state: user.billingState || "",
       zip: user.billingZip || "",
       country: user.billingCountry || "US",
+      phone: user.billingPhone || "",
     } : null,
   };
 }

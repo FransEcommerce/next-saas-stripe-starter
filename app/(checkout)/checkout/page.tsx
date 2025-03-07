@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { CheckoutForm } from "./components/checkout-form"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductById } from "./queries"
+import { redirect } from "next/navigation"
 
 // Loading skeleton
 function CheckoutSkeleton() {
@@ -64,6 +65,10 @@ function CheckoutSkeleton() {
 // This is a server component
 export default async function CheckoutPage({ searchParams }: { searchParams: { product: string } }) {
     const productId = searchParams.product
+    if (!productId) {
+        redirect("/dashboard/plugins")
+    }
+
     const product = await getProductById(productId)
 
     return (

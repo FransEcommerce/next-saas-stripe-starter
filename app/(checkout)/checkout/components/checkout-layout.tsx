@@ -40,7 +40,7 @@ export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00" }:
                 </div>
 
                 <div className="flex-1">
-                    <div className="max-w-[480px] mx-auto px-4 sm:px-8 py-8 sm:py-16">{children}</div>
+                    <div className="max-w-[580px] mx-auto px-4 sm:px-8 py-8 sm:py-16">{children}</div>
                 </div>
 
                 {/* Mobile Order Summary Drawer Trigger */}

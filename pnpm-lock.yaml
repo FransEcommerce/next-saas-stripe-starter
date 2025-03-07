@@ -140,6 +140,12 @@ dependencies:
   contentlayer2:
     specifier: ^0.5.0
     version: 0.5.4(acorn@8.14.0)(esbuild@0.25.0)
+  country-data-list:
+    specifier: ^1.4.0
+    version: 1.4.0
+  country-state-city:
+    specifier: ^3.2.1
+    version: 3.2.1
   date-fns:
     specifier: ^3.6.0
     version: 3.6.0
@@ -149,6 +155,9 @@ dependencies:
   framer-motion:
     specifier: ^12.4.7
     version: 12.4.7(react-dom@18.3.1)(react@18.3.1)
+  libphonenumber-js:
+    specifier: ^1.12.5
+    version: 1.12.5
   lucide-react:
     specifier: ^0.414.0
     version: 0.414.0(react@18.3.1)
@@ -176,6 +185,9 @@ dependencies:
   react:
     specifier: 18.3.1
     version: 18.3.1
+  react-circle-flags:
+    specifier: ^0.0.23
+    version: 0.0.23(react@18.3.1)
   react-day-picker:
     specifier: ^8.10.1
     version: 8.10.1(date-fns@3.6.0)(react@18.3.1)
@@ -5728,6 +5740,14 @@ packages:
       typescript: 5.5.3
     dev: true
 
+  /country-data-list@1.4.0:
+    resolution: {integrity: sha512-3i1Q1onE9MaqYPdtTUzZRZJY7lBXWpud3eWXrw3ckJyvOzXcsFALiy0Z4Giksy5ECpq9ajYijMPxfRZvVP65UA==}
+    dev: false
+
+  /country-state-city@3.2.1:
+    resolution: {integrity: sha512-kxbanqMc6izjhc/EHkGPCTabSPZ2G6eG4/97akAYHJUN4stzzFEvQPZoF8oXDQ+10gM/O/yUmISCR1ZVxyb6EA==}
+    dev: false
+
   /cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -7925,6 +7945,10 @@ packages:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
+  /libphonenumber-js@1.12.5:
+    resolution: {integrity: sha512-DOjiaVjjSmap12ztyb4QgoFmUe/GbgnEXHu+R7iowk0lzDIjScvPAm8cK9RYTEobbRb0OPlwlZUGTTJPJg13Kw==}
+    dev: false
+
   /lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
     engines: {node: '>=10'}
@@ -9511,6 +9535,15 @@ packages:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
     dependencies:
       safe-buffer: 5.2.1
+    dev: false
+
+  /react-circle-flags@0.0.23(react@18.3.1):
+    resolution: {integrity: sha512-J35vkTnG4Iz7cgitq/UIw4/1i8aUWEkz2Z0MQTTWycWOHKezuey5+3BPAsXNr78gYMdjSBtZWmSzQc0oEeK4oQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16.0.0 || 17.x || 18.x || 19.x
+    dependencies:
+      react: 18.3.1
     dev: false
 
   /react-day-picker@8.10.1(date-fns@3.6.0)(react@18.3.1):

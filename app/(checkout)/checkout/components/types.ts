@@ -25,5 +25,6 @@ export interface Product {
         state: string
         zip: string
         country: string
+        phone: string
     } | null
 }
