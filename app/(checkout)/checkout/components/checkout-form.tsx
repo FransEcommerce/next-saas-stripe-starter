@@ -154,36 +154,38 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
             }
             totalPrice={formatPrice(total)}
         >
-            <div className="space-y-8">
+            <div className="relative">
                 <CheckoutSteps currentStep={currentStep} />
-                <AnimatePresence mode="wait">
-                    {currentStep === 1 && (
-                        <BillingAddressForm
-                            key="step1"
-                            formData={formData}
-                            handleInputChange={handleInputChange}
-                            setFormData={setFormData}
-                            onNext={() => setCurrentStep(2)}
-                        />
-                    )}
-                    {currentStep === 2 && (
-                        <PaymentForm
-                            key="step2"
-                            formData={formData}
-                            paymentMethod={paymentMethod}
-                            setPaymentMethod={setPaymentMethod}
-                            handleInputChange={handleInputChange}
-                            handleFormDataChange={handleFormDataChange}
-                            setFormData={setFormData}
-                            isProcessing={isProcessing}
-                            uploadedFile={uploadedFile}
-                            total={total}
-                            formatPrice={formatPrice}
-                            onBack={() => setCurrentStep(1)}
-                            onSubmit={handleSubmit}
-                        />
-                    )}
-                </AnimatePresence>
+                <div className="pt-4">
+                    <AnimatePresence mode="wait">
+                        {currentStep === 1 && (
+                            <BillingAddressForm
+                                key="step1"
+                                formData={formData}
+                                handleInputChange={handleInputChange}
+                                setFormData={setFormData}
+                                onNext={() => setCurrentStep(2)}
+                            />
+                        )}
+                        {currentStep === 2 && (
+                            <PaymentForm
+                                key="step2"
+                                formData={formData}
+                                paymentMethod={paymentMethod}
+                                setPaymentMethod={setPaymentMethod}
+                                handleInputChange={handleInputChange}
+                                handleFormDataChange={handleFormDataChange}
+                                setFormData={setFormData}
+                                isProcessing={isProcessing}
+                                uploadedFile={uploadedFile}
+                                total={total}
+                                formatPrice={formatPrice}
+                                onBack={() => setCurrentStep(1)}
+                                onSubmit={handleSubmit}
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </CheckoutLayout>
     )

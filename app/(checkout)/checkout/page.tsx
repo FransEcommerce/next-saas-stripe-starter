@@ -19,23 +19,26 @@ function CheckoutSkeleton() {
                 </div>
 
                 {/* 主要内容骨架 */}
-                <div className="flex-1">
-                    <div className="max-w-[580px] mx-auto px-4 sm:px-8 py-8 sm:py-16 space-y-8">
+                <div className="flex-1 flex flex-col">
+                    <div className="flex-1 max-w-[580px] mx-auto px-4 sm:px-8 pb-8">
                         {/* 结账步骤骨架 */}
-                        <div className="flex items-center justify-center gap-4 mb-12 px-8">
-                            {[1, 2].map((i) => (
-                                <div key={i} className="flex items-center">
-                                    <div className="flex flex-col items-center">
-                                        <Skeleton className="w-12 h-12 rounded-full" />
-                                        <Skeleton className="w-16 h-4 mt-2" />
+                        <div className="sticky top-[57px] bg-background z-10 py-8">
+                            <div className="flex items-center justify-center gap-4 px-8">
+                                {[1, 2].map((i) => (
+                                    <div key={i} className="flex items-center">
+                                        <div className="flex flex-col items-center">
+                                            <Skeleton className="w-12 h-12 rounded-full" />
+                                            <Skeleton className="w-16 h-4 mt-2" />
+                                        </div>
+                                        {i < 2 && <Skeleton className="h-px w-24 mx-2 mt-[-20px]" />}
                                     </div>
-                                    {i < 2 && <Skeleton className="h-px w-24 mx-2 mt-[-20px]" />}
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-background to-transparent" />
                         </div>
 
                         {/* 表单字段骨架 */}
-                        <div className="space-y-4">
+                        <div className="pt-4 space-y-4">
                             <Skeleton className="h-5 w-20" /> {/* 标签 */}
                             <Skeleton className="h-10 w-full" /> {/* 输入框 */}
                             
@@ -78,25 +81,22 @@ function CheckoutSkeleton() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* 按钮骨架 */}
-                        <Skeleton className="h-10 w-full mt-6" />
                     </div>
+
+                    {/* 底部骨架 */}
+                    <footer className="py-6 px-8 border-t bg-background md:sticky md:bottom-0 md:left-0 md:right-0 md:mt-auto">
+                        <div className="max-w-[560px] mx-auto flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <Skeleton className="h-4 w-12" />
+                                <Skeleton className="h-4 w-12" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-4 w-20" />
+                                <Skeleton className="h-4 w-16" />
+                            </div>
+                        </div>
+                    </footer>
                 </div>
-
-                {/* 底部骨架 */}
-                <footer className="py-6 px-8 border-t">
-                    <div className="max-w-[560px] mx-auto flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Skeleton className="h-4 w-12" />
-                            <Skeleton className="h-4 w-12" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-20" />
-                            <Skeleton className="h-4 w-16" />
-                        </div>
-                    </div>
-                </footer>
             </main>
 
             {/* 订单摘要侧边栏骨架 - 桌面版 */}
