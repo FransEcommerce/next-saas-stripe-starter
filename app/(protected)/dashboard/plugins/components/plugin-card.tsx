@@ -76,7 +76,11 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
 
     return (
         <Card
-            className={`overflow-hidden border-0 shadow-lg transition-all duration-300 ${isPurchased ? "bg-gradient-to-br from-green-50 to-white ring-1 ring-green-100" : "bg-white"}`}
+            className={`overflow-hidden border shadow-lg transition-all duration-300 ${
+                isPurchased 
+                    ? "bg-gradient-to-br from-green-50 to-background dark:from-green-950/30 dark:to-background ring-1 ring-green-100 dark:ring-green-900/30" 
+                    : "bg-background"
+            }`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -172,7 +176,7 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                             Details
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[800px]">
+                    <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-6">
                         <DialogHeader>
                             <div className="flex items-center gap-3">
                                 <Image
@@ -221,7 +225,11 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                             </div>
 
                             <div>
-                                <div className={`rounded-xl p-5 mb-6 ${isPurchased ? "bg-green-50" : "bg-muted/30"}`}>
+                                <div className={`rounded-xl p-5 mb-6 ${
+                                    isPurchased 
+                                        ? "bg-green-50 dark:bg-green-950/30" 
+                                        : "bg-muted/30 dark:bg-muted/20"
+                                }`}>
                                     <div className="flex items-baseline mb-2">
                                         <span className="text-3xl font-bold">{formatPrice(product.price)}</span>
                                         {product.comparePrice && (
@@ -319,7 +327,7 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                     </DialogContent>
                 </Dialog>
                 {isPurchased ? (
-                    <div className="flex-1 text-green-600 text-sm font-medium flex items-center justify-center py-2 px-4 bg-green-50 rounded-md border border-green-500">
+                    <div className="flex-1 text-green-600 dark:text-green-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-500 dark:border-green-900">
                         <CheckCircle2 className="h-4 w-4 mr-2" />
                         Owned
                     </div>

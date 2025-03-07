@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react"
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { updateUserBilling } from '@/actions/update-user-billing';
 import type { BillingFormData } from '@/lib/validations/billing';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SectionColumns } from "@/components/dashboard/section-columns";
 import { Icons } from "@/components/shared/icons";
+import { Country, CountryDropdown } from "@/components/ui/country-dropdown";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { StateProvinceSelect } from "@/components/ui/state-province-select";
+import { CitySelect } from "@/components/ui/city-select";
 
 interface UserBillingFormProps {
   user: Pick<User, "id" | "billingCompany" | "billingName" | "billingAddress" | "billingCity" | "billingState" | "billingCountry" | "billingZip" | "billingPhone">;
@@ -25,6 +29,7 @@ export function UserBillingForm({ user }: UserBillingFormProps) {
   const { update } = useSession();
   const [updated, setUpdated] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const updateUserBillingWithId = updateUserBilling.bind(null, user.id);
 
   const checkUpdate = (formData: BillingFormData) => {
@@ -38,6 +43,7 @@ export function UserBillingForm({ user }: UserBillingFormProps) {
     handleSubmit,
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<BillingFormData>({
     resolver: zodResolver(billingInfoSchema),
@@ -55,7 +61,19 @@ export function UserBillingForm({ user }: UserBillingFormProps) {
 
   const formData = watch();
 
-  React.useEffect(() => {
+  // 初始化 selectedCountry
+  useEffect(() => {
+    if (formData.billingCountry && !selectedCountry) {
+      import("country-data-list").then(({ countries }) => {
+        const country = countries.all.find((c) => c.alpha3 === formData.billingCountry);
+        if (country) {
+          setSelectedCountry(country as Country);
+        }
+      });
+    }
+  }, [formData.billingCountry, selectedCountry]);
+
+  useEffect(() => {
     checkUpdate(formData);
   }, [formData]);
 
@@ -115,42 +133,38 @@ export function UserBillingForm({ user }: UserBillingFormProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="billingCity">City</Label>
-              <Input
-                id="billingCity"
-                {...register("billingCity")}
-              />
-              {errors?.billingCity && (
-                <p className="text-[13px] text-red-600">{errors.billingCity.message}</p>
-              )}
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="billingState">State/Province</Label>
-              <Input
-                id="billingState"
-                {...register("billingState")}
-              />
-              {errors?.billingState && (
-                <p className="text-[13px] text-red-600">{errors.billingState.message}</p>
-              )}
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="billingCountry">Country</Label>
+            <CountryDropdown
+              placeholder="Select country"
+              defaultValue={formData.billingCountry}
+              onChange={(country) => {
+                setValue("billingCountry", country.alpha3);
+                setSelectedCountry(country);
+              }}
+            />
+            {errors?.billingCountry && (
+              <p className="text-[13px] text-red-600">{errors.billingCountry.message}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="billingCountry">Country</Label>
-              <Input
-                id="billingCountry"
-                {...register("billingCountry")}
-              />
-              {errors?.billingCountry && (
-                <p className="text-[13px] text-red-600">{errors.billingCountry.message}</p>
-              )}
-            </div>
+            <StateProvinceSelect
+              countryCode={selectedCountry?.alpha2}
+              value={formData.billingState || ""}
+              onChange={(value) => setValue("billingState", value)}
+              label="State/Province"
+            />
+            <CitySelect
+              countryCode={selectedCountry?.alpha2}
+              stateCode={formData.billingState || ""}
+              value={formData.billingCity || ""}
+              onChange={(value) => setValue("billingCity", value)}
+              label="City"
+            />
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="billingZip">ZIP/Postal Code</Label>
               <Input
@@ -161,17 +175,18 @@ export function UserBillingForm({ user }: UserBillingFormProps) {
                 <p className="text-[13px] text-red-600">{errors.billingZip.message}</p>
               )}
             </div>
-          </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="billingPhone">Phone Number</Label>
-            <Input
-              id="billingPhone"
-              {...register("billingPhone")}
-            />
-            {errors?.billingPhone && (
-              <p className="text-[13px] text-red-600">{errors.billingPhone.message}</p>
-            )}
+            <div className="grid gap-2">
+              <Label htmlFor="billingPhone">Phone Number</Label>
+              <PhoneInput
+                value={formData.billingPhone}
+                onChange={(value) => setValue("billingPhone", value)}
+                defaultCountry={selectedCountry?.alpha2}
+              />
+              {errors?.billingPhone && (
+                <p className="text-[13px] text-red-600">{errors.billingPhone.message}</p>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end">

@@ -7,6 +7,9 @@ import { Country, CountryDropdown } from "@/components/ui/country-dropdown"
 import { PhoneInput, CountryData } from "@/components/ui/phone-input"
 import { State, City } from "country-state-city"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { countries } from "country-data-list"
+import { StateProvinceSelect } from "@/components/ui/state-province-select"
+import { CitySelect } from "@/components/ui/city-select"
 
 interface BillingAddressFormProps {
   formData: {
@@ -35,6 +38,7 @@ export function BillingAddressForm({
   const [countryData, setCountryData] = React.useState<CountryData>()
   const [states, setStates] = React.useState<any[]>([])
   const [cities, setCities] = React.useState<any[]>([])
+  const [isInitialized, setIsInitialized] = React.useState(false)
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -43,18 +47,29 @@ export function BillingAddressForm({
   }
 
   React.useEffect(() => {
-    if (selectedCountry) {
-      const states = State.getStatesOfCountry(selectedCountry.alpha2)
-      setStates(states)
+    if (formData.country && !selectedCountry) {
+      const country = countries.all.find((c) => c.alpha3 === formData.country);
+      if (country) {
+        setSelectedCountry(country as Country);
+        setCountryData(country as CountryData);
+      }
     }
-  }, [selectedCountry])
+  }, [formData.country, selectedCountry]);
 
   React.useEffect(() => {
-    if (formData.state) {
-      const cities = City.getCitiesOfState(selectedCountry?.alpha2 || "", formData.state)
-      setCities(cities)
+    if (selectedCountry) {
+      const statesList = State.getStatesOfCountry(selectedCountry.alpha2);
+      setStates(statesList);
     }
-  }, [formData.state, selectedCountry])
+  }, [selectedCountry]);
+
+  React.useEffect(() => {
+    if (selectedCountry?.alpha2 && formData.state && !isInitialized) {
+      const citiesList = City.getCitiesOfState(selectedCountry.alpha2, formData.state);
+      setCities(citiesList);
+      setIsInitialized(true);
+    }
+  }, [selectedCountry, formData.state, isInitialized]);
 
   return (
     <motion.form
@@ -91,17 +106,26 @@ export function BillingAddressForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-
           <div className="space-y-2">
             <Label htmlFor="country">Country</Label>
             <CountryDropdown
               placeholder="Select country"
               defaultValue={formData.country}
               onChange={(country) => {
-                setFormData((prev: any) => ({ ...prev, country: country.alpha3 }))
-                setSelectedCountry(country)
-                setCountryData(country)
-                setFormData((prev: any) => ({ ...prev, phone: country.countryCallingCodes[0] }))
+                setFormData((prev: any) => ({ 
+                  ...prev, 
+                  country: country.alpha3,
+                  state: "",
+                  city: ""
+                }));
+                setSelectedCountry(country);
+                setCountryData(country);
+                if (country.countryCallingCodes && country.countryCallingCodes.length > 0) {
+                  setFormData((prev: any) => ({ 
+                    ...prev, 
+                    phone: country.countryCallingCodes[0] 
+                  }));
+                }
               }}
             />
           </div>
@@ -122,7 +146,7 @@ export function BillingAddressForm({
           <Input
             id="address"
             name="address"
-            placeholder="123 Main St"
+            placeholder="Street address, P.O. box, apartment, suite, etc."
             value={formData.address}
             onChange={handleInputChange}
             required
@@ -130,52 +154,23 @@ export function BillingAddressForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="state">State / Province</Label>
-            <Select
-              value={formData.state}
-              onValueChange={(value) => setFormData((prev: any) => ({ ...prev, state: value }))}
-              disabled={states.length === 0}
-            >
-              <SelectTrigger id="state">
-                <SelectValue placeholder={states.length === 0 ? "No states available" : "Select state"} />
-              </SelectTrigger>
-              <SelectContent>
-                {states.length === 0 ? (
-                  <div className="text-sm text-muted-foreground p-2">No states available for this country</div>
-                ) : (
-                  states.map((state) => (
-                    <SelectItem key={state.isoCode} value={state.isoCode}>
-                      {state.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Select
-              value={formData.city}
-              onValueChange={(value) => setFormData((prev: any) => ({ ...prev, city: value }))}
-              disabled={cities.length === 0}
-            >
-              <SelectTrigger id="city">
-                <SelectValue placeholder={cities.length === 0 ? "No cities available" : "Select city"} />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.length === 0 ? (
-                  <div className="text-sm text-muted-foreground p-2">No cities available for this state</div>
-                ) : (
-                  cities.map((city) => (
-                    <SelectItem key={city.name} value={city.name}>
-                      {city.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+          <StateProvinceSelect
+            countryCode={selectedCountry?.alpha2}
+            value={formData.state || ""}
+            onChange={(value) => setFormData((prev: any) => ({ 
+              ...prev, 
+              state: value,
+              city: "" 
+            }))}
+            required
+          />
+          <CitySelect
+            countryCode={selectedCountry?.alpha2}
+            stateCode={formData.state || ""}
+            value={formData.city || ""}
+            onChange={(value) => setFormData((prev: any) => ({ ...prev, city: value }))}
+            required
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -193,7 +188,7 @@ export function BillingAddressForm({
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
             <PhoneInput
-              value={formData.phone}
+              value={formData.phone || ""}
               onChange={(value) => setFormData((prev: any) => ({ ...prev, phone: value }))}
               defaultCountry={selectedCountry?.alpha2}
               onCountryChange={setCountryData}

@@ -58,7 +58,7 @@ export function OrderSummary({ product, onApplyCoupon, couponCode, couponApplied
             <div>
                 <h2 className="font-medium mb-4">Order Summary</h2>
 
-                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border">
+                <div className="flex items-start gap-3 p-3 bg-card rounded-lg border">
                     <div className="h-16 w-16 rounded-lg overflow-hidden shrink-0">
                         <Image
                             src={product.plugin.avatar || "/placeholder.svg"}
@@ -114,7 +114,7 @@ export function OrderSummary({ product, onApplyCoupon, couponCode, couponApplied
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="flex items-center gap-2 text-sm text-green-600"
+                        className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400"
                     >
                         <Tag className="h-4 w-4" />
                         <span>Promo code applied: {formatPrice(couponDiscount)} off</span>
@@ -132,7 +132,7 @@ export function OrderSummary({ product, onApplyCoupon, couponCode, couponApplied
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="flex justify-between text-sm text-green-600"
+                        className="flex justify-between text-sm text-green-600 dark:text-green-400"
                     >
                         <span>Discount</span>
                         <span>-{formatPrice(discount)}</span>

@@ -45,6 +45,7 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
         cardCvc: "",
         paymentNote: "",
         paymentProof: "",
+        phone: "",
     })
 
     const handleFormDataChange = (newData: Partial<typeof formData>) => {
@@ -58,17 +59,30 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
         if (product.userBillingInfo) {
             setFormData((prev) => ({
                 ...prev,
-                email: product.userBillingInfo?.email || "",
-                name: product.userBillingInfo?.name || "",
-                company: product.userBillingInfo?.company || "",
-                address: product.userBillingInfo?.address || "",
-                city: product.userBillingInfo?.city || "",
-                state: product.userBillingInfo?.state || "",
-                zip: product.userBillingInfo?.zip || "",
                 country: product.userBillingInfo?.country || "US",
-            }))
+            }));
+            
+            setTimeout(() => {
+                setFormData((prev) => ({
+                    ...prev,
+                    email: product.userBillingInfo?.email || "",
+                    name: product.userBillingInfo?.name || "",
+                    company: product.userBillingInfo?.company || "",
+                    address: product.userBillingInfo?.address || "",
+                    state: product.userBillingInfo?.state || "",
+                    zip: product.userBillingInfo?.zip || "",
+                    phone: product.userBillingInfo?.phone || "",
+                }));
+                
+                setTimeout(() => {
+                    setFormData((prev) => ({
+                        ...prev,
+                        city: product.userBillingInfo?.city || "",
+                    }));
+                }, 200);
+            }, 100);
         }
-    }, [product.userBillingInfo])
+    }, [product.userBillingInfo]);
 
     const subtotal = product.price
     const discount = couponApplied ? couponDiscount : 0

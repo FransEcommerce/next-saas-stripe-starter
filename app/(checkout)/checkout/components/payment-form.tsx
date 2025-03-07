@@ -124,9 +124,9 @@ export function PaymentForm({
 
           {paymentMethod === "paypal" && (
             <motion.div key="paypal-form" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg text-center">
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg text-center">
                 <div className="flex justify-center mb-4">
-                  <PayPal className="h-8 w-8 text-blue-600" />
+                  <PayPal className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   You will be redirected to PayPal to complete your payment securely.
@@ -137,7 +137,7 @@ export function PaymentForm({
 
           {paymentMethod === "manual-transfer" && (
             <motion.div key="manual-transfer-form" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-4">
-              <div className="bg-yellow-50 p-4 rounded-lg mb-4">
+              <div className="bg-yellow-50 dark:bg-yellow-950/30 p-4 rounded-lg mb-4">
                 <h4 className="font-medium mb-2">Manual Payment Instructions</h4>
                 <p className="text-sm text-muted-foreground mb-2">
                   Please transfer the total amount to the following account:

@@ -97,7 +97,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                     <div className="grid grid-cols-2 gap-6 mb-8">
                                         <div className="space-y-1.5">
                                             <div className="text-sm text-muted-foreground">Billing Period</div>
-                                            <div className="font-medium">
+                                            <div className="font-medium text-xs sm:text-base">
                                                 {subscription.currentPeriodStart && subscription.currentPeriodEnd ? (
                                                     <>
                                                         {format(new Date(Date.parse(subscription.currentPeriodStart)), "MM/dd/yyyy")} -{" "}
@@ -113,7 +113,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                             <div className="text-sm text-muted-foreground">
                                                 {subscription.cancelAtPeriodEnd ? "Cancels On" : "Renews On"}
                                             </div>
-                                            <div className="font-medium">
+                                            <div className="font-medium text-xs sm:text-base">
                                                 {subscription.currentPeriodEnd ? (
                                                     format(new Date(subscription.currentPeriodEnd), "MM/dd/yyyy")
                                                 ) : (
@@ -134,20 +134,25 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                     : null;
 
                                                 return (
-                                                    <div key={service.id} className="flex flex-col p-4 rounded-xl bg-white/50 border shadow-sm">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3 mb-2">
+                                                    <div
+                                                        key={service.id}
+                                                        className="flex flex-col p-4 rounded-xl bg-card dark:bg-card/50 border shadow-sm"
+                                                    >
+                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                                                            <div className="flex items-center gap-3">
                                                                 <div
-                                                                    className="w-2 h-10 rounded-full shrink-0"
+                                                                    className="w-2 h-10 rounded-full shrink-0 border"
                                                                     style={{ backgroundColor: service.color }}
                                                                 />
                                                                 <div>
-                                                                    <div className="font-medium">{service.name}</div>
-                                                                    <div className="text-sm text-muted-foreground">{service.description}</div>
+                                                                    <div className="font-medium text-sm sm:text-base">{service.name}</div>
+                                                                    <div className="text-xs sm:text-sm text-muted-foreground">
+                                                                        {service.description}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="mb-2">
-                                                                <Badge variant="default" className="text-xs font-normal">
+                                                            <div className="self-start sm:self-center">
+                                                                <Badge variant="default" className="text-[8px] sm:text-xs font-normal">
                                                                     {service.limitType === "DAILY" ? (
                                                                         "Based on today's usage"
                                                                     ) : service.limitType === "MONTHLY" ? (
@@ -164,8 +169,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                         </div>
 
                                                         {hasLimit ? (
-                                                            <div className="mt-2">
-                                                                <div className="flex justify-between text-sm mb-1.5">
+                                                            <div className="mt-4">
+                                                                <div className="flex justify-between text-xs sm:text-sm mb-1.5">
                                                                     <span className="text-muted-foreground">Usage</span>
                                                                     <span className="font-medium">
                                                                         {usage.current} / {service.limitValue}
@@ -184,8 +189,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                 />
                                                             </div>
                                                         ) : (
-                                                            <div className="mt-2">
-                                                                <div className="flex justify-between text-sm mb-1.5">
+                                                            <div className="mt-4">
+                                                                <div className="flex justify-between text-xs sm:text-sm mb-1.5">
                                                                     <span className="text-muted-foreground">Usage</span>
                                                                     <span className="font-medium">
                                                                         {usage.current} / UNLIMITED
@@ -269,17 +274,16 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                 View Details
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[1300px]">
+                                        <DialogContent className="sm:max-w-[1300px] max-h-[90vh] overflow-y-auto p-6">
                                             <div className="grid gap-6">
                                                 <div className="flex items-center gap-3">
                                                     <div className="p-2 rounded-full bg-primary/10">
                                                         <Package className="h-5 w-5 text-primary" />
                                                     </div>
                                                     <div>
-                                                        <h2 className="text-xl font-bold">{subscription.plan.name}</h2>
-                                                        <p className="text-muted-foreground">{subscription.plan.description}</p>
+                                                        <h2 className="text-lg sm:text-xl font-bold">{subscription.plan.name}</h2>
+                                                        <p className="text-sm text-muted-foreground">{subscription.plan.description}</p>
                                                     </div>
-                                                    {/* <StatusBadge status={subscription.status} className="ml-auto" /> */}
                                                 </div>
 
                                                 <div className="grid md:grid-cols-2 gap-6">
@@ -379,21 +383,23 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                     return (
                                                                         <div
                                                                             key={service.id}
-                                                                            className="flex flex-col p-4 rounded-xl bg-white/50 border shadow-sm"
+                                                                            className="flex flex-col p-4 rounded-xl bg-card dark:bg-card/50 border shadow-sm"
                                                                         >
-                                                                            <div className="flex items-center justify-between">
-                                                                                <div className="flex items-center gap-3 mb-2">
+                                                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                                                                                <div className="flex items-center gap-3">
                                                                                     <div
-                                                                                        className="w-2 h-10 rounded-full shrink-0"
+                                                                                        className="w-2 h-10 rounded-full shrink-0 border"
                                                                                         style={{ backgroundColor: service.color }}
                                                                                     />
                                                                                     <div>
-                                                                                        <div className="font-medium">{service.name}</div>
-                                                                                        <div className="text-sm text-muted-foreground">{service.description}</div>
+                                                                                        <div className="font-medium text-sm sm:text-base">{service.name}</div>
+                                                                                        <div className="text-xs sm:text-sm text-muted-foreground">
+                                                                                            {service.description}
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="mb-2">
-                                                                                    <Badge variant="default" className="text-xs font-normal">
+                                                                                <div className="self-start sm:self-center">
+                                                                                    <Badge variant="default" className="text-[8px] sm:text-xs font-normal">
                                                                                         {service.limitType === "DAILY" ? (
                                                                                             "Based on today's usage"
                                                                                         ) : service.limitType === "MONTHLY" ? (
@@ -410,8 +416,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                             </div>
 
                                                                             {hasLimit ? (
-                                                                                <div className="mt-2">
-                                                                                    <div className="flex justify-between text-sm mb-1.5">
+                                                                                <div className="mt-4">
+                                                                                    <div className="flex justify-between text-xs sm:text-sm mb-1.5">
                                                                                         <span className="text-muted-foreground">Usage</span>
                                                                                         <span className="font-medium">
                                                                                             {usage.current} / {service.limitValue}
@@ -430,8 +436,8 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                                                     />
                                                                                 </div>
                                                                             ) : (
-                                                                                <div className="mt-2">
-                                                                                    <div className="flex justify-between text-sm mb-1.5">
+                                                                                <div className="mt-4">
+                                                                                    <div className="flex justify-between text-xs sm:text-sm mb-1.5">
                                                                                         <span className="text-muted-foreground">Usage</span>
                                                                                         <span className="font-medium">
                                                                                             {usage.current} / UNLIMITED
@@ -446,18 +452,6 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                {/* <div className="flex justify-end gap-3 mt-2">
-                                                    {subscription.status.toLowerCase() === "active" && !subscription.cancelAtPeriodEnd && (
-                                                        <Button
-                                                            variant="outline"
-                                                            className="text-destructive border-destructive hover:bg-destructive/10"
-                                                        >
-                                                            Cancel Subscription
-                                                        </Button>
-                                                    )}
-                                                    <Button>Manage Billing</Button>
-                                                </div> */}
                                             </div>
                                         </DialogContent>
                                     </Dialog>

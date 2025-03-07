@@ -164,9 +164,9 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                             ))}
                         </motion.div>
                     ) : (
-                        <div className="bg-muted/30 rounded-xl p-10 text-center">
+                        <div className="bg-muted/30 dark:bg-muted/10 rounded-xl p-10 text-center">
                             <div className="flex justify-center mb-4">
-                                <div className="p-3 rounded-full bg-muted">
+                                <div className="p-3 rounded-full bg-muted dark:bg-muted/20">
                                     <Package className="h-6 w-6 text-muted-foreground" />
                                 </div>
                             </div>
@@ -195,9 +195,9 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                             ))}
                         </motion.div>
                     ) : (
-                        <div className="bg-muted/30 rounded-xl p-10 text-center">
+                        <div className="bg-muted/30 dark:bg-muted/10 rounded-xl p-10 text-center">
                             <div className="flex justify-center mb-4">
-                                <div className="p-3 rounded-full bg-muted">
+                                <div className="p-3 rounded-full bg-muted dark:bg-muted/20">
                                     <ShoppingBag className="h-6 w-6 text-muted-foreground" />
                                 </div>
                             </div>

@@ -29,13 +29,14 @@ export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
                                     scale: isActive ? 1.1 : 1,
                                 }}
                                 className={`relative w-12 h-12 rounded-full flex items-center justify-center
-                  ${isCompleted ? "bg-primary" : isActive ? "bg-white" : "bg-transparent"}
-                  before:absolute before:inset-0 before:rounded-full before:p-[2px]
-                  before:bg-gradient-to-r before:from-blue-500 before:via-violet-500 before:to-pink-500
-                  before:content-[''] before:opacity-${isActive || isCompleted ? "100" : "30"}
-                  after:absolute after:inset-[2px] after:rounded-full after:bg-white
-                  after:content-['']
-                `}
+                                    ${isCompleted ? "bg-primary" : isActive ? "bg-background" : "bg-transparent"}
+                                    before:absolute before:inset-0 before:rounded-full before:p-[2px]
+                                    before:bg-gradient-to-r before:from-blue-500 before:via-violet-500 before:to-pink-500
+                                    before:content-[''] before:opacity-${isActive || isCompleted ? "100" : "30"}
+                                    after:absolute after:inset-[2px] after:rounded-full after:bg-background
+                                    after:content-['']
+                                    dark:after:bg-background
+                                `}
                                 style={{
                                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                                 }}
@@ -44,7 +45,7 @@ export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
                                     <motion.svg
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
-                                        className="w-5 h-5 text-black relative z-10"
+                                        className="w-5 h-5 text-foreground relative z-10"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -61,14 +62,16 @@ export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
                                     </motion.svg>
                                 ) : (
                                     <Icon
-                                        className={`h-5 w-5 relative z-10 ${isActive ? "text-primary" : "text-muted-foreground"
-                                            } transition-colors`}
+                                        className={`h-5 w-5 relative z-10 ${
+                                            isActive ? "text-primary" : "text-muted-foreground"
+                                        } transition-colors`}
                                     />
                                 )}
                             </motion.div>
                             <span
-                                className={`text-sm font-medium mt-2 ${isActive ? "text-primary" : "text-muted-foreground"
-                                    } transition-colors`}
+                                className={`text-sm font-medium mt-2 ${
+                                    isActive ? "text-primary" : "text-muted-foreground"
+                                } transition-colors`}
                             >
                                 {step.title}
                             </span>
@@ -77,7 +80,9 @@ export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
                             <motion.div
                                 initial={false}
                                 animate={{
-                                    background: isCompleted ? "linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)" : "var(--border)",
+                                    background: isCompleted 
+                                        ? "linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)" 
+                                        : "var(--border)",
                                 }}
                                 className="h-px w-24 mx-2 mt-[-20px]"
                             />

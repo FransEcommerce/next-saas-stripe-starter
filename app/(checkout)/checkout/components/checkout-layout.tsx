@@ -22,8 +22,8 @@ export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00" }:
     return (
         <div className="min-h-screen grid md:grid-cols-[1fr_620px]">
             {/* Main Content */}
-            <main className="relative flex flex-col min-h-screen bg-white">
-                <div className="sticky top-0 z-20 bg-white border-b">
+            <main className="relative flex flex-col min-h-screen bg-background">
+                <div className="sticky top-0 z-20 bg-background border-b">
                     <div className="px-4 py-3 flex items-center justify-between mx-auto">
                         <Link
                             href="/dashboard/plugins"
@@ -94,7 +94,7 @@ export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00" }:
             </main>
 
             {/* Desktop Order Summary Sidebar - Hidden on Mobile */}
-            <aside className="hidden md:block relative border-l bg-muted/10">
+            <aside className="hidden md:block relative border-l bg-muted/10 dark:bg-muted/5">
                 <div className="sticky top-0 h-screen overflow-auto">
                     <div className="max-w-[500px] mx-auto px-8 py-16">
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>

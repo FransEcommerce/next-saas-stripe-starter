@@ -116,7 +116,7 @@ export function LicenseDashboard({ initialLicenses }: LicenseDashboardProps) {
                             filteredLicenses.map((license) => (
                                 <Card
                                     key={license.id}
-                                    className="overflow-hidden group hover:shadow-lg transition-all duration-300 border-0 shadow-md"
+                                    className="overflow-hidden group hover:shadow-lg transition-all duration-300 border shadow-md"
                                 >
                                     <div className="relative h-48 w-full">
                                         <Image
@@ -158,8 +158,8 @@ export function LicenseDashboard({ initialLicenses }: LicenseDashboardProps) {
                                                     <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground block mb-1">
                                                         Domain
                                                     </span>
-                                                    <p className="font-medium text-sm truncate" title={license.domain}>
-                                                        {license.domain}
+                                                    <p className="font-medium text-sm truncate" title={license.domain || "-"}>
+                                                        {license.domain || "-"}
                                                     </p>
                                                 </div>
 
@@ -225,7 +225,7 @@ export function LicenseDashboard({ initialLicenses }: LicenseDashboardProps) {
                                                     </div>
                                                     <div className="grid grid-cols-3 items-center gap-4">
                                                         <span className="text-sm font-medium">Domain:</span>
-                                                        <span className="col-span-2">{license.domain}</span>
+                                                        <span className="col-span-2">{license.domain || "-"}</span>
                                                     </div>
                                                 </div>
                                             </DialogContent>
@@ -288,8 +288,8 @@ export function LicenseDashboard({ initialLicenses }: LicenseDashboardProps) {
                                                     <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground block mb-1">
                                                         Domain
                                                     </span>
-                                                    <p className="font-medium text-sm truncate" title={license.domain}>
-                                                        {license.domain}
+                                                    <p className="font-medium text-sm truncate" title={license.domain || "-"}>
+                                                        {license.domain || "-"}
                                                     </p>
                                                 </div>
 
