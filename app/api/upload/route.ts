@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
+// 使用新的路由段配置方式
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
+// 设置最大请求体大小为10mb
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 export async function POST(req: NextRequest) {
   try {
     // 验证用户会话（可选）
@@ -64,12 +73,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// 增加最大请求体大小限制
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
