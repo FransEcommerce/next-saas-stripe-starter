@@ -55,6 +55,7 @@ export async function getProductsAndPurchases() {
         purchaseDate: purchase.createdAt.toISOString(),
         expiryDate: purchase.license?.expiresAt?.toISOString() || null,
         licenseKey: purchase.license?.licenseKey || null, // 添加 licenseKey
+        orderStatus: purchase.status, // 添加订单状态
         product: {
             id: purchase.product.id,
             name: purchase.product.name,

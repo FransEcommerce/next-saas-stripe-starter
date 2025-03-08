@@ -25,5 +25,6 @@ export interface Purchase {
     purchaseDate: string;
     expiryDate: string | null;
     licenseKey: string | null;
+    orderStatus: string; 
     product: Product;
 }

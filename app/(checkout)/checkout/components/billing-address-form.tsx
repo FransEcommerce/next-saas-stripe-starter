@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label"
 import { Country, CountryDropdown } from "@/components/ui/country-dropdown"
 import { PhoneInput, CountryData } from "@/components/ui/phone-input"
 import { State, City } from "country-state-city"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { countries } from "country-data-list"
 import { StateProvinceSelect } from "@/components/ui/state-province-select"
 import { CitySelect } from "@/components/ui/city-select"
@@ -24,21 +23,21 @@ interface BillingAddressFormProps {
     phone: string
   }
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  setFormData: React.Dispatch<React.SetStateAction<any>>
+  handleFormDataChange?: (data: Partial<any>) => void
   onNext: () => void
 }
 
 export function BillingAddressForm({
   formData,
   handleInputChange,
-  setFormData,
+  handleFormDataChange,
   onNext
 }: BillingAddressFormProps) {
   const [selectedCountry, setSelectedCountry] = React.useState<Country | null>(null)
   const [countryData, setCountryData] = React.useState<CountryData>()
   const [states, setStates] = React.useState<any[]>([])
   const [cities, setCities] = React.useState<any[]>([])
-  const [isInitialized, setIsInitialized] = React.useState(false)
+  const [countryCode, setCountryCode] = React.useState<string | null>(null)
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -48,10 +47,11 @@ export function BillingAddressForm({
 
   React.useEffect(() => {
     if (formData.country && !selectedCountry) {
-      const country = countries.all.find((c) => c.alpha3 === formData.country);
+      const country = countries.all.find((c) => c.alpha3 === formData.country) || countries.all.find((c) => c.name.toLowerCase() === formData.country.toLowerCase());
       if (country) {
         setSelectedCountry(country as Country);
         setCountryData(country as CountryData);
+        setCountryCode(country.alpha3);
       }
     }
   }, [formData.country, selectedCountry]);
@@ -60,42 +60,94 @@ export function BillingAddressForm({
     if (selectedCountry) {
       const statesList = State.getStatesOfCountry(selectedCountry.alpha2);
       setStates(statesList);
+      if (formData.state) {
+        const stateByCode = statesList.find(s => s.isoCode === formData.state);
+        if (stateByCode) {
+        } else {
+          const stateByName = statesList.find(s => s.name === formData.state);
+          if (stateByName && handleFormDataChange) {
+            handleFormDataChange({ state: stateByName.isoCode });
+          }
+        }
+      }
     }
-  }, [selectedCountry]);
+  }, [selectedCountry, formData.state, handleFormDataChange]);
 
   React.useEffect(() => {
-    if (selectedCountry?.alpha2 && formData.state && !isInitialized) {
+    if (selectedCountry?.alpha2 && formData.state) {
       const citiesList = City.getCitiesOfState(selectedCountry.alpha2, formData.state);
       setCities(citiesList);
-      setIsInitialized(true);
+      if (formData.city && citiesList.length > 0) {
+        const cityExists = citiesList.some(c => c.name === formData.city);
+        if (!cityExists && handleFormDataChange) {
+        }
+      }
     }
-  }, [selectedCountry, formData.state, isInitialized]);
+  }, [selectedCountry, formData.state, formData.city, handleFormDataChange]);
 
-  // 添加一个函数来获取州名
-  const getStateName = (countryCode: string, stateCode: string) => {
-    const state = State.getStateByCodeAndCountry(stateCode, countryCode)
-    return state?.name || stateCode
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedCountry && handleFormDataChange) {
+      const countryName = selectedCountry.name;
+      
+      let stateName = formData.state;
+      if (selectedCountry.alpha2 && formData.state) {
+        const stateObj = State.getStateByCodeAndCountry(formData.state, selectedCountry.alpha2);
+        if (stateObj) {
+          stateName = stateObj.name;
+        }
+      }
+      
+      handleFormDataChange({
+        state: stateName,
+        country: countryName
+      });
+    }
+    onNext();
+  };
+
+  const handleCountryChange = (country: Country) => {
+    setSelectedCountry(country);
+    setCountryData(country);
+    setCountryCode(country.alpha3);
+    if (handleFormDataChange) {
+      handleFormDataChange({ 
+        country: country.alpha3,  
+        state: "",
+        city: ""
+      });
+      if (country.countryCallingCodes && country.countryCallingCodes.length > 0) {
+        handleFormDataChange({ phone: country.countryCallingCodes[0] });
+      }
+    }
+  };
+
+  const handleStateChange = (value: string) => {
+    if (handleFormDataChange) {
+      handleFormDataChange({ 
+        state: value,
+        city: "" 
+      });
+    }
+  };
+
+  const handleCityChange = (value: string) => {
+    if (handleFormDataChange) {
+      handleFormDataChange({ city: value });
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    if (handleFormDataChange) {
+      handleFormDataChange({ phone: value });
+    }
+  };
 
   return (
     <motion.form
       {...fadeIn}
       className="space-y-6"
-      onSubmit={(e) => {
-        e.preventDefault()
-        
-        // 在提交前转换州代码为州名
-        if (selectedCountry?.alpha2 && formData.state) {
-          const stateName = getStateName(selectedCountry.alpha2, formData.state)
-          setFormData(prev => ({
-            ...prev,
-            state: stateName,
-            country: selectedCountry.name  // 使用国家名称而不是代码
-          }))
-        }
-        
-        onNext()
-      }}
+      onSubmit={handleSubmit}
     >
       <div className="space-y-4">
         <div className="space-y-2">
@@ -127,23 +179,8 @@ export function BillingAddressForm({
             <Label htmlFor="country">Country</Label>
             <CountryDropdown
               placeholder="Select country"
-              defaultValue={formData.country}
-              onChange={(country) => {
-                setFormData((prev: any) => ({ 
-                  ...prev, 
-                  country: country.name,  // 保存国家名称而不是代码
-                  state: "",
-                  city: ""
-                }));
-                setSelectedCountry(country);
-                setCountryData(country);
-                if (country.countryCallingCodes && country.countryCallingCodes.length > 0) {
-                  setFormData((prev: any) => ({ 
-                    ...prev, 
-                    phone: country.countryCallingCodes[0] 
-                  }));
-                }
-              }}
+              defaultValue={countryCode || formData.country}
+              onChange={handleCountryChange}
             />
           </div>
           <div className="space-y-2">
@@ -174,18 +211,14 @@ export function BillingAddressForm({
           <StateProvinceSelect
             countryCode={selectedCountry?.alpha2}
             value={formData.state || ""}
-            onChange={(value) => setFormData((prev: any) => ({ 
-              ...prev, 
-              state: value,
-              city: "" 
-            }))}
+            onChange={handleStateChange}
             required
           />
           <CitySelect
             countryCode={selectedCountry?.alpha2}
             stateCode={formData.state || ""}
             value={formData.city || ""}
-            onChange={(value) => setFormData((prev: any) => ({ ...prev, city: value }))}
+            onChange={handleCityChange}
             required
           />
         </div>
@@ -206,7 +239,7 @@ export function BillingAddressForm({
             <Label htmlFor="phone">Phone</Label>
             <PhoneInput
               value={formData.phone || ""}
-              onChange={(value) => setFormData((prev: any) => ({ ...prev, phone: value }))}
+              onChange={handlePhoneChange}
               defaultCountry={selectedCountry?.alpha2}
               onCountryChange={setCountryData}
             />

@@ -399,7 +399,7 @@ export function EditPaymentDialog({
                             id="order-payments"
                             parentId={process.env.NEXT_PUBLIC_PAYMENT_PARENT_ID}
                             onUploadComplete={(data) => {
-                              setProofUrl(data.downloadUrl);
+                              setProofUrl(data.downloadUrl || "");
                               field.onChange(data.downloadUrl);
                             }}
                             accept="image/*,.pdf"

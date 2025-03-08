@@ -10,21 +10,18 @@ export interface OrderListProps {
         paymentMethod?: string | null; // 添加 paymentMethod 属性
         paymentNote?: string | null; // 添加 paymentNote 属性
         paymentProof?: string | null; // 添加 paymentProof 属性
-        couponCode?: string | null; // 添加 couponCode 属性
-        coupon?: {
-            code: string;
-            value: number;
-            type: string;
-        } | null; // 添加 coupon 属性
+        couponId?: string | null; // 使用 couponId 替代 couponCode 和 coupon
         product: {
             name: string;
             price: string | number; // 添加 price 属性
+            comparePrice?: number | null;
             plugin: {
+                id: string;
                 name: string;
                 version: string; // 添加 version 属性
                 avatar?: string | null;
                 description?: string | null; // 添加 description 属性
-            };
+            } | null;
         };
         user: {
             name?: string | null;

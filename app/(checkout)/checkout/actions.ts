@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/session"
 import { generateOrderNumber } from "@/lib/order";
 import { redirect } from "next/navigation"
 import { OrderStatus } from "@prisma/client"
+import { PaymentGatewayService } from "@/lib/payment-gateways/payment-gateway-service"
 
 interface CheckoutInput {
   productId: string
@@ -26,6 +27,8 @@ interface CheckoutInput {
   razorpayPaymentId?: string
   razorpayOrderId?: string
   razorpaySignature?: string
+  paypalOrderId?: string
+  paypalPaymentId?: string
   status?: OrderStatus
 }
 
@@ -80,10 +83,66 @@ export async function createCheckoutOrder(data: CheckoutInput) {
     const subtotal = Number(product.price)
     const total = subtotal - discountAmount
 
-    // 如果是 Razorpay 支付，确保有支付验证信息
-    if (data.paymentMethod === 'razorpay' && 
-        (!data.razorpayPaymentId || !data.razorpayOrderId || !data.razorpaySignature)) {
-      throw new Error("Missing Razorpay payment verification data");
+    // 根据支付方式进行验证
+    let paymentStatus: OrderStatus = "PENDING";
+    let gatewayFee: number | null = null;
+    let gatewayFeeCurrency: string | null = null;
+    
+    if (data.paymentMethod === 'razorpay') {
+      if (!data.razorpayPaymentId || !data.razorpayOrderId || !data.razorpaySignature) {
+        throw new Error("Missing Razorpay payment verification data");
+      }
+      
+      // 使用支付网关服务验证Razorpay支付
+      const verifyResult = await PaymentGatewayService.verifyPayment('razorpay', {
+        orderId: data.razorpayOrderId,
+        paymentId: data.razorpayPaymentId,
+        signature: data.razorpaySignature
+      });
+      
+      if (!verifyResult.verified) {
+        throw new Error(verifyResult.error || "Payment verification failed");
+      }
+      
+      paymentStatus = "COMPLETED";
+      
+      // 保存支付网关手续费和货币
+      if (verifyResult.gatewayFee !== undefined) {
+        gatewayFee = verifyResult.gatewayFee;
+      }
+      if (verifyResult.gatewayFeeCurrency !== undefined) {
+        gatewayFeeCurrency = verifyResult.gatewayFeeCurrency;
+      }
+    } else if (data.paymentMethod === 'paypal') {
+      if (!data.paypalOrderId || !data.paypalPaymentId) {
+        throw new Error("Missing PayPal payment verification data");
+      }
+      
+      // 使用支付网关服务验证PayPal支付
+      const verifyResult = await PaymentGatewayService.verifyPayment('paypal', {
+        orderId: data.paypalOrderId,
+        paymentId: data.paypalPaymentId
+      });
+      
+      if (!verifyResult.verified) {
+        throw new Error(verifyResult.error || "PayPal payment verification failed");
+      }
+      
+      paymentStatus = "COMPLETED";
+      
+      // 保存支付网关手续费和货币
+      if (verifyResult.gatewayFee !== undefined) {
+        gatewayFee = verifyResult.gatewayFee;
+      }
+      if (verifyResult.gatewayFeeCurrency !== undefined) {
+        gatewayFeeCurrency = verifyResult.gatewayFeeCurrency;
+      }
+    } else if (data.paymentMethod === 'manual-transfer') {
+      if (!data.paymentProof) {
+        throw new Error("Payment proof is required for manual transfer");
+      }
+      
+      paymentStatus = "PENDING";
     }
 
     // 创建订单
@@ -97,7 +156,7 @@ export async function createCheckoutOrder(data: CheckoutInput) {
           amount: total,
           subtotal,
           discountAmount,
-          status: (data.status as OrderStatus) || "PENDING",
+          status: data.status || paymentStatus,
           paymentMethod: data.paymentMethod,
           paymentNote: data.paymentNote,
           paymentProof: data.paymentProof,
@@ -115,6 +174,10 @@ export async function createCheckoutOrder(data: CheckoutInput) {
           razorpayPaymentId: data.razorpayPaymentId,
           razorpayOrderId: data.razorpayOrderId,
           razorpaySignature: data.razorpaySignature,
+          paypalOrderId: data.paypalOrderId,
+          paypalPaymentId: data.paypalPaymentId,
+          gatewayFee: gatewayFee,
+          gatewayFeeCurrency: gatewayFeeCurrency,
         },
       })
 

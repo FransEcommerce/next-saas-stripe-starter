@@ -1,158 +1,176 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
-import { Button } from "@/components/ui/button"
-import { useRouter } from 'next/navigation'
+import { Card, CardContent } from "@/components/ui/card"
+import { loadScript } from "@/lib/utils"
 
 interface RazorpayFormProps {
   total: number
-  formData: {
-    billingName: string
-    billingEmail: string
-    billingPhone: string
-  }
-  onPaymentComplete: (paymentData: {
-    razorpayPaymentId: string
-    razorpayOrderId: string
-    razorpaySignature: string
-    paymentMethod: string
-  }) => void
-  onCreateOrder: (orderData: any) => Promise<{ success: boolean; orderNumber?: string; error?: string }>
+  isLoading?: boolean
+  onSubmit?: () => void
   productName: string
+  onLoaded?: () => void
 }
 
-export function RazorpayForm({ 
+export interface RazorpayFormRef {
+  handlePayment: () => Promise<void>;
+  isLoaded: boolean;
+  isProcessing: boolean;
+}
+
+const RazorpayFormComponent = forwardRef<RazorpayFormRef, RazorpayFormProps>(({ 
   total, 
-  formData, 
-  onPaymentComplete,
-  onCreateOrder,
-  productName
-}: RazorpayFormProps) {
-  const [isProcessing, setIsProcessing] = useState(false)
-  const router = useRouter()
+  isLoading = false,
+  onSubmit,
+  productName,
+  onLoaded
+}, ref) => {
+  const { register, setValue, watch } = useFormContext();
+  const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [razorpayOrderId, setRazorpayOrderId] = useState("");
 
-  // 添加 Razorpay 脚本
+  // 加载 Razorpay 脚本
   useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-    document.body.appendChild(script)
+    loadScript("https://checkout.razorpay.com/v1/checkout.js")
+      .then(() => {
+        setIsRazorpayLoaded(true);
+        if (onLoaded) onLoaded();
+      })
+      .catch((error) => {
+        console.error("Failed to load Razorpay:", error);
+        toast.error("Failed to load payment gateway. Please try again.");
+      });
+  }, [onLoaded]);
 
-    return () => {
-      document.body.removeChild(script)
+  // 创建 Razorpay 订单
+  const createRazorpayOrder = async () => {
+    try {
+      setIsProcessing(true);
+      const response = await fetch("/api/payment-gateways/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: total,
+          currency: "USD",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create order");
+      }
+
+      const data = await response.json();
+      return data.orderId;
+    } catch (error) {
+      console.error("Error creating Razorpay order:", error);
+      toast.error("Failed to create payment order. Please try again.");
+      return null;
+    } finally {
+      setIsProcessing(false);
     }
-  }, [])
+  };
 
-  const handlePayment = async () => {
-    if (isProcessing) return
-    setIsProcessing(true)
+  // 处理 Razorpay 支付
+  const handleRazorpayPayment = async () => {
+    if (!isRazorpayLoaded) {
+      toast.error("Payment gateway is still loading. Please wait.");
+      return;
+    }
 
     try {
-      // 1. 创建 Razorpay 订单
-      const response = await fetch('/api/payment-gateways/razorpay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total, currency: 'USD' })
-      })
+      // 设置处理状态为 true
+      setIsProcessing(true);
+      
+      const orderId = await createRazorpayOrder();
+      if (!orderId) {
+        setIsProcessing(false);
+        return;
+      }
 
-      if (!response.ok) throw new Error('Failed to create order')
-      const data = await response.json()
+      setRazorpayOrderId(orderId);
+      setValue("razorpayOrderId", orderId);
 
-      // 2. 配置 Razorpay 选项
+      const billingInfo = watch("billingInfo");
+
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: total * 100,
-        currency: 'USD',
-        name: 'NextPion',
-        description: productName,
+        currency: "USD",
+        name: "NextPion",
+        description: productName || "Product Purchase",
         image: 'https://nextpion.frs.com.my/favicon.png',
-        order_id: data.orderId,
-        handler: async function (response: any) {
-          try {
-            // 验证支付
-            const verifyResponse = await fetch('/api/payment-gateways/razorpay/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderCreationId: data.orderId,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature
-              })
-            })
-
-            const verifyResult = await verifyResponse.json()
-
-            if (!verifyResult.verified) {
-              throw new Error('Payment verification failed')
-            }
-
-            // 支付验证成功，创建已完成状态的订单
-            const paymentData = {
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: data.orderId,
-              razorpaySignature: response.razorpay_signature,
-              paymentMethod: 'razorpay',
-              status: "COMPLETED"
-            }
-
-            // 创建订单
-            const orderResult = await onCreateOrder(paymentData)
-            
-            if (orderResult.success && orderResult.orderNumber) {
-              toast.success('Payment successful!')
-              router.push(`/checkout/thank-you?orderNumber=${orderResult.orderNumber}`)
-            } else {
-              throw new Error(orderResult.error || 'Failed to create order')
-            }
-          } catch (error) {
-            console.error('Order creation failed:', error)
-            toast.error('Payment verification failed. Please contact support.')
+        order_id: orderId,
+        handler: function (response: any) {
+          setValue("razorpayPaymentId", response.razorpay_payment_id);
+          setValue("razorpayOrderId", response.razorpay_order_id);
+          setValue("razorpaySignature", response.razorpay_signature);
+          setValue("status", "COMPLETED");
+          
+          toast.success("Payment Successful");
+          
+          // 提交表单
+          if (onSubmit) {
+            onSubmit();
           }
+          
+          // 重置处理状态
+          setIsProcessing(false);
+        },
+        prefill: {
+          name: billingInfo?.name || "",
+          email: billingInfo?.email || "",
+          contact: billingInfo?.phone || "",
+        },
+        theme: {
+          color: "#000000",
         },
         modal: {
           ondismiss: function() {
-            // 用户关闭支付窗口
-            toast.error('Payment cancelled')
+            // 当用户关闭 Razorpay 弹窗时重置处理状态
+            setIsProcessing(false);
           }
-        },
-        prefill: {
-          name: formData.billingName,
-          email: formData.billingEmail,
-          contact: formData.billingPhone
-        },
-        theme: {
-          color: '#000000'
         }
-      }
+      };
 
-      // 3. 初始化 Razorpay
-      const razorpay = new (window as any).Razorpay(options)
-      razorpay.open()
-
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
     } catch (error) {
-      console.error('Payment failed:', error)
-      toast.error('Payment failed. Please try again.')
-    } finally {
-      setIsProcessing(false)
+      console.error("Razorpay payment error:", error);
+      toast.error("There was an error processing your payment. Please try again.");
+      // 重置处理状态
+      setIsProcessing(false);
     }
-  }
+  };
+
+  // 导出方法供外部调用
+  useImperativeHandle(ref, () => ({
+    handlePayment: handleRazorpayPayment,
+    isLoaded: isRazorpayLoaded,
+    isProcessing
+  }));
 
   return (
-    <Button
-      type="button"
-      className="flex-1"
-      disabled={isProcessing}
-      onClick={handlePayment}
-    >
-      {isProcessing ? (
-        <div className="flex items-center">
-          <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-          Processing...
-        </div>
-      ) : (
-        "Pay Now"
-      )}
-    </Button>
-  )
-} 
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-sm">
+            You will be redirected to Razorpay to complete your payment.
+            After payment, you will be returned to this page.
+          </p>
+        </CardContent>
+      </Card>
+      <input
+        type="hidden"
+        {...register("razorpayOrderId")}
+        value={razorpayOrderId}
+      />
+    </div>
+  );
+});
+
+RazorpayFormComponent.displayName = "RazorpayForm";
+
+export const RazorpayForm = RazorpayFormComponent;

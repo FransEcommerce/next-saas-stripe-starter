@@ -14,7 +14,15 @@ export async function getUserOrders() {
         include: {
             product: {
                 include: {
-                    plugin: true,
+                    plugin: {
+                        select: {
+                            id: true,
+                            name: true,
+                            version: true,
+                            avatar: true,
+                            description: true,
+                        }
+                    },
                 },
             },
             license: true,
@@ -56,6 +64,13 @@ export async function getUserOrders() {
             ...order.product,
             price: Number(order.product.price.toString()),
             comparePrice: order.product.comparePrice ? Number(order.product.comparePrice.toString()) : null,
+            plugin: order.product.plugin ? {
+                id: order.product.plugin.id,
+                name: order.product.plugin.name,
+                version: order.product.plugin.version,
+                avatar: order.product.plugin.avatar,
+                description: order.product.plugin.description,
+            } : null,
         },
         license: order.license ? {
             id: order.license.id,

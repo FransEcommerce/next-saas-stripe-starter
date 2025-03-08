@@ -71,17 +71,33 @@ const CountryDropdownComponent = (
 
   useEffect(() => {
     if (defaultValue) {
-      const initialCountry = options.find(
+      // 首先尝试通过 alpha3 代码查找
+      let initialCountry = options.find(
         (country) => country.alpha3 === defaultValue
       );
+      
+      // 如果没找到，尝试通过 alpha2 代码查找
+      if (!initialCountry) {
+        initialCountry = options.find(
+          (country) => country.alpha2 === defaultValue
+        );
+      }
+      
+      // 如果还没找到，尝试通过国家名称查找（不区分大小写）
+      if (!initialCountry) {
+        initialCountry = options.find(
+          (country) => country.name.toLowerCase() === defaultValue.toLowerCase()
+        );
+      }
+      
       if (initialCountry) {
         setSelectedCountry(initialCountry);
       } else {
-        // Reset selected country if defaultValue is not found
+        // 重置选中的国家，如果找不到匹配的国家
         setSelectedCountry(undefined);
       }
     } else {
-      // Reset selected country if defaultValue is undefined or null
+      // 如果 defaultValue 是 undefined 或 null，重置选中的国家
       setSelectedCountry(undefined);
     }
   }, [defaultValue, options]);

@@ -23,41 +23,65 @@ export function CitySelect({
   const [cities, setCities] = useState<any[]>([])
   const [selectedValue, setSelectedValue] = useState(value)
 
+  // 加载城市列表
   useEffect(() => {
     if (countryCode && stateCode) {
+      console.log("CitySelect: 加载城市列表", countryCode, stateCode);
       const citiesList = City.getCitiesOfState(countryCode, stateCode)
       setCities(citiesList)
-      
-      // 如果 value 不在城市列表中，但匹配某个城市的名称，则使用该城市的名称
-      if (value && citiesList.length > 0) {
-        const cityExists = citiesList.some(city => city.name === value)
-        if (!cityExists) {
-          // 尝试查找名称匹配的城市
-          const matchingCity = citiesList.find(city => 
-            city.name.toLowerCase() === value.toLowerCase()
-          )
-          if (matchingCity) {
-            setSelectedValue(matchingCity.name)
-            onChange(matchingCity.name)
-          }
-        } else {
-          setSelectedValue(value)
-        }
-      }
     } else {
       setCities([])
     }
-  }, [countryCode, stateCode, value, onChange])
+  }, [countryCode, stateCode])
+
+  // 处理 value 变化
+  useEffect(() => {
+    if (value && cities.length > 0) {
+      console.log("CitySelect: 处理城市值", value);
+      
+      // 检查 value 是否在城市列表中
+      const cityExists = cities.some(city => city.name === value)
+      
+      if (cityExists) {
+        console.log("CitySelect: 城市存在于列表中", value);
+        setSelectedValue(value)
+      } else {
+        // 尝试查找名称匹配的城市（不区分大小写）
+        const matchingCity = cities.find(city => 
+          city.name.toLowerCase() === value.toLowerCase()
+        )
+        
+        if (matchingCity) {
+          console.log("CitySelect: 找到匹配的城市", value, "->", matchingCity.name);
+          setSelectedValue(matchingCity.name)
+          // 通知父组件正确的城市名称
+          if (matchingCity.name !== value) {
+            onChange(matchingCity.name)
+          }
+        } else {
+          console.log("CitySelect: 城市不存在于列表中", value);
+          // 如果城市不存在于列表中，保持当前值，让用户自己选择
+          setSelectedValue("")
+        }
+      }
+    } else {
+      setSelectedValue("")
+    }
+  }, [value, cities, onChange])
+
+  // 处理选择变化
+  const handleChange = (newValue: string) => {
+    console.log("CitySelect: 选择变更", newValue);
+    setSelectedValue(newValue)
+    onChange(newValue)
+  }
 
   return (
     <div className="space-y-2">
       <Label htmlFor="city">{label}{required && <span className="text-red-500 ml-1">*</span>}</Label>
       <Select
         value={selectedValue}
-        onValueChange={(val) => {
-          setSelectedValue(val)
-          onChange(val)
-        }}
+        onValueChange={handleChange}
         disabled={cities.length === 0}
       >
         <SelectTrigger id="city">
@@ -77,4 +101,4 @@ export function CitySelect({
       </Select>
     </div>
   )
-} 
+}

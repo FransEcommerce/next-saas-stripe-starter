@@ -161,19 +161,23 @@ function OrderSummarySidebar({
                     <span className="font-medium">#{order.orderNumber}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Amount:</span>
+                    <span className="text-muted-foreground">Subtotal:</span>
                     <span className="font-medium">
+                      {formatPrice(order.subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Discount:</span>
+                    <span className="font-medium text-green-600 dark:text-green-400">
+                      -{formatPrice(order.discountAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-base font-medium">Total:</span>
+                    <span className="text-base font-medium">
                       {formatPrice(order.amount)}
                     </span>
                   </div>
-                  {order.discountAmount && Number(order.discountAmount) > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Discount:</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">
-                        -{formatPrice(order.discountAmount)}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

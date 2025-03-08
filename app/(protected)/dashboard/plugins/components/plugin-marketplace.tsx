@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Grid3X3, List, Package, Search, ShoppingBag, CheckCircle } from "lucide-react"
+import { Grid3X3, List, Package, Search, ShoppingBag, CheckCircle, Clock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,21 +49,21 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
         }
     })
 
-    // Check if a product is purchased
-    const isProductPurchased = (productId: string) => {
-        return userPurchases.some((purchase) => purchase.product.id === productId)
-    }
-
-    // Get expiry date for a purchased product
-    const getPurchaseExpiryDate = (productId: string) => {
-        const purchase = userPurchases.find((p) => p.product.id === productId)
-        return purchase?.expiryDate || null
-    }
-
-    // Get license key for a purchased product
-    const getLicenseKey = (productId: string) => {
-        const purchase = userPurchases.find((p) => p.product.id === productId)
-        return purchase?.licenseKey || null
+    // 检查产品状态
+    const getProductStatus = (productId: string) => {
+        const purchase = userPurchases.find((p) => p.product.id === productId);
+        if (!purchase) return { isPurchased: false, isPending: false };
+        
+        // 根据订单状态判断
+        const status = purchase.orderStatus;
+        const isPurchased = status === 'COMPLETED' || status === 'PAID';
+        const isPending = status === 'PENDING' || status === 'PROCESSING';
+        
+        return { 
+            isPurchased, 
+            isPending,
+            purchase 
+        };
     }
 
     // Handle purchase
@@ -88,6 +88,16 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
         show: { opacity: 1, y: 0 },
     }
 
+    // 获取已完成购买的插件
+    const completedPurchases = userPurchases.filter(
+        purchase => purchase.orderStatus === 'COMPLETED' || purchase.orderStatus === 'PAID'
+    );
+
+    // 获取处理中的订单
+    const pendingPurchases = userPurchases.filter(
+        purchase => purchase.orderStatus === 'PENDING' || purchase.orderStatus === 'PROCESSING'
+    );
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col space-y-2">
@@ -103,7 +113,14 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                             <CheckCircle className="h-3.5 w-3.5" />
                             My Plugins
                             <span className="ml-1 bg-primary/20 text-primary px-1.5 py-0.5 rounded-full text-xs">
-                                {userPurchases.length}
+                                {completedPurchases.length}
+                            </span>
+                        </TabsTrigger>
+                        <TabsTrigger value="pending" className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" />
+                            Processing
+                            <span className="ml-1 bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded-full text-xs">
+                                {pendingPurchases.length}
                             </span>
                         </TabsTrigger>
                     </TabsList>
@@ -151,17 +168,22 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                             initial="hidden"
                             animate="show"
                         >
-                            {sortedProducts.map((product) => (
-                                <motion.div key={product.id} variants={itemVariants}>
-                                    <PluginCard
-                                        product={product}
-                                        isPurchased={isProductPurchased(product.id)}
-                                        purchaseExpiryDate={getPurchaseExpiryDate(product.id)}
-                                        licenseKey={getLicenseKey(product.id)}
-                                        onPurchase={handlePurchase}
-                                    />
-                                </motion.div>
-                            ))}
+                            {sortedProducts.map((product) => {
+                                const { isPurchased, isPending, purchase } = getProductStatus(product.id);
+                                return (
+                                    <motion.div key={product.id} variants={itemVariants}>
+                                        <PluginCard
+                                            product={product}
+                                            isPurchased={isPurchased}
+                                            isPending={isPending}
+                                            purchaseExpiryDate={purchase?.expiryDate || null}
+                                            licenseKey={purchase?.licenseKey || null}
+                                            orderStatus={purchase?.orderStatus || null}
+                                            onPurchase={handlePurchase}
+                                        />
+                                    </motion.div>
+                                );
+                            })}
                         </motion.div>
                     ) : (
                         <div className="bg-muted/30 dark:bg-muted/10 rounded-xl p-10 text-center">
@@ -181,16 +203,23 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                 </TabsContent>
 
                 <TabsContent value="purchased">
-                    {userPurchases.length > 0 ? (
+                    {completedPurchases.length > 0 ? (
                         <motion.div
                             className={`grid gap-6 ${viewMode === "grid" ? "md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
                             variants={containerVariants}
                             initial="hidden"
                             animate="show"
                         >
-                            {userPurchases.map((purchase) => (
+                            {completedPurchases.map((purchase) => (
                                 <motion.div key={purchase.id} variants={itemVariants}>
-                                    <PluginCard product={purchase.product} isPurchased={true} purchaseExpiryDate={purchase.expiryDate} licenseKey={purchase.licenseKey} />
+                                    <PluginCard 
+                                        product={purchase.product} 
+                                        isPurchased={true} 
+                                        isPending={false}
+                                        purchaseExpiryDate={purchase.expiryDate} 
+                                        licenseKey={purchase.licenseKey}
+                                        orderStatus={purchase.orderStatus}
+                                    />
                                 </motion.div>
                             ))}
                         </motion.div>
@@ -202,6 +231,43 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                                 </div>
                             </div>
                             <h3 className="text-lg font-medium mb-2">No purchased plugins</h3>
+                            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                You haven't purchased any plugins yet. Browse our marketplace to find plugins that enhance your
+                                experience.
+                            </p>
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="pending">
+                    {pendingPurchases.length > 0 ? (
+                        <motion.div
+                            className={`grid gap-6 ${viewMode === "grid" ? "md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="show"
+                        >
+                            {pendingPurchases.map((purchase) => (
+                                <motion.div key={purchase.id} variants={itemVariants}>
+                                    <PluginCard 
+                                        product={purchase.product} 
+                                        isPurchased={false} 
+                                        isPending={true}
+                                        purchaseExpiryDate={purchase.expiryDate} 
+                                        licenseKey={purchase.licenseKey}
+                                        orderStatus={purchase.orderStatus}
+                                    />
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    ) : (
+                        <div className="bg-muted/30 dark:bg-muted/10 rounded-xl p-10 text-center">
+                            <div className="flex justify-center mb-4">
+                                <div className="p-3 rounded-full bg-muted dark:bg-muted/20">
+                                    <Clock className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                            </div>
+                            <h3 className="text-lg font-medium mb-2">No pending orders</h3>
                             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                                 You haven't purchased any plugins yet. Browse our marketplace to find plugins that enhance your
                                 experience.

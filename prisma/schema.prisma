@@ -236,6 +236,8 @@ model Order {
   subtotal       Decimal     @db.Decimal(10, 2) // 小计金额
   discountAmount Decimal?    @db.Decimal(10, 2) // 折扣金额
   tax            Decimal?    @db.Decimal(10, 2) // 税费
+  gatewayFee     Decimal?    @db.Decimal(10, 2) // 支付处理手续费
+  gatewayFeeCurrency String? // 支付处理手续费货币
   paymentId      String? // 支付ID
   paymentMethod  String? // 支付方式
   paymentNote    String? // 支付备注
@@ -261,6 +263,10 @@ model Order {
   razorpayPaymentId String?
   razorpayOrderId   String?
   razorpaySignature String?
+
+  // 添加 PayPal 支付相关字段
+  paypalOrderId String?
+  paypalPaymentId String?
 
   // 关联
   userId              String

@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FileText } from "lucide-react";
 import Image from "next/image";
 
 interface OrderPaymentProps {
@@ -26,6 +27,9 @@ interface OrderPaymentProps {
 }
 
 export function OrderPayment({ order }: OrderPaymentProps) {
+    // 检查是否为 PDF 文件
+    const isPdfFile = order.paymentProof?.includes('.pdf/shared/');
+
     return (
         <Card>
             <CardHeader>
@@ -77,34 +81,51 @@ export function OrderPayment({ order }: OrderPaymentProps) {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Payment Proof</span>
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="sm">
-                                                View Image
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-3xl">
-                                            <DialogHeader>
-                                                <DialogTitle>Payment Proof</DialogTitle>
-                                            </DialogHeader>
-                                            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg">
-                                                <Image
-                                                    src={order.paymentProof}
-                                                    alt="Payment proof"
-                                                    fill
-                                                    className="object-contain"
-                                                />
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
+                                    {isPdfFile ? (
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            onClick={() => order.paymentProof && window.open(order.paymentProof, "_blank")}
+                                        >
+                                            View PDF
+                                        </Button>
+                                    ) : (
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant="ghost" size="sm">
+                                                    View Image
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-3xl">
+                                                <DialogHeader>
+                                                    <DialogTitle>Payment Proof</DialogTitle>
+                                                </DialogHeader>
+                                                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg">
+                                                    <Image
+                                                        src={order.paymentProof}
+                                                        alt="Payment proof"
+                                                        fill
+                                                        className="object-contain"
+                                                    />
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
+                                    )}
                                 </div>
                                 <div className="relative h-24 w-full overflow-hidden rounded-lg bg-muted">
-                                    <Image
-                                        src={order.paymentProof}
-                                        alt="Payment proof thumbnail"
-                                        fill
-                                        className="object-cover opacity-80 hover:opacity-100 transition-opacity"
-                                    />
+                                    {isPdfFile ? (
+                                        <div className="flex items-center justify-center h-full">
+                                            <FileText className="h-10 w-10 text-red-500" />
+                                            <span className="ml-2 text-sm font-medium">PDF Document</span>
+                                        </div>
+                                    ) : (
+                                        <Image
+                                            src={order.paymentProof}
+                                            alt="Payment proof thumbnail"
+                                            fill
+                                            className="object-cover opacity-80 hover:opacity-100 transition-opacity"
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </>

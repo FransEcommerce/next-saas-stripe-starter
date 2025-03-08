@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation"
 import { AnimatePresence } from "framer-motion"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { toast } from "sonner"
+import { useForm, FormProvider } from "react-hook-form"
 
 import { CheckoutLayout } from "./checkout-layout"
-import { CheckoutSteps } from "./checkout-steps"
 import { OrderSummary } from "./order-summary"
 import { BillingAddressForm } from "./billing-address-form"
 import { PaymentForm } from "./payment-form"
@@ -25,10 +25,33 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
     const router = useRouter()
     const [currentStep, setCurrentStep] = useState(1)
     const [isProcessing, setIsProcessing] = useState(false)
-    const [paymentMethod, setPaymentMethod] = useState("card")
+    const [paymentMethod, setPaymentMethod] = useState("razorpay")
     const [couponCode, setCouponCode] = useState("")
     const [couponApplied, setCouponApplied] = useState(false)
     const [couponDiscount, setCouponDiscount] = useState(0)
+
+    // 创建表单方法
+    const methods = useForm({
+        defaultValues: {
+            paymentMethod: "razorpay",
+            paymentProof: "",
+            paymentNote: "",
+            razorpayPaymentId: "",
+            razorpayOrderId: "",
+            razorpaySignature: "",
+            billingInfo: {
+                name: "",
+                email: "",
+                company: "",
+                address: "",
+                city: "",
+                state: "",
+                zip: "",
+                country: "US",
+                phone: "",
+            }
+        }
+    });
 
     const [formData, setFormData] = useState({
         email: "",
@@ -83,6 +106,24 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
         }
     }, [product.userBillingInfo]);
 
+    // 同步 formData 和 react-hook-form
+    useEffect(() => {
+        methods.setValue("billingInfo.name", formData.name);
+        methods.setValue("billingInfo.email", formData.email);
+        methods.setValue("billingInfo.company", formData.company);
+        methods.setValue("billingInfo.address", formData.address);
+        methods.setValue("billingInfo.city", formData.city);
+        methods.setValue("billingInfo.state", formData.state);
+        methods.setValue("billingInfo.zip", formData.zip);
+        methods.setValue("billingInfo.country", formData.country);
+        methods.setValue("billingInfo.phone", formData.phone);
+    }, [formData, methods]);
+
+    // 同步支付方式
+    useEffect(() => {
+        methods.setValue("paymentMethod", paymentMethod);
+    }, [paymentMethod, methods]);
+
     const subtotal = product.price
     const discount = couponApplied ? couponDiscount : 0
     const total = subtotal - discount
@@ -127,40 +168,35 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
         }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (formValues: any) => {
         setIsProcessing(true);
 
         try {
-            const formEventData = e as any;
             const submitData = {
                 productId: product.id,
                 couponCode: couponCode,
-                paymentMethod: paymentMethod,
-                status: formEventData.target?.status,
-                paymentProof: formData.paymentProof,
-                paymentNote: formData.paymentNote,
-                billingInfo: {
-                    name: formData.name,
-                    email: formData.email,
-                    company: formData.company,
-                    address: formData.address,
-                    city: formData.city,
-                    state: formData.state,
-                    zip: formData.zip,
-                    country: formData.country,
-                    phone: formData.phone,
-                },
-                ...(formEventData.target?.razorpayPaymentId && {
-                    razorpayPaymentId: formEventData.target.razorpayPaymentId,
-                    razorpayOrderId: formEventData.target.razorpayOrderId,
-                    razorpaySignature: formEventData.target.razorpaySignature,
+                paymentMethod: formValues.paymentMethod,
+                status: formValues.status,
+                paymentProof: formValues.paymentProof,
+                paymentNote: formValues.paymentNote,
+                billingInfo: formValues.billingInfo,
+                ...(formValues.razorpayPaymentId && {
+                    razorpayPaymentId: formValues.razorpayPaymentId,
+                    razorpayOrderId: formValues.razorpayOrderId,
+                    razorpaySignature: formValues.razorpaySignature,
+                }),
+                ...(formValues.paypalOrderId && {
+                    paypalOrderId: formValues.paypalOrderId,
+                    paypalPaymentId: formValues.paypalPaymentId,
                 })
             };
+
+            console.log('提交结账数据:', submitData);
 
             const result = await createCheckoutOrder(submitData);
 
             if (result.success) {
+                router.push(`/checkout/thank-you?orderNumber=${result.orderNumber}`);
                 return {
                     success: true,
                     orderNumber: result.orderNumber
@@ -181,48 +217,49 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
     };
 
     return (
-        <CheckoutLayout
-            orderSummary={
-                <OrderSummary
-                    product={product}
-                    onApplyCoupon={handleApplyCoupon}
-                    couponCode={couponCode}
-                    couponApplied={couponApplied}
-                    couponDiscount={couponDiscount}
-                />
-            }
-            totalPrice={formatPrice(total)}
-            currentStep={currentStep}
-        >
-            <div className="pt-4">
-                <AnimatePresence mode="wait">
-                    {currentStep === 1 && (
-                        <BillingAddressForm
-                            key="step1"
-                            formData={formData}
-                            handleInputChange={handleInputChange}
-                            setFormData={setFormData}
-                            onNext={() => setCurrentStep(2)}
-                        />
-                    )}
-                    {currentStep === 2 && (
-                        <PaymentForm
-                            key="step2"
-                            formData={formData}
-                            paymentMethod={paymentMethod}
-                            setPaymentMethod={setPaymentMethod}
-                            handleFormDataChange={handleFormDataChange}
-                            setFormData={setFormData}
-                            isProcessing={isProcessing}
-                            total={total}
-                            formatPrice={formatPrice}
-                            onBack={() => setCurrentStep(1)}
-                            onSubmit={handleSubmit}
-                            productName={product.name}
-                        />
-                    )}
-                </AnimatePresence>
-            </div>
-        </CheckoutLayout>
+        <FormProvider {...methods}>
+            <CheckoutLayout
+                orderSummary={
+                    <OrderSummary
+                        product={product}
+                        onApplyCoupon={handleApplyCoupon}
+                        couponCode={couponCode}
+                        couponApplied={couponApplied}
+                        couponDiscount={couponDiscount}
+                    />
+                }
+                totalPrice={formatPrice(total)}
+                currentStep={currentStep}
+            >
+                <div className="pt-4">
+                    <AnimatePresence mode="wait">
+                        {currentStep === 1 && (
+                            <BillingAddressForm
+                                key="step1"
+                                formData={formData}
+                                handleInputChange={handleInputChange}
+                                handleFormDataChange={handleFormDataChange}
+                                onNext={() => setCurrentStep(2)}
+                            />
+                        )}
+                        {currentStep === 2 && (
+                            <PaymentForm
+                                key="step2"
+                                total={total}
+                                formData={formData}
+                                isProcessing={isProcessing}
+                                paymentMethod={paymentMethod}
+                                setPaymentMethod={setPaymentMethod}
+                                handleFormDataChange={handleFormDataChange}
+                                onBack={() => setCurrentStep(1)}
+                                onSubmit={methods.handleSubmit(handleSubmit)}
+                                formatPrice={formatPrice}
+                                productName={product.name}
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
+            </CheckoutLayout>
+        </FormProvider>
     )
 }

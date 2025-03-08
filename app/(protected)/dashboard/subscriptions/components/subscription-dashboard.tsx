@@ -469,7 +469,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                             <p className="text-muted-foreground mb-8 max-w-md">
                                 You don't have any active subscriptions at the moment. Browse our plans to get started.
                             </p>
-                            <Button size="lg">Browse Plans</Button>
+                            <Button size="lg" variant="outline" disabled>Coming Soon</Button>
                         </div>
                     </Card>
                 )}

@@ -6,9 +6,14 @@ import { RadioGroupItem } from "@/components/ui/radio-group"
 
 interface ManualTransferButtonProps {
   id: string
+  config: {
+    name: string
+    description: string
+    icon: string
+  }
 }
 
-export function ManualTransferButton({ id }: ManualTransferButtonProps) {
+export function ManualTransferButton({ id, config }: ManualTransferButtonProps) {
   return (
     <div>
       <RadioGroupItem
@@ -27,10 +32,10 @@ export function ManualTransferButton({ id }: ManualTransferButtonProps) {
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium leading-none">
-                Manual Bank Transfer
+                {config.name}
               </p>
               <p className="text-sm text-muted-foreground">
-                Upload payment proof after transfer
+                {config.description}
               </p>
             </div>
           </div>
@@ -38,4 +43,4 @@ export function ManualTransferButton({ id }: ManualTransferButtonProps) {
       </Label>
     </div>
   )
-} 
+}

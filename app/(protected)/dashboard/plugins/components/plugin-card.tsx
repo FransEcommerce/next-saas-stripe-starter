@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { CheckCircle2, Clock, Download, ExternalLink, ShoppingCart, Star, Eye, EyeOff, Copy, Check } from "lucide-react"
+import { CheckCircle2, Clock, Download, ExternalLink, ShoppingCart, Star, Eye, EyeOff, Copy, Check, Loader2 } from "lucide-react"
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button"
@@ -21,12 +21,22 @@ import type { Product } from "./types"
 interface PluginCardProps {
     product: Product
     isPurchased?: boolean
+    isPending?: boolean
     purchaseExpiryDate?: string | null
     licenseKey?: string | null
+    orderStatus?: string | null
     onPurchase?: (productId: string) => void
 }
 
-export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = null, licenseKey = null, onPurchase }: PluginCardProps) {
+export function PluginCard({ 
+    product, 
+    isPurchased = false, 
+    isPending = false,
+    purchaseExpiryDate = null, 
+    licenseKey = null, 
+    orderStatus = null,
+    onPurchase 
+}: PluginCardProps) {
     const [isHovered, setIsHovered] = useState(false)
     const [showLicenseKey, setShowLicenseKey] = useState(false)
 
@@ -74,13 +84,36 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
         return key.replace(/[A-Z0-9]/g, "•");
     }
 
+    // 根据状态获取卡片样式
+    const getCardStyle = () => {
+        if (isPurchased) {
+            return "bg-gradient-to-br from-green-50 to-background dark:from-green-950/30 dark:to-background ring-1 ring-green-100 dark:ring-green-900/30";
+        } else if (isPending) {
+            return "bg-gradient-to-br from-amber-50 to-background dark:from-amber-950/30 dark:to-background ring-1 ring-amber-100 dark:ring-amber-900/30";
+        } else {
+            return "bg-background";
+        }
+    }
+
+    // 获取状态徽章
+    const getStatusBadge = () => {
+        if (isPurchased) {
+            return <Badge className="bg-green-500 text-white">Owned</Badge>;
+        } else if (isPending) {
+            return <Badge className="bg-amber-500 text-white">Processing</Badge>;
+        } else if (product.comparePrice) {
+            return (
+                <Badge className="bg-rose-500 text-white">
+                    Save {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
+                </Badge>
+            );
+        }
+        return null;
+    }
+
     return (
         <Card
-            className={`overflow-hidden border shadow-lg transition-all duration-300 ${
-                isPurchased 
-                    ? "bg-gradient-to-br from-green-50 to-background dark:from-green-950/30 dark:to-background ring-1 ring-green-100 dark:ring-green-900/30" 
-                    : "bg-background"
-            }`}
+            className={`overflow-hidden border shadow-lg transition-all duration-300 ${getCardStyle()}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -109,19 +142,9 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                     </div>
                 </div>
 
-                {isPurchased && (
-                    <div className="absolute top-3 right-3">
-                        <Badge className="bg-green-500 text-white">Purchased</Badge>
-                    </div>
-                )}
-
-                {product.comparePrice && !isPurchased && (
-                    <div className="absolute top-3 right-3">
-                        <Badge className="bg-rose-500 text-white">
-                            Save {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
-                        </Badge>
-                    </div>
-                )}
+                <div className="absolute top-3 right-3">
+                    {getStatusBadge()}
+                </div>
 
                 <div className="absolute bottom-3 left-3">
                     <h3 className="text-xl font-bold text-white">{product.name}</h3>
@@ -190,7 +213,10 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                                     <DialogTitle className="text-xl">{product.name}</DialogTitle>
                                     <DialogDescription>Version {product.plugin.version}</DialogDescription>
                                 </div>
-                                {isPurchased && <Badge className="ml-auto bg-green-500 text-white">Purchased</Badge>}
+                                <div className="ml-auto">
+                                    {isPurchased && <Badge className="bg-green-500 text-white">Owned</Badge>}
+                                    {isPending && <Badge className="bg-amber-500 text-white">Processing</Badge>}
+                                </div>
                             </div>
                         </DialogHeader>
 
@@ -228,6 +254,8 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                                 <div className={`rounded-xl p-5 mb-6 ${
                                     isPurchased 
                                         ? "bg-green-50 dark:bg-green-950/30" 
+                                        : isPending
+                                        ? "bg-amber-50 dark:bg-amber-950/30"
                                         : "bg-muted/30 dark:bg-muted/20"
                                 }`}>
                                     <div className="flex items-baseline mb-2">
@@ -278,6 +306,11 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                                                     <span className="text-muted-foreground">{maskLicenseKey(licenseKey)}</span>
                                                 )}
                                             </code>
+                                        </div>
+                                    ) : isPending ? (
+                                        <div className="w-full mb-3 flex justify-center items-center py-2 px-4 bg-amber-50 dark:bg-amber-950/30 rounded-md border border-amber-500 dark:border-amber-900">
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">Processing Order</span>
                                         </div>
                                     ) : (
                                         <Button className="w-full mb-3" onClick={() => onPurchase?.(product.id)}>
@@ -330,6 +363,11 @@ export function PluginCard({ product, isPurchased = false, purchaseExpiryDate = 
                     <div className="flex-1 text-green-600 dark:text-green-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-500 dark:border-green-900">
                         <CheckCircle2 className="h-4 w-4 mr-2" />
                         Owned
+                    </div>
+                ) : isPending ? (
+                    <div className="flex-1 text-amber-600 dark:text-amber-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-amber-50 dark:bg-amber-950/30 rounded-md border border-amber-500 dark:border-amber-900">
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing
                     </div>
                 ) : (
                     <Button size="sm" className="flex-1" onClick={() => onPurchase?.(product.id)}>

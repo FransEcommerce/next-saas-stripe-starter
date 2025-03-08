@@ -84,6 +84,8 @@ export async function getOrderByNumber(orderNumber: string) {
     subtotal: order.subtotal?.toNumber() || 0,
     discountAmount: order.discountAmount?.toNumber() || 0,
     tax: order.tax?.toNumber() || 0,
+    gatewayFee: order.gatewayFee?.toNumber() || 0,
+    gatewayFeeCurrency: order.gatewayFeeCurrency || 'USD',
     affiliateCommission: order.affiliateCommission?.toNumber() || 0,
     coupon: order.coupon ? {
       ...order.coupon,

@@ -18,15 +18,15 @@ export async function getUsers(search?: string) {
 
     const where = search ? {
       OR: [
-        { email: { contains: search, mode: 'insensitive' } },
-        { name: { contains: search, mode: 'insensitive' } },
-        { billingName: { contains: search, mode: 'insensitive' } },
-        { billingAddress: { contains: search, mode: 'insensitive' } },
-        { billingCity: { contains: search, mode: 'insensitive' } },
-        { billingState: { contains: search, mode: 'insensitive' } },
-        { billingCountry: { contains: search, mode: 'insensitive' } },
-        { billingZip: { contains: search, mode: 'insensitive' } },
-        { billingPhone: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingName: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingAddress: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingCity: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingState: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingCountry: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingZip: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        { billingPhone: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
       ]
     } : {};
 
@@ -144,7 +144,15 @@ export async function getOrder(orderId: string) {
         user: true,
         product: {
           include: {
-            plugin: true,
+            plugin: {
+              select: {
+                id: true,
+                name: true,
+                version: true,
+                avatar: true,
+                description: true,
+              }
+            },
           },
         },
         license: true,
@@ -166,6 +174,13 @@ export async function getOrder(orderId: string) {
         ...order.product,
         price: convertDecimalToNumber(order.product.price),
         comparePrice: convertDecimalToNumber(order.product.comparePrice),
+        plugin: order.product.plugin ? {
+          id: order.product.plugin.id,
+          name: order.product.plugin.name,
+          version: order.product.plugin.version,
+          avatar: order.product.plugin.avatar,
+          description: order.product.plugin.description,
+        } : null,
       } : null,
     };
   } catch (error) {
@@ -193,6 +208,15 @@ export async function getOrders() {
           select: {
             name: true,
             price: true,
+            comparePrice: true,
+            plugin: {
+              select: {
+                id: true,
+                name: true,
+                version: true,
+                avatar: true,
+              }
+            }
           }
         },
         license: {
@@ -259,13 +283,32 @@ export async function getOrdersByProduct(productId: string) {
           select: {
             name: true,
             email: true,
-          },
+          }
+        },
+        product: {
+          select: {
+            name: true,
+            price: true,
+            comparePrice: true,
+            plugin: {
+              select: {
+                id: true,
+                name: true,
+                version: true,
+                avatar: true,
+              }
+            }
+          }
         },
         license: {
           select: {
+            id: true,
             licenseKey: true,
             status: true,
-          },
+            domain: true,
+            activatedAt: true,
+            expiresAt: true,
+          }
         },
       },
       orderBy: {
@@ -280,6 +323,11 @@ export async function getOrdersByProduct(productId: string) {
       subtotal: convertDecimalToNumber(order.subtotal),
       discountAmount: convertDecimalToNumber(order.discountAmount),
       tax: convertDecimalToNumber(order.tax),
+      product: {
+        ...order.product,
+        price: convertDecimalToNumber(order.product.price),
+        comparePrice: convertDecimalToNumber(order.product.comparePrice),
+      },
     }));
   } catch (error) {
     console.error("Error fetching orders by product:", error);
@@ -299,12 +347,37 @@ export async function getOrdersByUser(userId: string) {
         userId,
       },
       include: {
-        product: {
-          include: {
-            plugin: true,
-          },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          }
         },
-        license: true,
+        product: {
+          select: {
+            name: true,
+            price: true,
+            comparePrice: true,
+            plugin: {
+              select: {
+                id: true,
+                name: true,
+                version: true,
+                avatar: true,
+              }
+            }
+          }
+        },
+        license: {
+          select: {
+            id: true,
+            licenseKey: true,
+            status: true,
+            domain: true,
+            activatedAt: true,
+            expiresAt: true,
+          }
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -318,11 +391,11 @@ export async function getOrdersByUser(userId: string) {
       subtotal: convertDecimalToNumber(order.subtotal),
       discountAmount: convertDecimalToNumber(order.discountAmount),
       tax: convertDecimalToNumber(order.tax),
-      product: order.product ? {
+      product: {
         ...order.product,
         price: convertDecimalToNumber(order.product.price),
         comparePrice: convertDecimalToNumber(order.product.comparePrice),
-      } : null,
+      },
     }));
   } catch (error) {
     console.error("Error fetching orders by user:", error);

@@ -174,12 +174,12 @@ export const placeholderBlurhash =
 
 export function formatPrice(
   price: number | string | Prisma.Decimal | null | undefined,
+  currency: string = "USD",
   options: {
-    currency?: "USD" | "EUR" | "GBP" | "CNY";
     notation?: Intl.NumberFormatOptions["notation"];
   } = {}
 ) {
-  const { currency = "USD", notation = "standard" } = options;
+  const { notation = "standard" } = options;
 
   if (!price) return "$0.00";
 
@@ -193,6 +193,7 @@ export function formatPrice(
     numericPrice = price.toNumber();
   }
 
+  // 支持更多货币类型
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
@@ -209,6 +210,27 @@ export function generateProjectId(): string {
   const day = now.getDate().toString().padStart(2, '0');
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   return `${year}${month}${day}${random}`;
+}
+
+export function generateOrderNumber() {
+  const timestamp = new Date().getTime().toString().slice(-8);
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `ORD-${timestamp}-${random}`;
+}
+
+export function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = (error) => reject(error);
+    document.body.appendChild(script);
+  });
 }
 
 /**

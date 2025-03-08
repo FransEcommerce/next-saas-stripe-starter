@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { ShoppingCart } from "lucide-react";
 import { OrderDetailsDialog } from "./order-details-dialog";
 import { OrderListProps } from "./types"; // 导入类型
 
@@ -42,10 +43,16 @@ export function OrderList({ orders }: OrderListProps) {
 
     if (orders.length === 0) {
         return (
-            <div className="text-center py-8">
-                <p className="text-muted-foreground">You have no orders yet.</p>
-                <Link href="/dashboard/products">
-                    <Button className="mt-4">Explore Products</Button>
+            <div className="text-center p-12 border rounded-lg bg-muted/20">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                    <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No Orders Found</h3>
+                <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                    You haven't placed any orders yet. Browse our products and make your first purchase to get started.
+                </p>
+                <Link href="/dashboard/plugins">
+                    <Button variant="outline">Explore Products</Button>
                 </Link>
             </div>
         );
@@ -64,11 +71,11 @@ export function OrderList({ orders }: OrderListProps) {
                     <div key={order.id} className="border rounded-lg p-4 mb-4">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center space-x-2">
-                                {order.product.plugin.avatar && (
+                                {order.product.plugin?.avatar && (
                                     <div className="relative h-8 w-8 overflow-hidden rounded-lg">
                                         <Image
                                             src={order.product.plugin.avatar}
-                                            alt={order.product.plugin.name}
+                                            alt={order.product.plugin?.name}
                                             fill
                                             className="object-cover"
                                         />
@@ -118,11 +125,11 @@ export function OrderList({ orders }: OrderListProps) {
                                 <TableCell className="font-medium">#{order.orderNumber}</TableCell>
                                 <TableCell>
                                     <div className="flex items-center space-x-2">
-                                        {order.product.plugin.avatar && (
+                                        {order.product.plugin?.avatar && (
                                             <div className="relative h-8 w-8 overflow-hidden rounded-lg">
                                                 <Image
                                                     src={order.product.plugin.avatar}
-                                                    alt={order.product.plugin.name}
+                                                    alt={order.product.plugin?.name}
                                                     fill
                                                     className="object-cover"
                                                 />
