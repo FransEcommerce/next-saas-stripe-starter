@@ -106,7 +106,7 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
             </div>
 
             <Tabs defaultValue="all" className="w-full">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 overflow-hidden">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div className="w-full overflow-x-auto scrollbar-hide">
                         <TabsList className="w-max">
                             <TabsTrigger value="all" className="whitespace-nowrap text-xs sm:text-sm">All Plugins</TabsTrigger>

@@ -113,11 +113,11 @@ export function PluginCard({
 
     return (
         <Card
-            className={`w-full overflow-hidden border shadow-lg transition-all duration-300 ${getCardStyle()}`}
+            className={`w-full border shadow-lg transition-all duration-300 ${getCardStyle()}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="relative h-48 overflow-hidden">
+            <div className="relative h-48">
                 <Image
                     src={product.plugin.cover || "/placeholder.svg"}
                     alt={product.name}
@@ -127,7 +127,7 @@ export function PluginCard({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                 <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                    <div className="h-10 w-10 rounded-lg overflow-hidden border-2 border-white shadow-md">
+                    <div className="h-10 w-10 rounded-lg border-2 border-white shadow-md">
                         <Image
                             src={product.plugin.avatar || "/placeholder.svg"}
                             alt={product.name}
@@ -156,7 +156,7 @@ export function PluginCard({
                 </div> */}
             </div>
 
-            <CardContent className="p-5 overflow-hidden">
+            <CardContent className="p-5">
                 <p className="text-muted-foreground mb-4 line-clamp-2 min-h-[40px] break-words">{product.description}</p>
 
                 <div className="space-y-3">
@@ -222,7 +222,7 @@ export function PluginCard({
 
                         <div className="grid md:grid-cols-2 gap-6 mt-4">
                             <div>
-                                <div className="relative h-48 rounded-lg overflow-hidden mb-4">
+                                <div className="relative h-48 rounded-lg mb-4">
                                     <Image
                                         src={product.plugin.cover || "/placeholder.svg"}
                                         alt={product.name}
