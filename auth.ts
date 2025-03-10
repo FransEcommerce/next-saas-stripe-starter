@@ -7,6 +7,7 @@ import { env } from "@/env.mjs";
 import { sendMagicLinkEmail } from "@/lib/email";
 import { createAuthMiddleware } from "better-auth/api";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 const FREE_PLAN_ID = env.FREE_PLAN_ID || "free";
 
@@ -29,6 +30,91 @@ export const auth = betterAuth({
         name: "session_token",
         attributes: {
           secure: process.env.NODE_ENV === "production",
+        }
+      }
+    }
+  },
+
+  // 用户配置
+  user: {
+    deleteUser: {
+      enabled: true, // 启用用户删除功能
+      beforeDelete: async (user) => {
+        // 删除用户前的操作，使用完整的删除用户逻辑
+        try {
+          // 使用事务确保所有删除操作要么全部成功，要么全部失败
+          await prisma.$transaction(async (tx) => {
+            const userId = user.id;
+            
+            // 1. 删除用户的下载令牌
+            await tx.downloadToken.deleteMany({
+              where: { userId },
+            });
+
+            // 2. 删除用户的许可证
+            await tx.license.deleteMany({
+              where: { userId },
+            });
+
+            // 3. 删除用户的推广员相关数据
+            const affiliate = await tx.affiliate.findUnique({
+              where: { userId },
+              select: { id: true },
+            });
+
+            if (affiliate) {
+              // 首先删除推广员支付记录，因为它依赖于支付方式
+              await tx.affiliatePayment.deleteMany({
+                where: { affiliateId: affiliate.id },
+              });
+
+              // 然后删除推广员支付方式
+              await tx.affiliatePaymentMethod.deleteMany({
+                where: { affiliateId: affiliate.id },
+              });
+
+              // 更新引用了这个推广员的订单
+              await tx.order.updateMany({
+                where: { affiliateId: affiliate.id },
+                data: { affiliateId: null },
+              });
+
+              // 最后删除推广员记录
+              await tx.affiliate.delete({
+                where: { id: affiliate.id },
+              });
+            }
+
+            // 4. 删除用户的订单
+            await tx.order.deleteMany({
+              where: { userId },
+            });
+
+            // 5. 删除用户的会话
+            await tx.session.deleteMany({
+              where: { userId },
+            });
+
+            // 6. 删除用户的账户
+            await tx.account.deleteMany({
+              where: { userId },
+            });
+
+            // 7. 删除用户的服务使用记录
+            await tx.serviceUsage.deleteMany({
+              where: { userId },
+            });
+
+            // 8. 删除用户的订阅
+            await tx.subscription.deleteMany({
+              where: { userId },
+            });
+
+            // 注意：不需要删除用户本身，因为 Better Auth 会处理这部分
+          });
+        } catch (error) {
+          console.error("Error cleaning up user data before deletion:", error);
+          // 不抛出错误，让 Better Auth 继续删除用户
         }
       }
     }
