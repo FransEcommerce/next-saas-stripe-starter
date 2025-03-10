@@ -191,10 +191,10 @@ export function PluginCard({
                 </div>
             </CardContent>
 
-            <CardFooter className="px-5 pb-5 pt-0 flex flex-col sm:flex-row gap-3">
+            <CardFooter className="px-5 pb-5 pt-0 flex gap-3">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-full sm:flex-1">
+                        <Button variant="outline" size="sm" className="flex-1">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             Details
                         </Button>
@@ -360,17 +360,17 @@ export function PluginCard({
                     </DialogContent>
                 </Dialog>
                 {isPurchased ? (
-                    <div className="w-full sm:flex-1 text-green-600 dark:text-green-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-500 dark:border-green-900">
+                    <div className="flex-1 text-green-600 dark:text-green-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-500 dark:border-green-900">
                         <CheckCircle2 className="h-4 w-4 mr-2" />
                         Owned
                     </div>
                 ) : isPending ? (
-                    <div className="w-full sm:flex-1 text-amber-600 dark:text-amber-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-amber-50 dark:bg-amber-950/30 rounded-md border border-amber-500 dark:border-amber-900">
+                    <div className="flex-1 text-amber-600 dark:text-amber-400 text-sm font-medium flex items-center justify-center py-2 px-4 bg-amber-50 dark:bg-amber-950/30 rounded-md border border-amber-500 dark:border-amber-900">
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Processing
                     </div>
                 ) : (
-                    <Button size="sm" className="w-full sm:flex-1" onClick={() => onPurchase?.(product.id)}>
+                    <Button size="sm" className="flex-1" onClick={() => onPurchase?.(product.id)}>
                         <ShoppingCart className="h-4 w-4 mr-2" />
                         Purchase
                     </Button>
