@@ -10,6 +10,7 @@ import {
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { UserAccountNav } from "@/components/layout/user-account-nav";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
+import Image from "next/image";
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
@@ -41,7 +42,6 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
             <div className="w-full flex-1">
               {/* <SearchCommand links={filteredLinks} /> */}
             </div>
-
             <ModeToggle />
             <UserAccountNav />
           </MaxWidthWrapper>

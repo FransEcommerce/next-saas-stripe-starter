@@ -199,77 +199,83 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
 
   if (isSm || isMobile) {
     return (
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-9 shrink-0 md:hidden"
-          >
-            <Menu className="size-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="flex flex-col p-0">
-          <ScrollArea className="h-full overflow-y-auto">
-            <div className="flex h-screen flex-col">
-              <nav className="flex flex-1 flex-col gap-y-8 p-6 text-lg font-medium">
-                <div className="flex items-center justify-center w-40">
-                  <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
-                  <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
-                </div>
-                {links.map((section) => (
-                  <section
-                    key={section.title}
-                    className="flex flex-col gap-0.5"
-                  >
-                    <p className="text-xs text-muted-foreground">
-                      {section.title}
-                    </p>
+      <div className="flex items-center justify-center gap-2">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-9 shrink-0 md:hidden border-none"
+            >
+              <Menu className="size-5" />
+              <span className="sr-only">Toggle navigation menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="flex flex-col p-0">
+            <ScrollArea className="h-full overflow-y-auto">
+              <div className="flex h-screen flex-col">
+                <nav className="flex flex-1 flex-col gap-y-8 p-6 text-lg font-medium">
+                  <div className="flex items-center justify-center w-40">
+                    <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
+                    <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
+                  </div>
+                  {links.map((section) => (
+                    <section
+                      key={section.title}
+                      className="flex flex-col gap-0.5"
+                    >
+                      <p className="text-xs text-muted-foreground">
+                        {section.title}
+                      </p>
 
-                    {section.items.map((item) => {
-                      const Icon = Icons[item.icon || "arrowRight"];
-                      return (
-                        item.href && (
-                          <Fragment key={`link-fragment-${item.title}`}>
-                            <Link
-                              key={`link-${item.title}`}
-                              onClick={() => {
-                                if (!item.disabled) setOpen(false);
-                              }}
-                              href={item.disabled ? "#" : item.href}
-                              className={cn(
-                                "flex items-center gap-3 rounded-md p-2 text-sm font-medium hover:bg-muted",
-                                path === item.href
-                                  ? "bg-muted"
-                                  : "text-muted-foreground hover:text-accent-foreground",
-                                item.disabled &&
-                                "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
-                              )}
-                            >
-                              <Icon className="size-5" />
-                              {item.title}
-                              {item.badge && (
-                                <Badge className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full">
-                                  {item.badge}
-                                </Badge>
-                              )}
-                            </Link>
-                          </Fragment>
-                        )
-                      );
-                    })}
-                  </section>
-                ))}
+                      {section.items.map((item) => {
+                        const Icon = Icons[item.icon || "arrowRight"];
+                        return (
+                          item.href && (
+                            <Fragment key={`link-fragment-${item.title}`}>
+                              <Link
+                                key={`link-${item.title}`}
+                                onClick={() => {
+                                  if (!item.disabled) setOpen(false);
+                                }}
+                                href={item.disabled ? "#" : item.href}
+                                className={cn(
+                                  "flex items-center gap-3 rounded-md p-2 text-sm font-medium hover:bg-muted",
+                                  path === item.href
+                                    ? "bg-muted"
+                                    : "text-muted-foreground hover:text-accent-foreground",
+                                  item.disabled &&
+                                  "cursor-not-allowed opacity-80 hover:bg-transparent hover:text-muted-foreground",
+                                )}
+                              >
+                                <Icon className="size-5" />
+                                {item.title}
+                                {item.badge && (
+                                  <Badge className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full">
+                                    {item.badge}
+                                  </Badge>
+                                )}
+                              </Link>
+                            </Fragment>
+                          )
+                        );
+                      })}
+                    </section>
+                  ))}
 
-                {/* <div className="mt-auto">
+                  {/* <div className="mt-auto">
                   <UpgradeCard />
                 </div> */}
-              </nav>
-            </div>
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
+                </nav>
+              </div>
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
+        <div className="flex items-center justify-center w-40">
+          <Image src="/logo.png" alt="Logo" width={429} height={60} className="dark:hidden" />
+          <Image src="/logo-white.png" alt="Logo" width={429} height={60} className="hidden dark:block" />
+        </div>
+      </div>
     );
   }
 

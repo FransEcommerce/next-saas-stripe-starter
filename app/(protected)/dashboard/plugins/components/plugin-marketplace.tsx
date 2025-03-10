@@ -107,19 +107,19 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
 
             <Tabs defaultValue="all" className="w-full">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <TabsList>
+                    <TabsList className="w-full sm:w-auto">
                         <TabsTrigger value="all">All Plugins</TabsTrigger>
-                        <TabsTrigger value="purchased" className="flex items-center gap-1.5">
-                            <CheckCircle className="h-3.5 w-3.5" />
-                            My Plugins
-                            <span className="ml-1 bg-primary/20 text-primary px-1.5 py-0.5 rounded-full text-xs">
+                        <TabsTrigger value="purchased" className="flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5 hidden sm:inline" />
+                            <span className="sm:ml-0.5">My Plugins</span>
+                            <span className="ml-1 bg-primary/20 text-primary px-1 sm:px-1.5 py-0.5 rounded-full text-xs">
                                 {completedPurchases.length}
                             </span>
                         </TabsTrigger>
-                        <TabsTrigger value="pending" className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" />
-                            Processing
-                            <span className="ml-1 bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded-full text-xs">
+                        <TabsTrigger value="pending" className="flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5 hidden sm:inline" />
+                            <span className="sm:ml-0.5">Processing</span>
+                            <span className="ml-1 bg-amber-500/20 text-amber-500 px-1 sm:px-1.5 py-0.5 rounded-full text-xs">
                                 {pendingPurchases.length}
                             </span>
                         </TabsTrigger>

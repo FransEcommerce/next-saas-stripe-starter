@@ -466,7 +466,7 @@ export function SubscriptionDashboard({ initialSubscriptions }: SubscriptionDash
                                 <Package className="h-10 w-10 text-primary" />
                             </div>
                             <h3 className="text-xl font-bold mb-2">No Active Subscriptions</h3>
-                            <p className="text-muted-foreground mb-8 max-w-md">
+                            <p className="text-muted-foreground mb-8 max-w-md px-4">
                                 You don't have any active subscriptions at the moment. Browse our plans to get started.
                             </p>
                             <Button size="lg" variant="outline" disabled>Coming Soon</Button>
