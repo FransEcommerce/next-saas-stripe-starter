@@ -113,7 +113,7 @@ export function PluginCard({
 
     return (
         <Card
-            className={`overflow-hidden border shadow-lg transition-all duration-300 ${getCardStyle()}`}
+            className={`w-full overflow-hidden border shadow-lg transition-all duration-300 ${getCardStyle()}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -156,11 +156,11 @@ export function PluginCard({
                 </div> */}
             </div>
 
-            <CardContent className="p-5">
-                <p className="text-muted-foreground mb-4 line-clamp-2 min-h-[40px]">{product.description}</p>
+            <CardContent className="p-5 overflow-hidden">
+                <p className="text-muted-foreground mb-4 line-clamp-2 min-h-[40px] break-words">{product.description}</p>
 
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                         <div className="text-sm text-muted-foreground">License Duration</div>
                         <div className="flex items-center gap-1.5">
                             <Clock className="h-3.5 w-3.5 text-muted-foreground" />
@@ -169,7 +169,7 @@ export function PluginCard({
                     </div>
 
                     {isPurchased && purchaseExpiryDate && product.duration !== null && (
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between flex-wrap">
                             <div className="text-sm text-muted-foreground">Expires On</div>
                             <div className="font-medium">{formatExpiryDate(purchaseExpiryDate)}</div>
                         </div>
@@ -182,7 +182,7 @@ export function PluginCard({
                                 {product.features.slice(0, 3).map((feature, index) => (
                                     <li key={index} className="flex items-start gap-2 text-sm">
                                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                        <span className="text-muted-foreground">{feature}</span>
+                                        <span className="text-muted-foreground break-words">{feature}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -191,7 +191,7 @@ export function PluginCard({
                 </div>
             </CardContent>
 
-            <CardFooter className="px-5 pb-5 pt-0 flex gap-3">
+            <CardFooter className="px-5 pb-5 pt-0 flex gap-3 flex-wrap">
                 <Dialog>
                     <DialogTrigger asChild>
                         <Button variant="outline" size="sm" className="flex-1">
@@ -231,7 +231,7 @@ export function PluginCard({
                                     />
                                 </div>
 
-                                <p className="text-muted-foreground mb-4">{product.plugin.description}</p>
+                                <p className="text-muted-foreground mb-4 break-words">{product.plugin.description}</p>
 
                                 {product.features && product.features.length > 0 && (
                                     <div className="space-y-4">
@@ -241,7 +241,7 @@ export function PluginCard({
                                                 {product.features.map((feature, index) => (
                                                     <li key={index} className="flex items-start gap-2 text-sm">
                                                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                                        <span className="text-muted-foreground">{feature}</span>
+                                                        <span className="text-muted-foreground break-words">{feature}</span>
                                                     </li>
                                                 ))}
                                             </ul>
@@ -330,25 +330,25 @@ export function PluginCard({
                                     <div>
                                         <h4 className="text-sm font-medium mb-2">Technical Details</h4>
                                         <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between flex-wrap">
                                                 <span className="text-muted-foreground">Version</span>
                                                 <span className="font-medium">{product.plugin.version}</span>
                                             </div>
                                             {product.plugin.chatpionVersion && (
-                                                <div className="flex justify-between">
+                                                <div className="flex justify-between flex-wrap">
                                                     <span className="text-muted-foreground">Required Platform Version</span>
                                                     <span className="font-medium">{product.plugin.chatpionVersion}</span>
                                                 </div>
                                             )}
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between flex-wrap">
                                                 <span className="text-muted-foreground">License Type</span>
                                                 <span className="font-medium">{product.duration === null ? "Lifetime" : "Subscription"}</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between flex-wrap">
                                                 <span className="text-muted-foreground">Support Included</span>
                                                 <span className="font-medium">Yes</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between flex-wrap">
                                                 <span className="text-muted-foreground">Updates</span>
                                                 <span className="font-medium">Free during license period</span>
                                             </div>
