@@ -209,7 +209,7 @@ export function FileUpload({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">
+              <div className="text-sm font-medium break-words">
                 {displayText}
               </div>
               <div className="text-xs text-muted-foreground">

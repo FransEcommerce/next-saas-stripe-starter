@@ -56,7 +56,7 @@ export function PaymentForm({
     razorpay: {
       keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       name: "Razorpay",
-      description: "Pay with Credit/Debit Card, UPI, Netbanking",
+      description: "Pay with Credit/Debit Card",
       icon: "credit-card"
     },
     paypal: {
@@ -171,10 +171,10 @@ export function PaymentForm({
           id="paypal-payment" 
           config={paymentGatewayConfigs.paypal}
         />
-        <ManualTransferButton 
+        {/* <ManualTransferButton 
           id="manual-transfer-payment" 
           config={paymentGatewayConfigs.manualTransfer}
-        />
+        /> */}
         <ManualPaypalButton 
           id="manual-paypal-payment" 
           value="manual-paypal"
