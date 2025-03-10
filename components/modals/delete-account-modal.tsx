@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { signOut, useSession, authClient } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 
 function DeleteAccountModal({
   showDeleteAccountModal,
@@ -26,11 +26,19 @@ function DeleteAccountModal({
   async function deleteAccount() {
     setDeleting(true);
     try {
-      // 使用 Better Auth 的 deleteUser 方法删除用户账户
-      await authClient.deleteUser({
-        callbackURL: `${window.location.origin}/`,
+      // 使用后端 API 删除用户账户
+      const response = await fetch("/api/user", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to delete account");
+      }
+
       // 删除成功后登出用户
       await new Promise((resolve) =>
         setTimeout(() => {
