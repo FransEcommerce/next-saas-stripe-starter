@@ -1,47 +1,50 @@
-import { EmailConfig } from "next-auth/providers/email";
 import { env } from "@/env.mjs";
 import { siteConfig } from "@/config/site";
 
-export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
-  async ({ identifier, url, provider }) => {
-    const authSubject = `Sign-in link for ${siteConfig.name}`;
+interface SendMagicLinkEmailParams {
+  identifier: string;
+  url: string;
+}
 
-    try {
-      // 调用 API 路由生成邮件模板
-      const response = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/send-magic-link`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          identifier,
-          url,
-        }),
-      });
+export const sendMagicLinkEmail = async ({ identifier, url }: SendMagicLinkEmailParams) => {
+  const authSubject = `Sign-in link for - ${siteConfig.name}`;
 
-      if (!response.ok) {
-        throw new Error("Failed to generate email template");
-      }
+  try {
+    // 调用 API 路由生成邮件模板
+    const response = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/send-magic-link`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identifier,
+        url,
+      }),
+    });
 
-      const { html } = await response.json();
-
-      // 发送邮件
-      const sendEmailResponse = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: identifier,
-          subject: authSubject,
-          html,
-        }),
-      });
-
-      if (!sendEmailResponse.ok) {
-        throw new Error("Failed to send email");
-      }
-    } catch (error) {
-      throw new Error("Failed to send verification email.");
+    if (!response.ok) {
+      throw new Error("Failed to generate email template");
     }
-  };
+
+    const { html } = await response.json();
+
+    // 发送邮件
+    const sendEmailResponse = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: identifier,
+        subject: authSubject,
+        html,
+      }),
+    });
+
+    if (!sendEmailResponse.ok) {
+      throw new Error("Failed to send email");
+    }
+  } catch (error) {
+    throw new Error("Failed to send verification email.");
+  }
+};

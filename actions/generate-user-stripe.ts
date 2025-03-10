@@ -5,6 +5,7 @@ import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { absoluteUrl } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 export type responseAction = {
   status: "success" | "error";
@@ -18,7 +19,9 @@ export async function generateUserStripe(priceId: string): Promise<responseActio
   let redirectUrl: string = "";
 
   try {
-    const session = await auth()
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
     const user = session?.user;
 
     if (!user || !user.email || !user.id) {

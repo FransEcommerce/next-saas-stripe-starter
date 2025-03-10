@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-
+import { headers } from 'next/headers';
 // 使用新的路由段配置方式
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,9 @@ export const revalidate = 0;
 export async function POST(req: NextRequest) {
   try {
     // 验证用户会话（可选）
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
     
     // 如果需要身份验证，取消注释下面的代码
     // if (!session) {

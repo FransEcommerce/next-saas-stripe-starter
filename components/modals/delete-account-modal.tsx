@@ -5,13 +5,13 @@ import {
   useMemo,
   useState,
 } from "react";
-import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { signOut, useSession } from "@/lib/auth-client";
 
 function DeleteAccountModal({
   showDeleteAccountModal,

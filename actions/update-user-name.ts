@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { userNameSchema } from "@/lib/validations/user";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 export type FormData = {
   name: string;
@@ -11,7 +12,9 @@ export type FormData = {
 
 export async function updateUserName(userId: string, data: FormData) {
   try {
-    const session = await auth()
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
 
     if (!session?.user || session?.user.id !== userId) {
       throw new Error("Unauthorized");

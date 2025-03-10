@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-
+import { headers } from "next/headers";
 // 定义响应类型
 type UploadSuccessResponse = {
   success: true;
@@ -29,7 +29,9 @@ export type UploadResponse = UploadSuccessResponse | UploadErrorResponse;
 export async function uploadFile(formData: FormData): Promise<UploadResponse> {
   try {
     // 可选的身份验证检查
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
     
     // 如果需要身份验证，取消注释下面的代码
     // if (!session) {

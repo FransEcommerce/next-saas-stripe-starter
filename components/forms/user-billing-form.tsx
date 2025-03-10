@@ -6,7 +6,7 @@ import { updateUserBilling } from '@/actions/update-user-billing';
 import type { BillingFormData } from '@/lib/validations/billing';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@prisma/client";
-import { useSession } from "next-auth/react";
+import { useSessionAdapter } from "@/lib/auth-client";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -26,7 +26,7 @@ interface UserBillingFormProps {
 }
 
 export function UserBillingForm({ user }: UserBillingFormProps) {
-  const { update } = useSession();
+  const { update } = useSessionAdapter();
   const [updated, setUpdated] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);

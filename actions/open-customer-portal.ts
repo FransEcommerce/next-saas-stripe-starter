@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 
 import { stripe } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/utils";
+import { headers } from "next/headers";
 
 export type responseAction = {
   status: "success" | "error";
@@ -19,7 +20,9 @@ export async function openCustomerPortal(
   let redirectUrl: string = "";
 
   try {
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
 
     if (!session?.user || !session?.user.email) {
       throw new Error("Unauthorized");

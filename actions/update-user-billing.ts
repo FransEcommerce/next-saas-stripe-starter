@@ -5,10 +5,14 @@ import { prisma } from "@/lib/db";
 import { billingInfoSchema } from '@/lib/validations/billing';
 import type { BillingFormData } from '@/lib/validations/billing';
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 export async function updateUserBilling(userId: string, data: BillingFormData) {
   try {
-    const session = await auth()
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
+
 
     if (!session?.user || session?.user.id !== userId) {
       throw new Error("Unauthorized");

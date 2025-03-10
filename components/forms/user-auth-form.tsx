@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -16,6 +15,7 @@ import { toast } from "sonner";
 import { Icons } from "@/components/shared/icons";
 import { Mail, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { signInGoogle, signInMagicLink } from "@/lib/auth-client";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   type?: string;
@@ -43,19 +43,15 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
     setEmail(data.email.toLowerCase());
 
     try {
-      const signInResult = await signIn("email", {
-        email: data.email.toLowerCase(),
-        redirect: false,
-        callbackUrl: searchParams?.get("from") || "/dashboard",
-      });
+      const signInResult = await signInMagicLink(data.email.toLowerCase());
 
-      if (!signInResult?.ok) {
-        throw new Error(signInResult?.error || "Failed to send email");
+      if (!signInResult || signInResult instanceof Error) {
+        throw new Error(signInResult?.message || "Failed to send login link");
       }
 
       setMagicLinkSent(true);
       toast.success("Check your email", {
-        description: "We sent you a login link. Be sure to check your spam too.",
+        description: "We've sent you a login link. Please check your spam folder as well.",
       });
     } catch (error) {
       toast.error("Something went wrong.", {
@@ -66,6 +62,19 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
     }
   }
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      await signInGoogle();
+    } catch (error) {
+      toast.error("Google sign in failed", {
+        description: error.message || "Please try again later",
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       {magicLinkSent ? (
@@ -75,7 +84,7 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
           </div>
           <h3 className="text-xl font-medium">Check your email</h3>
           <p className="text-muted-foreground">
-            We've sent a magic link to <span className="font-medium">{email}</span>
+            We've sent a login link to <span className="font-medium">{email}</span>
           </p>
           <Button variant="ghost" className="mt-2" onClick={() => setMagicLinkSent(false)}>
             Use a different email
@@ -85,7 +94,7 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
         <div className="space-y-6">
           {error === "Verification" && (
             <div className="bg-red-50 p-4 rounded-lg text-red-600 text-sm">
-              The sign in link is no longer valid. It may have been used already or it may have expired.
+              Login link is invalid. It may have been used or expired.
             </div>
           )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -132,11 +141,11 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Sending magic link...
+                  Sending login link...
                 </span>
               ) : (
                 <span className="flex items-center justify-center">
-                  Continue with email <ArrowRight className="ml-2 h-4 w-4" />
+                  Continue with Email <ArrowRight className="ml-2 h-4 w-4" />
                 </span>
               )}
             </Button>
@@ -158,10 +167,7 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
       <button
         type="button"
         className={cn(buttonVariants({ variant: "outline" }))}
-        onClick={() => {
-          setIsGoogleLoading(true);
-          signIn("google");
-        }}
+        onClick={handleGoogleSignIn}
         disabled={isLoading || isGoogleLoading}
       >
         {isGoogleLoading ? (

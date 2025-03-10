@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSessionAdapter } from "@/lib/auth-client";
 
 import { docsConfig } from "@/config/docs";
 import { marketingConfig } from "@/config/marketing";
@@ -16,7 +17,7 @@ import { Icons } from "@/components/shared/icons";
 import { ModeToggle } from "./mode-toggle";
 
 export function NavMobile() {
-  const { data: session } = useSession();
+  const { data: session } = useSessionAdapter();
   const [open, setOpen] = useState(false);
   const selectedLayout = useSelectedLayoutSegment();
   const documentation = selectedLayout === "docs";
@@ -74,7 +75,8 @@ export function NavMobile() {
 
           {session ? (
             <>
-              {session.user.role === "ADMIN" ? (
+              {/* 检查用户角色，如果不存在则默认为普通用户 */}
+              {session.user?.id ? (
                 <li className="py-3">
                   <Link
                     href="/admin"

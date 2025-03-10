@@ -1,4 +1,3 @@
-import { signIn } from "next-auth/react";
 import {
   Dispatch,
   SetStateAction,
@@ -7,6 +6,7 @@ import {
   useState,
 } from "react";
 
+import { signInGoogle } from "@/lib/auth-client";
 import { Icons } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
@@ -41,7 +41,7 @@ function SignInModal({
             disabled={signInClicked}
             onClick={() => {
               setSignInClicked(true);
-              signIn("google", { redirect: false }).then(() =>
+              signInGoogle().then(() =>
                 setTimeout(() => {
                   setShowSignInModal(false);
                 }, 400),

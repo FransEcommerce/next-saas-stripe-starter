@@ -89,33 +89,36 @@ enum SubscriptionStatus {
 }
 
 model Account {
-  id                String   @id @default(uuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?  @db.Text
-  session_state     String?
-  createdAt         DateTime @default(now()) @map(name: "created_at")
-  updatedAt         DateTime @default(now()) @map(name: "updated_at")
+  id                    String   @id @default(uuid())
+  userId                String
+  accountId             String   @map(name: "providerAccountId")
+  providerId            String   @map(name: "provider")
+  accessToken           String?  @map(name: "access_token") @db.Text
+  refreshToken          String?  @map(name: "refresh_token") @db.Text
+  accessTokenExpiresAt  DateTime? @map(name: "expires_at")
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?  @map(name: "id_token") @db.Text
+  password              String?
+  createdAt             DateTime @default(now()) @map(name: "created_at")
+  updatedAt             DateTime @default(now()) @map(name: "updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([providerId, accountId])
   @@index([userId])
   @@map(name: "accounts")
 }
 
 model Session {
   id           String   @id @default(uuid())
-  sessionToken String   @unique
   userId       String
-  expires      DateTime
+  token        String   @unique @map(name: "sessionToken")
+  expiresAt    DateTime @map(name: "expires")
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -126,7 +129,7 @@ model User {
   id            String    @id @default(uuid())
   name          String?
   email         String?   @unique
-  emailVerified DateTime?
+  emailVerified Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now()) @map(name: "created_at")
   updatedAt     DateTime  @default(now()) @map(name: "updated_at")
@@ -160,6 +163,18 @@ model User {
   @@map(name: "users")
 }
 
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map(name: "verifications")
+}
+
+// Better Auth 所需的验证模型
 model VerificationToken {
   identifier String
   token      String   @unique

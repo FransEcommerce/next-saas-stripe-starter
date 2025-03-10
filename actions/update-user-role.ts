@@ -6,6 +6,7 @@ import { UserRole } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { userRoleSchema } from "@/lib/validations/user";
+import { headers } from "next/headers";
 
 export type FormData = {
   role: UserRole;
@@ -13,7 +14,9 @@ export type FormData = {
 
 export async function updateUserRole(userId: string, data: FormData) {
   try {
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
 
     if (!session?.user || session?.user.id !== userId) {
       throw new Error("Unauthorized");

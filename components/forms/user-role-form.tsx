@@ -4,10 +4,10 @@ import { useState, useTransition } from "react";
 import { updateUserRole, type FormData } from "@/actions/update-user-role";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User, UserRole } from "@prisma/client";
-import { useSession } from "next-auth/react";
+import { useSessionAdapter } from "@/lib/auth-client";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import * as z from "zod";
 
 import { userRoleSchema } from "@/lib/validations/user";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ interface UserNameFormProps {
 }
 
 export function UserRoleForm({ user }: UserNameFormProps) {
-  const { update } = useSession();
+  const { update } = useSessionAdapter();
   const [updated, setUpdated] = useState(false);
   const [isPending, startTransition] = useTransition();
   const updateUserRoleWithId = updateUserRole.bind(null, user.id);

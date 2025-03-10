@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { LayoutDashboard, Lock, LogOut, Settings } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
 import { Drawer } from "vaul";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -15,9 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { signOut, useSessionAdapter } from "@/lib/auth-client";
 
 export function UserAccountNav() {
-  const { data: session } = useSession();
+  const { data: session } = useSessionAdapter();
   const user = session?.user;
 
   const [open, setOpen] = useState(false);

@@ -2,8 +2,8 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
+import { useSessionAdapter } from "@/lib/auth-client";
 
 import { docsConfig } from "@/config/docs";
 import { marketingConfig } from "@/config/marketing";
@@ -25,11 +25,11 @@ interface NavBarProps {
 
 export function NavBar({ scroll = false }: NavBarProps) {
   const scrolled = useScroll(50);
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSessionAdapter();
   const { setShowSignInModal } = useContext(ModalContext);
 
-  const selectedLayout = useSelectedLayoutSegment();
-  const documentation = selectedLayout === "docs";
+  const selectedLayout = usePathname();
+  const documentation = selectedLayout === "/docs";
 
   const configMap = {
     docs: docsConfig.mainNav,
