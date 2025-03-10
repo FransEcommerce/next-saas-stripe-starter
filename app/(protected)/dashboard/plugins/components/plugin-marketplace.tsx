@@ -109,17 +109,17 @@ export function PluginMarketplace({ initialProducts = [], initialUserPurchases =
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 overflow-hidden">
                     <div className="w-full overflow-x-auto scrollbar-hide">
                         <TabsList className="w-max">
-                            <TabsTrigger value="all" className="whitespace-nowrap">All Plugins</TabsTrigger>
+                            <TabsTrigger value="all" className="whitespace-nowrap text-xs sm:text-sm">All Plugins</TabsTrigger>
                             <TabsTrigger value="purchased" className="flex items-center gap-1 whitespace-nowrap">
                                 <CheckCircle className="h-3.5 w-3.5 hidden sm:inline" />
-                                <span className="sm:ml-0.5">My Plugins</span>
+                                <span className="sm:ml-0.5 text-xs sm:text-sm">My Plugins</span>
                                 <span className="ml-1 bg-primary/20 text-primary px-1 sm:px-1.5 py-0.5 rounded-full text-xs">
                                     {completedPurchases.length}
                                 </span>
                             </TabsTrigger>
                             <TabsTrigger value="pending" className="flex items-center gap-1 whitespace-nowrap">
                                 <Clock className="h-3.5 w-3.5 hidden sm:inline" />
-                                <span className="sm:ml-0.5">Processing</span>
+                                <span className="sm:ml-0.5 text-xs sm:text-sm">Processing</span>
                                 <span className="ml-1 bg-amber-500/20 text-amber-500 px-1 sm:px-1.5 py-0.5 rounded-full text-xs">
                                     {pendingPurchases.length}
                                 </span>
