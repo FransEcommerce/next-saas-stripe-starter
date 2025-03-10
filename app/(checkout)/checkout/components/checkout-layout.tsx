@@ -50,7 +50,7 @@ export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00", c
                     </div>
 
                     {/* Mobile Order Summary Drawer Trigger */}
-                    <div className="md:hidden sticky bottom-0 left-0 right-0 border-t bg-background shadow-sm">
+                    <div className="md:hidden sticky bottom-0 left-0 right-0 border-t bg-background shadow-sm z-[999]">
                         <Drawer.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
                             <Drawer.Trigger asChild>
                                 <button className="w-full p-4 flex flex-col items-center">
@@ -65,7 +65,7 @@ export function CheckoutLayout({ children, orderSummary, totalPrice = "$0.00", c
                             </Drawer.Trigger>
                             <Drawer.Portal>
                                 <Drawer.Overlay className="fixed inset-0 z-40 h-full bg-black/80 backdrop-blur-sm" />
-                                <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 overflow-hidden rounded-t-[10px] border bg-background px-3 text-sm">
+                                <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 overflow-hidden rounded-t-[10px] border bg-background px-3 text-sm z-[9999]">
                                     <div className="sticky top-0 z-20 flex w-full items-center justify-center bg-inherit">
                                         <div className="my-3 h-1.5 w-16 rounded-full bg-muted-foreground/20" />
                                     </div>

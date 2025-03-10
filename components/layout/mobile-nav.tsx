@@ -75,28 +75,6 @@ export function NavMobile() {
 
           {session ? (
             <>
-              {/* 检查用户角色，如果不存在则默认为普通用户 */}
-              {session.user?.id ? (
-                <li className="py-3">
-                  <Link
-                    href="/admin"
-                    onClick={() => setOpen(false)}
-                    className="flex w-full font-medium capitalize"
-                  >
-                    Admin
-                  </Link>
-                </li>
-              ) : null}
-
-              <li className="py-3">
-                <Link
-                  href="/dashboard"
-                  onClick={() => setOpen(false)}
-                  className="flex w-full font-medium capitalize"
-                >
-                  Dashboard
-                </Link>
-              </li>
             </>
           ) : (
             <>
