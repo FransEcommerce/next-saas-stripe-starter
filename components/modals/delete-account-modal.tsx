@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { signOut, useSession } from "@/lib/auth-client";
+import { signOut, useSession, authClient } from "@/lib/auth-client";
 
 function DeleteAccountModal({
   showDeleteAccountModal,
@@ -25,28 +25,25 @@ function DeleteAccountModal({
 
   async function deleteAccount() {
     setDeleting(true);
-    await fetch(`/api/user`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then(async (res) => {
-      if (res.status === 200) {
-        // delay to allow for the route change to complete
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            signOut({
-              callbackUrl: `${window.location.origin}/`,
-            });
-            resolve(null);
-          }, 500),
-        );
-      } else {
-        setDeleting(false);
-        const error = await res.text();
-        throw error;
-      }
-    });
+    try {
+      // 使用 Better Auth 的 deleteUser 方法删除用户账户
+      await authClient.deleteUser({
+        callbackURL: `${window.location.origin}/`,
+      });
+      
+      // 删除成功后登出用户
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          signOut({
+            callbackUrl: `${window.location.origin}/`,
+          });
+          resolve(null);
+        }, 500)
+      );
+    } catch (error) {
+      setDeleting(false);
+      throw error instanceof Error ? error.message : "Failed to delete account";
+    }
   }
 
   return (
