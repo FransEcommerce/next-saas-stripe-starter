@@ -147,6 +147,38 @@ export async function createCheckoutOrder(data: CheckoutInput) {
 
     // 创建订单
     const order = await prisma.$transaction(async (tx) => {
+      // 检查并更新用户的账单地址信息
+      const userBillingInfo = await tx.user.findUnique({
+        where: { id: user.id },
+        select: {
+          billingName: true,
+          billingCompany: true,
+          billingAddress: true,
+          billingCity: true,
+          billingState: true,
+          billingCountry: true,
+          billingZip: true,
+          billingPhone: true,
+        },
+      });
+
+      // 如果用户存在且账单地址为空，则更新用户信息
+      if (userBillingInfo && (!userBillingInfo.billingName || !userBillingInfo.billingAddress)) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            billingName: data.billingInfo.name,
+            billingCompany: data.billingInfo.company,
+            billingAddress: data.billingInfo.address,
+            billingCity: data.billingInfo.city,
+            billingState: data.billingInfo.state,
+            billingCountry: data.billingInfo.country,
+            billingZip: data.billingInfo.zip,
+            billingPhone: data.billingInfo.phone,
+          },
+        });
+      }
+
       const newOrder = await tx.order.create({
         data: {
           orderNumber: generateOrderNumber(),

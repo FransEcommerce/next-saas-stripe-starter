@@ -169,13 +169,16 @@ export default async function CheckoutPage({ searchParams }: { searchParams: { p
         redirect("/dashboard/plugins")
     }
 
-    const product = await getProductById(productId)
+    try {
+        const product = await getProductById(productId)
 
-    return (
-        <Suspense fallback={<CheckoutSkeleton />}>
-            <CheckoutSkeleton />
-            <CheckoutForm product={product} />
-        </Suspense>
-    )
+        return (
+            <Suspense fallback={<CheckoutSkeleton />}>
+                <CheckoutForm product={product} />
+            </Suspense>
+        )
+    } catch (error) {
+        // 如果发生错误（例如产品未找到或用户已购买），重定向到插件页面
+        redirect("/dashboard/plugins")
+    }
 }
-

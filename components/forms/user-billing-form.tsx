@@ -65,21 +65,76 @@ export function UserBillingForm({ user }: UserBillingFormProps) {
   useEffect(() => {
     if (formData.billingCountry && !selectedCountry) {
       import("country-data-list").then(({ countries }) => {
-        const country = countries.all.find((c) => c.alpha3 === formData.billingCountry);
+        const country = countries.all.find(
+          (c) => c.alpha3 === formData.billingCountry || c.name === formData.billingCountry
+        );
         if (country) {
           setSelectedCountry(country as Country);
         }
       });
     }
-  }, [formData.billingCountry, selectedCountry]);
+  }, [formData.billingCountry]);
+
+  // 处理州/省的初始化和更新
+  useEffect(() => {
+    if (selectedCountry?.alpha2 && formData.billingState) {
+      import("country-state-city").then(({ State }) => {
+        const states = State.getStatesOfCountry(selectedCountry.alpha2);
+        const stateByCode = states.find(s => s.isoCode === formData.billingState);
+        const stateByName = states.find(s => s.name === formData.billingState);
+        
+        if (!stateByCode && stateByName && formData.billingState !== stateByName.name) {
+          setValue("billingState", stateByName.name, { shouldDirty: true });
+        }
+      });
+    }
+  }, [selectedCountry?.alpha2, formData.billingState]);
+
+  // 处理城市的初始化和更新
+  useEffect(() => {
+    if (selectedCountry?.alpha2 && formData.billingState && formData.billingCity) {
+      import("country-state-city").then(({ State, City }) => {
+        const states = State.getStatesOfCountry(selectedCountry.alpha2);
+        const stateObj = states.find(s => s.isoCode === formData.billingState || s.name === formData.billingState);
+        
+        if (stateObj) {
+          const cities = City.getCitiesOfState(selectedCountry.alpha2, stateObj.isoCode);
+          const cityByName = cities.find(c => c.name === formData.billingCity);
+          
+          if (cityByName && formData.billingCity !== cityByName.name) {
+            setValue("billingCity", cityByName.name, { shouldDirty: true });
+          }
+        }
+      });
+    }
+  }, [selectedCountry?.alpha2, formData.billingState]);
 
   useEffect(() => {
     checkUpdate(formData);
-  }, [formData]);
+  }, [formData, user]);
 
   const onSubmit = handleSubmit((data) => {
     startTransition(async () => {
-      const { status } = await updateUserBillingWithId(data);
+      // 在提交前转换数据
+      const submissionData = { ...data };
+      
+      // 转换国家代码为名称
+      if (selectedCountry) {
+        submissionData.billingCountry = selectedCountry.name;
+      }
+
+      // 转换州/省代码为名称
+      if (selectedCountry?.alpha2 && data.billingState) {
+        const stateObj = await import("country-state-city").then(({ State }) => {
+          const states = State.getStatesOfCountry(selectedCountry.alpha2);
+          return states.find(s => s.isoCode === data.billingState || s.name === data.billingState);
+        });
+        if (stateObj) {
+          submissionData.billingState = stateObj.name;
+        }
+      }
+
+      const { status } = await updateUserBillingWithId(submissionData);
 
       if (status !== "success") {
         toast.error("Something went wrong.", {

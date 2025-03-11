@@ -6,21 +6,15 @@ import { registerPaymentGateways } from '@/lib/payment-gateways/register-gateway
 registerPaymentGateways();
 
 export async function POST(request: NextRequest) {
-  console.log('PayPal 验证支付请求开始处理');
-  
   try {
     // 记录请求体
     const requestBody = await request.text();
-    console.log('PayPal 验证支付请求体:', requestBody);
     
     // 解析请求体
     const requestData = JSON.parse(requestBody);
     const { orderId, paymentId } = requestData;
     
-    console.log('PayPal 验证支付参数:', { orderId, paymentId });
-
     if (!orderId) {
-      console.error('PayPal 验证支付缺少订单ID');
       return NextResponse.json({ 
         verified: false,
         error: 'Missing order ID' 
@@ -30,18 +24,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 创建 PayPal 支付网关实例
-    console.log('创建 PayPal 支付网关实例');
     const paymentGateway = PaymentGatewayFactory.createGateway('paypal');
     
     // 调用 PayPal 支付网关验证支付
-    console.log('开始验证 PayPal 支付:', { orderId, paymentId: paymentId || orderId });
     const result = await paymentGateway.verifyPayment({ 
       orderId, 
       paymentId: paymentId || orderId
     });
     
-    console.log('PayPal 支付验证结果:', result);
-
     return NextResponse.json(result);
   } catch (error) {
     console.error('PayPal 支付验证失败:', error);

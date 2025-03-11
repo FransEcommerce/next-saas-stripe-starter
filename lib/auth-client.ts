@@ -58,7 +58,6 @@ export function useSessionAdapter() {
         status: session.isPending ? "loading" : session.data ? "authenticated" : "unauthenticated",
         update: async () => {
             // 这是一个空操作，因为 Better Auth 没有提供 update 方法
-            console.log("Session update called, but not implemented in Better Auth");
             return null;
         }
     };

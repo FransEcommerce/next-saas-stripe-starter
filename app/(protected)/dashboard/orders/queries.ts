@@ -3,17 +3,51 @@ import { prisma } from "@/lib/db";
 
 export async function getUserOrders() {
     const user = await getCurrentUser();
-    const userId = user?.id;
-
-    if (!userId) {
+    if (!user?.id) {
         return null;
     }
 
     const orders = await prisma.order.findMany({
-        where: { userId },
-        include: {
+        where: { userId: user.id },
+        select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            amount: true,
+            subtotal: true,
+            discountAmount: true,
+            tax: true,
+            paymentMethod: true,
+            paymentNote: true,
+            paymentProof: true,
+            createdAt: true,
+            updatedAt: true,
+            paidAt: true,
+            refundedAt: true,
+            cancelledAt: true,
+            // 账单信息
+            billingCompany: true,
+            billingName: true,
+            billingAddress: true,
+            billingCity: true,
+            billingState: true,
+            billingCountry: true,
+            billingZip: true,
+            billingPhone: true,
+            billingEmail: true,
+            // 关联数据
             product: {
-                include: {
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    price: true,
+                    comparePrice: true,
+                    active: true,
+                    duration: true,
+                    features: true,
+                    createdAt: true,
+                    updatedAt: true,
                     plugin: {
                         select: {
                             id: true,
@@ -22,69 +56,40 @@ export async function getUserOrders() {
                             avatar: true,
                             description: true,
                         }
-                    },
-                },
+                    }
+                }
             },
-            license: true,
-            user: true,
+            license: {
+                select: {
+                    id: true,
+                    licenseKey: true,
+                    status: true,
+                    domain: true,
+                    activatedAt: true,
+                    expiresAt: true,
+                }
+            },
+            user: {
+                select: {
+                    name: true,
+                    email: true,
+                }
+            }
         },
         orderBy: { createdAt: "desc" },
     });
 
-    // 将 Decimal 转换为 number，并移除不需要的字段
-    const processedOrders = orders.map((order) => ({
-        id: order.id,
-        orderNumber: order.orderNumber,
-        status: order.status,
-        amount: Number(order.amount.toString()),
-        subtotal: Number(order.subtotal.toString()),
-        discountAmount: order.discountAmount ? Number(order.discountAmount.toString()) : null,
-        tax: order.tax ? Number(order.tax.toString()) : null,
-        paymentMethod: order.paymentMethod,
-        paymentNote: order.paymentNote,
-        paymentProof: order.paymentProof,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-        paidAt: order.paidAt,
-        refundedAt: order.refundedAt,
-        cancelledAt: order.cancelledAt,
-        billingCompany: order.billingCompany,
-        billingName: order.billingName,
-        billingAddress: order.billingAddress,
-        billingCity: order.billingCity,
-        billingState: order.billingState,
-        billingCountry: order.billingCountry,
-        billingZip: order.billingZip,
-        billingPhone: order.billingPhone,
-        billingEmail: order.billingEmail,
-        userId: order.userId,
-        productId: order.productId,
-        couponId: order.couponId,
+    // 处理 Decimal 类型
+    return orders.map(order => ({
+        ...order,
+        amount: Number(order.amount),
+        subtotal: Number(order.subtotal),
+        discountAmount: order.discountAmount ? Number(order.discountAmount) : 0,
+        tax: order.tax ? Number(order.tax) : null,
         product: {
             ...order.product,
-            price: Number(order.product.price.toString()),
-            comparePrice: order.product.comparePrice ? Number(order.product.comparePrice.toString()) : null,
-            plugin: order.product.plugin ? {
-                id: order.product.plugin.id,
-                name: order.product.plugin.name,
-                version: order.product.plugin.version,
-                avatar: order.product.plugin.avatar,
-                description: order.product.plugin.description,
-            } : null,
-        },
-        license: order.license ? {
-            id: order.license.id,
-            licenseKey: order.license.licenseKey,
-            status: order.license.status,
-            domain: order.license.domain,
-            activatedAt: order.license.activatedAt,
-            expiresAt: order.license.expiresAt,
-        } : null,
-        user: {
-            name: order.user.name,
-            email: order.user.email,
-        },
+            price: Number(order.product.price),
+            comparePrice: order.product.comparePrice ? Number(order.product.comparePrice) : null,
+        }
     }));
-
-    return processedOrders;
 }

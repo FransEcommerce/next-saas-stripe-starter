@@ -91,15 +91,27 @@ export function BillingAddressForm({
       const countryName = selectedCountry.name;
       
       let stateName = formData.state;
+      let cityName = formData.city;
+
       if (selectedCountry.alpha2 && formData.state) {
         const stateObj = State.getStateByCodeAndCountry(formData.state, selectedCountry.alpha2);
         if (stateObj) {
           stateName = stateObj.name;
+          
+          // 获取城市的完整名称
+          if (formData.city) {
+            const cities = City.getCitiesOfState(selectedCountry.alpha2, formData.state);
+            const cityObj = cities.find(c => c.name === formData.city);
+            if (cityObj) {
+              cityName = cityObj.name;
+            }
+          }
         }
       }
       
       handleFormDataChange({
         state: stateName,
+        city: cityName,
         country: countryName
       });
     }
@@ -112,7 +124,7 @@ export function BillingAddressForm({
     setCountryCode(country.alpha3);
     if (handleFormDataChange) {
       handleFormDataChange({ 
-        country: country.alpha3,  
+        country: country.name,  // 使用国家名称而不是代号
         state: "",
         city: ""
       });

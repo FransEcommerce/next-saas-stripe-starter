@@ -1,8 +1,32 @@
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { redirect } from "next/navigation";
+
+export async function checkUserAndProduct(productId: string) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // 检查用户是否已购买过该产品
+  const existingOrder = await prisma.order.findFirst({
+    where: {
+      userId: user.id,
+      productId: productId,
+      status: "COMPLETED", // 假设已完成的订单表示成功购买
+    },
+  });
+
+  if (existingOrder) {
+    redirect("/dashboard/plugins");
+  }
+
+  return user;
+}
 
 export async function getProductById(productId: string) {
-  const user = await getCurrentUser();
+  const user = await checkUserAndProduct(productId);
 
   const product = await prisma.product.findUnique({
     where: { id: productId },

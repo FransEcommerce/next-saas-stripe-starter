@@ -163,10 +163,10 @@ export function PaymentForm({
         onValueChange={handlePaymentMethodChange}
         className="grid gap-4"
       >
-        <RazorpayButton 
+        {/* <RazorpayButton 
           id="razorpay-payment" 
           config={paymentGatewayConfigs.razorpay}
-        />
+        /> */}
         <PayPalButton 
           id="paypal-payment" 
           config={paymentGatewayConfigs.paypal}
@@ -175,7 +175,7 @@ export function PaymentForm({
           id="manual-transfer-payment" 
           config={paymentGatewayConfigs.manualTransfer}
         /> */}
-        <ManualPaypalButton 
+        {/* <ManualPaypalButton 
           id="manual-paypal-payment" 
           value="manual-paypal"
           config={{
@@ -183,7 +183,7 @@ export function PaymentForm({
             description: paymentGatewayConfigs.manualPaypal.description,
             icon: paymentGatewayConfigs.manualPaypal.icon
           }}
-        />
+        /> */}
       </RadioGroup>
 
       <div className="mt-6">

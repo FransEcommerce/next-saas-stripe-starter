@@ -191,8 +191,6 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
                 })
             };
 
-            console.log('提交结账数据:', submitData);
-
             const result = await createCheckoutOrder(submitData);
 
             if (result.success) {

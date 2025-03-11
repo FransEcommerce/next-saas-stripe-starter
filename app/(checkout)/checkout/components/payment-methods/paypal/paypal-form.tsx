@@ -111,8 +111,6 @@ const PayPalFormComponent = forwardRef<PayPalFormRef, PayPalFormProps>(({
         try {
           setIsProcessing(true);
           
-          console.log('PayPal 支付批准:', data);
-          
           // 验证付款
           const response = await fetch(`/api/payment-gateways/paypal/verify-payment`, {
             method: 'POST',
@@ -125,8 +123,6 @@ const PayPalFormComponent = forwardRef<PayPalFormRef, PayPalFormProps>(({
             }),
           });
           
-          console.log('PayPal 验证响应状态:', response.status);
-          
           if (!response.ok) {
             const errorData = await response.json();
             console.error('PayPal 验证失败:', errorData);
@@ -134,19 +130,12 @@ const PayPalFormComponent = forwardRef<PayPalFormRef, PayPalFormProps>(({
           }
           
           const result = await response.json();
-          console.log('PayPal 验证结果:', result);
           
           if (result.verified) {
             // 更新表单值
             setValue("paypalOrderId", data.orderID);
             setValue("paypalPaymentId", data.paymentID || data.orderID);
             setValue("status", "COMPLETED");
-            
-            console.log('设置 PayPal 表单值:', {
-              paypalOrderId: data.orderID,
-              paypalPaymentId: data.paymentID || data.orderID,
-              status: "COMPLETED"
-            });
             
             toast.success("Payment Successful");
             

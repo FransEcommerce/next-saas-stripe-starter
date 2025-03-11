@@ -43,7 +43,6 @@ export function OrderCustomer({ order }: OrderCustomerProps) {
                             </div>
                         </div>
                     </div>
-
                     {(order.billingName || order.billingCompany || order.billingAddress || order.billingCity ||
                         order.billingState || order.billingCountry || order.billingZip || order.billingPhone) && (
                             <div className="space-y-2">
