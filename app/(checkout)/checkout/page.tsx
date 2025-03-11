@@ -38,7 +38,7 @@ function CheckoutSkeleton() {
                     <div className="flex-1 max-w-[580px] mx-auto px-4 sm:px-8 pb-8">
                         {/* 表单字段骨架 */}
                         <div className="pt-4">
-                            <div className="space-y-6 w-[330px] sm:w-[480px]">
+                            <div className="space-y-6 w-[340px] sm:w-[480px]">
                                 <div className="space-y-4">
                                     {/* Email */}
                                     <div className="space-y-2">

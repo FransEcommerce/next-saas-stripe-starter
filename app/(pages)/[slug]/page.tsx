@@ -28,7 +28,7 @@ export async function generateMetadata({
   const { title, description } = page;
 
   return constructMetadata({
-    title: `${title} – SaaS Starter`,
+    title: `${title} – NEXTPION`,
     description: description,
   });
 }
@@ -54,16 +54,16 @@ export default async function PagePage({
   );
 
   return (
-    <article className="container max-w-3xl py-6 lg:py-12">
-      <div className="space-y-4">
-        <h1 className="inline-block font-heading text-4xl lg:text-5xl">
+    <article className="container max-w-3xl py-6 lg:py-20">
+      <div className="space-y-3">
+        <h1 className="inline-block font-heading text-2xl lg:text-3xl">
           {page.title}
         </h1>
         {page.description && (
-          <p className="text-xl text-muted-foreground">{page.description}</p>
+          <p className="text-base text-muted-foreground">{page.description}</p>
         )}
       </div>
-      <hr className="my-4" />
+      <hr className="my-3" />
       <Mdx code={page.body.code} images={images} />
     </article>
   );
