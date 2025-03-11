@@ -173,6 +173,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: { p
 
     return (
         <Suspense fallback={<CheckoutSkeleton />}>
+            <CheckoutSkeleton />
             <CheckoutForm product={product} />
         </Suspense>
     )
