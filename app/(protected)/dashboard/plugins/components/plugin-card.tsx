@@ -117,7 +117,7 @@ export function PluginCard({
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="relative h-48">
+            <div className="relative h-48 overflow-hidden">
                 <Image
                     src={product.plugin.cover || "/placeholder.svg"}
                     alt={product.name}
@@ -127,13 +127,13 @@ export function PluginCard({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                 <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                    <div className="h-10 w-10 rounded-lg border-2 border-white shadow-md">
+                    <div className="h-10 w-10 rounded-lg border-2 border shadow-md overflow-hidden">
                         <Image
                             src={product.plugin.avatar || "/placeholder.svg"}
                             alt={product.name}
-                            width={40}
-                            height={40}
-                            className="object-cover"
+                            width={200}
+                            height={200}
+                            className="object-cover w-full h-full"
                         />
                     </div>
                     <div className="bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md">
@@ -202,13 +202,15 @@ export function PluginCard({
                     <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-6">
                         <DialogHeader>
                             <div className="flex items-center gap-3">
-                                <Image
-                                    src={product.plugin.avatar || "/placeholder.svg"}
-                                    alt={product.name}
-                                    width={48}
-                                    height={48}
-                                    className="rounded-lg"
-                                />
+                                <div className="w-10 h-10 rounded-lg border-2 border shadow-md overflow-hidden">
+                                    <Image
+                                        src={product.plugin.avatar || "/placeholder.svg"}
+                                        alt={product.name}
+                                        width={200}
+                                        height={200}
+                                        className="rounded-lg object-cover w-full h-full"
+                                    />
+                                </div>
                                 <div>
                                     <DialogTitle className="text-xl">{product.name}</DialogTitle>
                                     <DialogDescription>Version {product.plugin.version}</DialogDescription>
@@ -222,7 +224,7 @@ export function PluginCard({
 
                         <div className="grid md:grid-cols-2 gap-6 mt-4">
                             <div>
-                                <div className="relative h-48 rounded-lg mb-4">
+                                <div className="relative h-48 rounded-lg mb-4 overflow-hidden border">
                                     <Image
                                         src={product.plugin.cover || "/placeholder.svg"}
                                         alt={product.name}
